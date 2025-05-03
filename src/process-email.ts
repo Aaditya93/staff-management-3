@@ -54,10 +54,10 @@ export async function processAllUserEmails() {
               result.error
             );
           } else {
-            // await updateUserEmailTimestamp(
-            //   (user._id as any).toString(),
-            //   account.email
-            // );
+            await updateUserEmailTimestamp(
+              (user._id as any).toString(),
+              account.email
+            );
             if (result.emails && result.emails.length > 0) {
               // Process emails through AI processing before forwarding
               const processedEmails = result.emails.map((email) =>
