@@ -10,27 +10,17 @@ export async function processAllUserEmails() {
   try {
     // Get all users
     const users = await getAllUsers();
-    console.log(`Found ${users.length} users`);
 
     // Process each user
     for (const user of users) {
-      console.log(`Processing user: ${user.name} (${user.email})`);
-
       // Skip if user has no accounts
       if (!user.accounts || user.accounts.length === 0) {
-        console.log(`No accounts found for user: ${user.name}`);
         continue;
       }
 
       // Process each account of the user
       for (const account of user.accounts) {
-        console.log(
-          `Processing account: ${account.email} (${account.provider})`
-        );
-
         try {
-          console.log(`Attempting to fetch email with ID: ${account.email}`);
-          console.log("usertid", account.emailUpdatedAt);
           const result = await fetchAllEmails(
             account.accessToken,
             account.refreshToken,
@@ -89,10 +79,6 @@ export async function processAllUserEmails() {
                       email: email,
                     };
 
-                    console.log(
-                      "Processing email:",
-                      "id" in email ? email.id : "unknown ID"
-                    );
                     const result = await processIncomingEmail(emailData);
 
                     return {
@@ -116,15 +102,7 @@ export async function processAllUserEmails() {
                   }
                 })
               );
-
-              console.log(
-                `Email processing results for ${account.email}:`,
-                forwardResults
-              );
-            } else {
-              console.log(`No new emails to forward for ${account.email}`);
             }
-            console.log(`Successfully fetched email for ${account.email}:`);
           }
         } catch (error) {
           console.error(
@@ -134,8 +112,6 @@ export async function processAllUserEmails() {
         }
       }
     }
-
-    console.log("Finished processing all users and accounts");
   } catch (error) {
     console.error("Error in main process:", error);
   }

@@ -23,7 +23,7 @@ export async function updateUserTokens(
 ): Promise<void> {
   try {
     await dbConnect();
-    console.log("Updating user tokens for email:", email);
+
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -39,7 +39,6 @@ export async function updateUserTokens(
         lean: true,
       }
     );
-    console.log("User Updated");
   } catch (error) {
     console.log("error", error);
   }
@@ -140,19 +139,8 @@ export async function getValidAccessToken(
   email: string,
   userId: string
 ): Promise<string | null> {
-  console.log("expiresAt", expiresAt);
-  console.log("Now", new Date());
   const now = Math.floor(Date.now() / 1000);
   const tokenExpired = !expiresAt || expiresAt < now;
-
-  console.log(
-    "Token expired?",
-    tokenExpired,
-    "Current time:",
-    now,
-    "Expires at:",
-    expiresAt
-  );
 
   // If token is not expired, return it
   if (!tokenExpired && accessToken) {
@@ -164,8 +152,6 @@ export async function getValidAccessToken(
     const newTokens = await refreshAccessToken(refreshToken);
 
     if (newTokens) {
-      console.log("Token refreshed successfully");
-
       // Update the tokens in the database
 
       await updateUserTokens(userId, email, {
@@ -177,7 +163,6 @@ export async function getValidAccessToken(
     }
   }
 
-  console.log("Could not refresh token");
   return null;
 }
 

@@ -19,21 +19,15 @@ function processAllUserEmails() {
         try {
             // Get all users
             const users = yield (0, User_1.getAllUsers)();
-            console.log(`Found ${users.length} users`);
             // Process each user
             for (const user of users) {
-                console.log(`Processing user: ${user.name} (${user.email})`);
                 // Skip if user has no accounts
                 if (!user.accounts || user.accounts.length === 0) {
-                    console.log(`No accounts found for user: ${user.name}`);
                     continue;
                 }
                 // Process each account of the user
                 for (const account of user.accounts) {
-                    console.log(`Processing account: ${account.email} (${account.provider})`);
                     try {
-                        console.log(`Attempting to fetch email with ID: ${account.email}`);
-                        console.log("usertid", account.emailUpdatedAt);
                         const result = yield (0, fetch_emails_1.fetchAllEmails)(account.accessToken, account.refreshToken, account.expiresAt, user._id.toString(), account.email, {
                             // Convert to ISO string if it's a Date object or non-ISO string
                             lastSyncTime: account.emailUpdatedAt
@@ -63,7 +57,6 @@ function processAllUserEmails() {
                                             emailId: account.email,
                                             email: email,
                                         };
-                                        console.log("Processing email:", "id" in email ? email.id : "unknown ID");
                                         const result = yield (0, receive_email_1.processIncomingEmail)(emailData);
                                         return {
                                             success: true,
@@ -80,12 +73,7 @@ function processAllUserEmails() {
                                         };
                                     }
                                 })));
-                                console.log(`Email processing results for ${account.email}:`, forwardResults);
                             }
-                            else {
-                                console.log(`No new emails to forward for ${account.email}`);
-                            }
-                            console.log(`Successfully fetched email for ${account.email}:`);
                         }
                     }
                     catch (error) {
@@ -93,7 +81,6 @@ function processAllUserEmails() {
                     }
                 }
             }
-            console.log("Finished processing all users and accounts");
         }
         catch (error) {
             console.error("Error in main process:", error);

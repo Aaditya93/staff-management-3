@@ -26,7 +26,6 @@ function updateUserTokens(userId, email, tokens) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield (0, db_1.default)();
-            console.log("Updating user tokens for email:", email);
             const user = yield User_1.default.findByIdAndUpdate(userId, {
                 $set: {
                     [`accounts.$[elem].accessToken`]: tokens.accessToken,
@@ -38,7 +37,6 @@ function updateUserTokens(userId, email, tokens) {
                 new: true,
                 lean: true,
             });
-            console.log("User Updated");
         }
         catch (error) {
             console.log("error", error);
@@ -121,11 +119,8 @@ exports.refreshAccessToken = refreshAccessToken;
  */
 function getValidAccessToken(accessToken, refreshToken, expiresAt, email, userId) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("expiresAt", expiresAt);
-        console.log("Now", new Date());
         const now = Math.floor(Date.now() / 1000);
         const tokenExpired = !expiresAt || expiresAt < now;
-        console.log("Token expired?", tokenExpired, "Current time:", now, "Expires at:", expiresAt);
         // If token is not expired, return it
         if (!tokenExpired && accessToken) {
             return accessToken;
@@ -134,13 +129,11 @@ function getValidAccessToken(accessToken, refreshToken, expiresAt, email, userId
         if (refreshToken) {
             const newTokens = yield refreshAccessToken(refreshToken);
             if (newTokens) {
-                console.log("Token refreshed successfully");
                 // Update the tokens in the database
                 yield updateUserTokens(userId, email, Object.assign(Object.assign({}, newTokens), { provider: "microsoft-entra-id" }));
                 return newTokens.accessToken;
             }
         }
-        console.log("Could not refresh token");
         return null;
     });
 }

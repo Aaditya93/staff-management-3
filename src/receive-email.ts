@@ -18,15 +18,6 @@ export async function processIncomingEmail(emailData: any) {
   if (analysis.isTravelEmail) {
     try {
       ticketResult = await handleIncomingEmail(analysis, emailData.email);
-
-      if (ticketResult.isNewTicket) {
-        console.log("New ticket created with ID:", ticketResult.ticket?._id);
-      } else if (ticketResult.ticket) {
-        console.log(
-          "Email added to existing ticket with ID:",
-          ticketResult.ticket._id
-        );
-      }
     } catch (error) {
       console.error("Error handling ticket:", error);
       throw new Error(`Ticket processing failed: ${error}`);

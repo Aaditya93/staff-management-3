@@ -21,13 +21,10 @@ const PORT = process.env.PORT || 3001;
 app.use(express_1.default.json());
 // Function to process emails periodically
 const startPeriodicEmailProcessing = () => {
-    console.log("Starting periodic email processing");
     // Set interval to call processAllUserEmails every 5 seconds
     setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            console.log("Running scheduled email processing job");
             yield (0, process_email_1.processAllUserEmails)();
-            console.log("Email processing completed successfully");
         }
         catch (error) {
             console.error("Error in scheduled email processing:", error);
@@ -37,6 +34,4 @@ const startPeriodicEmailProcessing = () => {
 // Start periodic email processing
 startPeriodicEmailProcessing();
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => { });
