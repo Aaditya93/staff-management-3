@@ -129,12 +129,10 @@ export const updateUserEmailTimestamp = async (id: string, email: string) => {
         lean: true,
       }
     );
-    console.log("User Updated");
 
     if (!updatedUser) {
       throw new Error(`User with ID ${id} not found`);
     }
-    console.log("Updated User", updatedUser);
 
     return updatedUser;
   } catch (error) {

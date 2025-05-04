@@ -64,10 +64,6 @@ export async function processAllUserEmails() {
                 (email) => !("error" in email)
               );
 
-              console.log(
-                `Processed ${validProcessedEmails.length} emails for AI analysis`
-              );
-
               // Process each email individually
               const forwardResults = await Promise.all(
                 validProcessedEmails.map(async (email) => {

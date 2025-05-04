@@ -25,7 +25,7 @@ function processIncomingEmail(emailData) {
         const analysis = yield (0, gemini_1.analyzeEmail)(aiData);
         let ticketResult = null;
         // Handle ticket creation if it's a travel email
-        if (analysis.isTravelEmail) {
+        if (analysis.isTravelEmail && !analysis.isConfirmationEmail) {
             try {
                 ticketResult = yield (0, create_ticket_1.handleIncomingEmail)(analysis, emailData.email);
             }

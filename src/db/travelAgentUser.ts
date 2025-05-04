@@ -55,7 +55,6 @@ export const getTravelAgentUserByEmail = async (email: string) => {
   try {
     await dbConnect();
     const user = await TravelAgentUser.findOne({ email }).lean();
-    console.log("User found:", user);
     return user;
   } catch (error) {
     console.error("Error while getting user by email:", error);

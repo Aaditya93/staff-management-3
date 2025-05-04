@@ -133,11 +133,9 @@ const updateUserEmailTimestamp = (id, email) => __awaiter(void 0, void 0, void 0
             new: true,
             lean: true,
         });
-        console.log("User Updated");
         if (!updatedUser) {
             throw new Error(`User with ID ${id} not found`);
         }
-        console.log("Updated User", updatedUser);
         return updatedUser;
     }
     catch (error) {

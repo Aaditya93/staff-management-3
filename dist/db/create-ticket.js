@@ -107,7 +107,6 @@ function createTicketFromEmail(analysisData, emailData) {
                     },
                 ] }));
             const savedTicket = yield newTicket.save();
-            console.log("Ticket created successfully:", savedTicket);
             return savedTicket;
         }
         catch (error) {
@@ -140,7 +139,6 @@ function handleIncomingEmail(analysisData, emailData) {
                         _id: analysisData.ticketId,
                     });
                     if (existingTicket) {
-                        console.log(`Found existing ticket with ID: ${analysisData.ticketId}`);
                         // Create a new email entry
                         const newEmail = {
                             id: emailData.id,
@@ -169,11 +167,9 @@ function handleIncomingEmail(analysisData, emailData) {
                         existingTicket.email.push(newEmail);
                         // Save the updated ticket
                         ticket = yield existingTicket.save();
-                        console.log("Added new email to existing ticket");
                     }
                     else {
                         // If ticketId is present but ticket not found, create a new one with that ID
-                        console.log(`No ticket found with ID ${analysisData.ticketId}. Creating new ticket.`);
                         ticket = yield createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
                         isNewTicket = true;
                     }

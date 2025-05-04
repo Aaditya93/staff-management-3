@@ -61,8 +61,6 @@ export async function fetchEmailById(
       userId
     );
 
-    console.log("Fetching email with ID:", cleanEmailId);
-
     const response = await fetch(fullUrl, {
       headers: {
         Authorization: `Bearer ${newToken}`,
@@ -136,7 +134,6 @@ export async function fetchAllEmails(
       searchQuery = "",
       lastSyncTime = "", // Default to empty string (no timestamp filtering)
     } = options;
-    console.log("lastSyncTime", lastSyncTime);
 
     // Get a valid access token
     const newToken = await getValidAccessToken(
@@ -174,10 +171,10 @@ export async function fetchAllEmails(
 
     // Add timestamp filter if provided
     if (lastSyncTime) {
-      // Format: receivedDateTime ge 2023-01-01T00:00:00Z
-      filterConditions.push(`receivedDateTime ge ${lastSyncTime}`);
-
-      // filterConditions.push(`receivedDateTime ge 2025-04-11T09:15:09.908Z`);
+      // Filter for emails that were either received or sent after the last sync time
+      filterConditions.push(
+        `(receivedDateTime ge ${lastSyncTime} or sentDateTime ge ${lastSyncTime})`
+      );
     }
 
     // Combine filter conditions if any exist
@@ -191,8 +188,6 @@ export async function fetchAllEmails(
     }
 
     const fullUrl = `${graphUrl}?${queryParams.join("&")}`;
-
-    console.log(`Fetching emails since ${lastSyncTime || "the beginning"}`);
 
     // Make request to Microsoft Graph API
     const response = await fetch(fullUrl, {
@@ -235,8 +230,6 @@ export async function fetchAllEmails(
 
     // Extract the emails
     const emails = data.value;
-
-    console.log(`Retrieved ${emails.length} email(s) matching criteria`);
 
     // You can get additional pages if needed with @odata.nextLink
     // This is the basic implementation without pagination handling

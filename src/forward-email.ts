@@ -16,13 +16,8 @@ export async function forwardEmailsToAPI(
 ) {
   try {
     if (!emails || emails.length === 0) {
-      console.log(`No emails to forward for account: ${accountEmail}`);
       return { success: true, count: 0 };
     }
-
-    console.log(
-      `Forwarding ${emails.length} emails to receiving API for account: ${accountEmail}`
-    );
 
     // Process each email and send to API
     const results = await Promise.all(
@@ -50,9 +45,6 @@ export async function forwardEmailsToAPI(
     );
 
     const successCount = results.filter((r) => r.success).length;
-    console.log(
-      `Successfully forwarded ${successCount} out of ${emails.length} emails for ${accountEmail}`
-    );
 
     return {
       success: true,
@@ -72,26 +64,17 @@ export async function processAllUserEmails() {
   try {
     // Get all users
     const users = await getAllUsers();
-    console.log(`Found ${users.length} users`);
 
     // Process each user
     for (const user of users) {
-      console.log(`Processing user: ${user.name} (${user.email})`);
-
       // Skip if user has no accounts
       if (!user.accounts || user.accounts.length === 0) {
-        console.log(`No accounts found for user: ${user.name}`);
         continue;
       }
 
       // Process each account of the user
       for (const account of user.accounts) {
-        console.log(
-          `Processing account: ${account.email} (${account.provider})`
-        );
-
         try {
-          console.log(`Attempting to fetch email with ID: ${account.email}`);
           const result = await fetchAllEmails(
             account.accessToken,
             account.refreshToken,
@@ -105,10 +88,6 @@ export async function processAllUserEmails() {
             user._id as any,
             account.email
           );
-          console.log(
-            `Updated email timestamp for ${account.email}:`,
-            updateUserTimestamp
-          );
 
           if (result.error) {
             console.error(
@@ -116,8 +95,6 @@ export async function processAllUserEmails() {
               result.error
             );
           } else {
-            console.log(`Successfully fetched email for ${account.email}:`);
-
             // Forward fetched emails to the email receiver API
             if (result.emails && result.emails.length > 0) {
               const forwardResult = await forwardEmailsToAPI(
@@ -125,13 +102,6 @@ export async function processAllUserEmails() {
                 (user._id as any).toString(),
                 account.email
               );
-
-              console.log(
-                `Email forwarding results for ${account.email}:`,
-                forwardResult
-              );
-            } else {
-              console.log(`No new emails to forward for ${account.email}`);
             }
           }
         } catch (error) {
@@ -142,8 +112,6 @@ export async function processAllUserEmails() {
         }
       }
     }
-
-    console.log("Finished processing all users and accounts");
   } catch (error) {
     console.error("Error in main process:", error);
   }

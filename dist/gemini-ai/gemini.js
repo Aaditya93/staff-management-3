@@ -44,6 +44,7 @@ const emailAnalysisConfig = {
             "hasTicketId",
             "isTravelEmail",
             "companyName",
+            "isConfirmationEmail",
             "travelAgent",
             "salesStaff",
         ],
@@ -84,6 +85,10 @@ const emailAnalysisConfig = {
                     "Example format: '68021f4013d187f32b23ae9c'. Only extract this if the ID matches this exact pattern. " +
                     "IDs might be labeled as 'TicketID:', 'Reference:', or similar. Return an empty string if no valid ticket ID is found.",
             },
+            isConfirmationEmail: {
+                type: "boolean",
+                description: "Whether the email is a of recevide Travel request confirmation.It has Thank You for Your Inquiry! menitioned in the mail",
+            },
             isTravelEmail: {
                 type: "boolean",
                 description: "Whether the email is related to travel booking and packages. If Ticket id is present then this should be true",
@@ -91,7 +96,7 @@ const emailAnalysisConfig = {
             // For the schema description
             companyName: {
                 type: "string",
-                description: "It should include victoria tours The actual business/company name mentioned in the email (e.g., 'Your Vacation DMC', not 'yourvacationdmc.com'). Return in lowercase letters. Exclude domain names, email addresses, and URLs. Do not include 'Victoria Tours' as the company name.",
+                description: "The actual business/company name mentioned in the email (e.g., 'Your Vacation DMC', not 'yourvacationdmc.com'). Return in lowercase letters. Exclude domain names, email addresses, and URLs. Do not include 'Victoria Tours' as the company name.",
             },
             travelAgent: {
                 type: "object",
@@ -192,10 +197,11 @@ const analyzeEmail = (emailData) => __awaiter(void 0, void 0, void 0, function* 
     7. hasTicketId: Boolean (true/false) indicating if the email contains any ticket ID or reference number
     8. ticketId: The actual ticket ID or reference number if present (empty string if none)
     9. isTravelEmail: Boolean (true/false) indicating if the email is related to travel booking and packages
-    10. companyName: The company or travel agency name mentioned in the email (convert to all lowercase letters). It should not be 'Victoria Tours' or any other domain name.
+    10. companyName: The company or travel agency name mentioned in the email (convert to all lowercase letters). It should not be 'Victoria Tours'.
     11. travelAgent: Travel agent handling the booking (with name and emailId). It should not be of victoria Tours employee
     12. salesStaff: Sales Staff handling the booking (with name and emailId). It Should be  of victoria Tours employee 
     13. personnelMentioned: Array of all unique personnel mentioned in the email with their name, emailId, and role if available
+    14. isConfirmationEmail: Boolean (true/false) indicating if the email is a confirmation email for travel request. It has Thank You for Your Inquiry! mentioned in the mail
     
     Look carefully for ticket IDs, booking references, or confirmation numbers in any format.
     For the company name, ensure it's in all lowercase letters and is consistent.

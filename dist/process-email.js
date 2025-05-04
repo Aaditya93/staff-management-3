@@ -47,7 +47,6 @@ function processAllUserEmails() {
                                 const processedEmails = result.emails.map((email) => (0, process_email_ai_1.processEmailForAI)(user._id.toString(), user.name, account.email, email));
                                 // Filter out any emails that returned with errors
                                 const validProcessedEmails = processedEmails.filter((email) => !("error" in email));
-                                console.log(`Processed ${validProcessedEmails.length} emails for AI analysis`);
                                 // Process each email individually
                                 const forwardResults = yield Promise.all(validProcessedEmails.map((email) => __awaiter(this, void 0, void 0, function* () {
                                     try {

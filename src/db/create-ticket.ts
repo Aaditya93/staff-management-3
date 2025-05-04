@@ -207,8 +207,6 @@ export async function createTicketFromEmail(
 
     const savedTicket = await newTicket.save();
 
-    console.log("Ticket created successfully:", savedTicket);
-
     return savedTicket;
   } catch (error) {
     console.error("Error creating ticket from email:", error);
@@ -244,10 +242,6 @@ export async function handleIncomingEmail(
         });
 
         if (existingTicket) {
-          console.log(
-            `Found existing ticket with ID: ${analysisData.ticketId}`
-          );
-
           // Create a new email entry
           const newEmail = {
             id: emailData.id,
@@ -279,13 +273,9 @@ export async function handleIncomingEmail(
 
           // Save the updated ticket
           ticket = await existingTicket.save();
-
-          console.log("Added new email to existing ticket");
         } else {
           // If ticketId is present but ticket not found, create a new one with that ID
-          console.log(
-            `No ticket found with ID ${analysisData.ticketId}. Creating new ticket.`
-          );
+
           ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
           isNewTicket = true;
         }

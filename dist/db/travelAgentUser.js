@@ -73,7 +73,6 @@ const getTravelAgentUserByEmail = (email) => __awaiter(void 0, void 0, void 0, f
     try {
         yield (0, db_1.default)();
         const user = yield TravelAgentUser.findOne({ email }).lean();
-        console.log("User found:", user);
         return user;
     }
     catch (error) {
