@@ -119,8 +119,8 @@ function fetchAllEmails(accessToken, refreshToken, expiresAt, userId, emailId, o
             // Add timestamp filter if provided
             if (lastSyncTime) {
                 // Format: receivedDateTime ge 2023-01-01T00:00:00Z
-                // filterConditions.push(`receivedDateTime ge ${lastSyncTime}`);
-                filterConditions.push(`receivedDateTime ge 2025-04-11T09:15:09.908Z`);
+                filterConditions.push(`receivedDateTime ge ${lastSyncTime}`);
+                // filterConditions.push(`receivedDateTime ge 2025-04-11T09:15:09.908Z`);
             }
             // Combine filter conditions if any exist
             if (filterConditions.length > 0) {

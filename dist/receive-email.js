@@ -19,19 +19,19 @@ const process_email_transform_1 = require("./process-email-transform");
  * @param email - The raw email data
  * @returns Result object with analysis and ticket information
  */
-function processIncomingEmail(email) {
+function processIncomingEmail(emailData) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("Received email:", email);
         // Transform and analyze the email
-        const aiData = yield (0, process_email_transform_1.transformEmailData)(email);
+        console.log("email", emailData);
+        const aiData = yield (0, process_email_transform_1.transformEmailData)(emailData.email);
+        console.log("aiData", aiData);
         const analysis = yield (0, gemini_1.analyzeEmail)(aiData);
-        console.log("AI analysis result:", analysis);
         let ticketResult = null;
         // Handle ticket creation if it's a travel email
         if (analysis.isTravelEmail) {
             try {
-                ticketResult = yield (0, create_ticket_1.handleIncomingEmail)(analysis, email);
+                ticketResult = yield (0, create_ticket_1.handleIncomingEmail)(analysis, emailData.email);
                 if (ticketResult.isNewTicket) {
                     console.log("New ticket created with ID:", (_a = ticketResult.ticket) === null || _a === void 0 ? void 0 : _a._id);
                 }

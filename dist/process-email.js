@@ -47,23 +47,40 @@ function processAllUserEmails() {
                             console.error(`Error fetching email for ${account.email}:`, result.error);
                         }
                         else {
-                            // await updateUserEmailTimestamp(
-                            //   (user._id as any).toString(),
-                            //   account.email
-                            // );
+                            yield (0, User_1.updateUserEmailTimestamp)(user._id.toString(), account.email);
                             if (result.emails && result.emails.length > 0) {
                                 // Process emails through AI processing before forwarding
                                 const processedEmails = result.emails.map((email) => (0, process_email_ai_1.processEmailForAI)(user._id.toString(), user.name, account.email, email));
-                                console.log(`Processed emails:`, processedEmails);
                                 // Filter out any emails that returned with errors
                                 const validProcessedEmails = processedEmails.filter((email) => !("error" in email));
                                 console.log(`Processed ${validProcessedEmails.length} emails for AI analysis`);
-                                const forwardResult = yield (0, receive_email_1.processIncomingEmail)({
-                                    userId: user._id.toString(),
-                                    emailId: account.email,
-                                    email: validProcessedEmails,
-                                });
-                                console.log(`Email forwarding results for ${account.email}:`, forwardResult);
+                                // Process each email individually
+                                const forwardResults = yield Promise.all(validProcessedEmails.map((email) => __awaiter(this, void 0, void 0, function* () {
+                                    try {
+                                        // Ensure email is properly formatted for processIncomingEmail
+                                        const emailData = {
+                                            userId: user._id.toString(),
+                                            emailId: account.email,
+                                            email: email,
+                                        };
+                                        console.log("Processing email:", "id" in email ? email.id : "unknown ID");
+                                        const result = yield (0, receive_email_1.processIncomingEmail)(emailData);
+                                        return {
+                                            success: true,
+                                            emailId: "id" in email ? email.id : "unknown",
+                                            result,
+                                        };
+                                    }
+                                    catch (error) {
+                                        console.error(`Failed to process email ID ${"id" in email ? email.id : "unknown"}:`, error);
+                                        return {
+                                            success: false,
+                                            emailId: "id" in email ? email.id : "unknown",
+                                            error: error instanceof Error ? error.message : String(error),
+                                        };
+                                    }
+                                })));
+                                console.log(`Email processing results for ${account.email}:`, forwardResults);
                             }
                             else {
                                 console.log(`No new emails to forward for ${account.email}`);

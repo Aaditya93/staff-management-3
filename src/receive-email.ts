@@ -7,20 +7,17 @@ import { transformEmailData } from "./process-email-transform";
  * @param email - The raw email data
  * @returns Result object with analysis and ticket information
  */
-export async function processIncomingEmail(email: any) {
-  console.log("Received email:", email);
+export async function processIncomingEmail(emailData: any) {
+  const aiData = await transformEmailData(emailData.email);
 
-  // Transform and analyze the email
-  const aiData = await transformEmailData(email);
   const analysis = await analyzeEmail(aiData);
-  console.log("AI analysis result:", analysis);
 
   let ticketResult = null;
 
   // Handle ticket creation if it's a travel email
   if (analysis.isTravelEmail) {
     try {
-      ticketResult = await handleIncomingEmail(analysis, email);
+      ticketResult = await handleIncomingEmail(analysis, emailData.email);
 
       if (ticketResult.isNewTicket) {
         console.log("New ticket created with ID:", ticketResult.ticket?._id);

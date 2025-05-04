@@ -68,7 +68,6 @@ export async function processAllUserEmails() {
                   email
                 )
               );
-              console.log(`Processed emails:`, processedEmails);
 
               // Filter out any emails that returned with errors
               const validProcessedEmails = processedEmails.filter(
@@ -78,15 +77,49 @@ export async function processAllUserEmails() {
               console.log(
                 `Processed ${validProcessedEmails.length} emails for AI analysis`
               );
-              const forwardResult = await processIncomingEmail({
-                userId: (user._id as any).toString(),
-                emailId: account.email,
-                email: validProcessedEmails,
-              });
+
+              // Process each email individually
+              const forwardResults = await Promise.all(
+                validProcessedEmails.map(async (email) => {
+                  try {
+                    // Ensure email is properly formatted for processIncomingEmail
+                    const emailData = {
+                      userId: (user._id as any).toString(),
+                      emailId: account.email,
+                      email: email,
+                    };
+
+                    console.log(
+                      "Processing email:",
+                      "id" in email ? email.id : "unknown ID"
+                    );
+                    const result = await processIncomingEmail(emailData);
+
+                    return {
+                      success: true,
+                      emailId: "id" in email ? email.id : "unknown",
+                      result,
+                    };
+                  } catch (error) {
+                    console.error(
+                      `Failed to process email ID ${
+                        "id" in email ? email.id : "unknown"
+                      }:`,
+                      error
+                    );
+                    return {
+                      success: false,
+                      emailId: "id" in email ? email.id : "unknown",
+                      error:
+                        error instanceof Error ? error.message : String(error),
+                    };
+                  }
+                })
+              );
 
               console.log(
-                `Email forwarding results for ${account.email}:`,
-                forwardResult
+                `Email processing results for ${account.email}:`,
+                forwardResults
               );
             } else {
               console.log(`No new emails to forward for ${account.email}`);

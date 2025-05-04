@@ -4,6 +4,7 @@ import {
   createTravelAgentUser,
   getTravelAgentUserByEmail,
 } from "./travelAgentUser";
+
 import User from "./User";
 /**
  * Creates a new ticket from analyzed email data and raw email information
