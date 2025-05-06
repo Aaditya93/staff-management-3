@@ -11,11 +11,16 @@ export async function processIncomingEmail(emailData: any) {
   const aiData = await transformEmailData(emailData.email);
 
   const analysis = await analyzeEmail(aiData);
+  console.log("AI Analysis Result:", analysis);
 
   let ticketResult = null;
 
   // Handle ticket creation if it's a travel email
-  if (analysis.isTravelEmail && !analysis.isConfirmationEmail) {
+  if (
+    analysis.isTravelEmail &&
+    !analysis.isConfirmationEmail &&
+    analysis.isInquiryEmail
+  ) {
     try {
       ticketResult = await handleIncomingEmail(analysis, emailData.email);
     } catch (error) {

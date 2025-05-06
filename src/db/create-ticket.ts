@@ -172,7 +172,7 @@ export async function createTicketFromEmail(
 
       // Default fields
       isApproved: false,
-      market: "",
+      market: "pending",
       status: "new",
 
       estimateTimeToSendPrice: 0,
@@ -236,7 +236,6 @@ export async function handleIncomingEmail(
         analysisData.ticketId &&
         analysisData.ticketId.length === 24
       ) {
-        // Try to find existing ticket by ID
         const existingTicket = await Ticket.findById({
           _id: analysisData.ticketId,
         });

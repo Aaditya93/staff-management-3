@@ -35,6 +35,7 @@ const emailAnalysisConfig = {
       "isConfirmationEmail",
       "travelAgent",
       "salesStaff",
+      "isInquiryEmail",
     ],
     properties: {
       destination: {
@@ -70,6 +71,11 @@ const emailAnalysisConfig = {
         type: "boolean",
         description:
           "Whether the email contains a ticket ID or reference number",
+      },
+      isInquiryEmail: {
+        type: "boolean",
+        description:
+          "Whether the email is an inquiry about travel packages or rates. Usually contains requests for itineraries, pricing, or availability for specific destinations and dates.",
       },
       ticketId: {
         type: "string",
@@ -210,7 +216,8 @@ export const analyzeEmail = async (emailData: {
     12. salesStaff: Sales Staff handling the booking (with name and emailId). It Should be  of victoria Tours employee 
     13. personnelMentioned: Array of all unique personnel mentioned in the email with their name, emailId, and role if available
     14. isConfirmationEmail: Boolean (true/false) indicating if the email is a confirmation email for travel request. It has Thank You for Your Inquiry! mentioned in the mail
-    
+    15. isInquiryEmail: Boolean (true/false) indicating if the email is an inquiry about travel packages, rates, or itineraries
+
     Look carefully for ticket IDs, booking references, or confirmation numbers in any format.
     For the company name, ensure it's in all lowercase letters and is consistent.
     Identify all personnel mentioned in the email with their full names and email addresses if available.

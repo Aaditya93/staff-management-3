@@ -87,7 +87,7 @@ function createTicketFromEmail(analysisData, emailData) {
                     emailId: analysisData.salesStaff.emailId,
                 }, 
                 // Default fields
-                isApproved: false, market: "", status: "new", estimateTimeToSendPrice: 0, cost: 0, waitingTime: 0, speed: "normal", inbox: emailData.emailType === "received" ? 1 : 0, sent: emailData.emailType === "sent" ? 1 : 0, 
+                isApproved: false, market: "pending", status: "new", estimateTimeToSendPrice: 0, cost: 0, waitingTime: 0, speed: "normal", inbox: emailData.emailType === "received" ? 1 : 0, sent: emailData.emailType === "sent" ? 1 : 0, 
                 // Email tracking
                 lastMailTimeReceived: emailData.emailType === "received" ? receivedTime : 0, lastMailTimeSent: emailData.emailType === "sent" ? receivedTime : 0, 
                 // Add the first email to the email array
@@ -134,7 +134,6 @@ function handleIncomingEmail(analysisData, emailData) {
                 if (analysisData.hasTicketId &&
                     analysisData.ticketId &&
                     analysisData.ticketId.length === 24) {
-                    // Try to find existing ticket by ID
                     const existingTicket = yield ticket_1.default.findById({
                         _id: analysisData.ticketId,
                     });

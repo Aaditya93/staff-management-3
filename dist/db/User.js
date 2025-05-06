@@ -55,7 +55,10 @@ const userSchema = new mongoose_1.default.Schema({
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: "TravelAgentUser",
     },
-    country: String,
+    destination: {
+        type: [String],
+        default: [],
+    },
     provider: String,
     image: String,
     backgroundImage: String,
