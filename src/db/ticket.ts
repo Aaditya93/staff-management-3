@@ -56,8 +56,8 @@ export interface ITicket extends Document {
   speed: string;
   inbox: number;
   sent: number;
-  lastMailTimeReceived: number;
-  lastMailTimeSent: number;
+  lastMailTimeReceived: string;
+  lastMailTimeSent: string;
   balance?: number;
   email: EmailEntry[];
   createdAt: Date;
@@ -196,12 +196,10 @@ const TicketSchema = new Schema<ITicket>(
       min: 0,
     },
     lastMailTimeReceived: {
-      type: Number,
-      default: 0,
+      type: String,
     },
     lastMailTimeSent: {
-      type: Number,
-      default: 0,
+      type: String,
     },
     balance: Number,
     isApproved: {

@@ -55,7 +55,7 @@ function createTicketFromEmail(analysisData, emailData) {
                 // Agent information
                 agent: analysisData.companyName, 
                 // Email metadata
-                receivedDateTime: emailData.receivedDateTime, sentDateTime: emailData.emailType === "sent" ? emailData.receivedDateTime : null }, (analysisData.ticketId && { ticketId: analysisData.ticketId })), { 
+                receivedDateTime: emailData.emailType === "received" ? emailData.receivedDateTime : null, sentDateTime: emailData.emailType === "sent" ? emailData.receivedDateTime : null, lastTimeReceived: emailData.emailType === "received" ? emailData.receivedDateTime : null, lastTimeSent: emailData.emailType === "sent" ? emailData.receivedDateTime : null }, (analysisData.ticketId && { ticketId: analysisData.ticketId })), { 
                 // Travel details from analysis
                 destination: analysisData.destination }), (isValidDateFormat(analysisData.arrivalDate) && {
                 arrivalDate: parseDate(analysisData.arrivalDate),
@@ -153,19 +153,46 @@ function handleIncomingEmail(analysisData, emailData) {
                             timestamp: new Date(),
                         };
                         // Update email counts and timestamps based on email type
-                        const receivedTime = new Date(emailData.receivedDateTime).getTime();
                         if (emailData.emailType === "received") {
                             existingTicket.inbox += 1;
-                            existingTicket.lastMailTimeReceived = receivedTime;
+                            existingTicket.lastMailTimeReceived = emailData.receivedDateTime;
                         }
                         else if (emailData.emailType === "sent") {
                             existingTicket.sent += 1;
-                            existingTicket.lastMailTimeSent = receivedTime;
+                            existingTicket.lastMailTimeSent = emailData.receivedDateTime || "";
+                        }
+                        if (existingTicket.email && existingTicket.email.length > 0) {
+                            // Get all emails sorted by timestamp
+                            const sortedEmails = [...existingTicket.email, newEmail].sort((a, b) => new Date(a.timestamp).getTime() -
+                                new Date(b.timestamp).getTime());
+                            let totalWaitTime = 0;
+                            let waitTimeCount = 0;
+                            // Calculate time differences between received and subsequent sent emails
+                            for (let i = 0; i < sortedEmails.length - 1; i++) {
+                                const currentEmail = sortedEmails[i];
+                                const nextEmail = sortedEmails[i + 1];
+                                // If current is received and next is sent, calculate waiting time
+                                if (currentEmail.emailType === "received" &&
+                                    nextEmail.emailType === "sent") {
+                                    const receivedTime = new Date(currentEmail.timestamp).getTime();
+                                    const sentTime = new Date(nextEmail.timestamp).getTime();
+                                    const waitTime = sentTime - receivedTime; // in milliseconds
+                                    if (waitTime > 0) {
+                                        totalWaitTime += waitTime;
+                                        waitTimeCount++;
+                                    }
+                                }
+                            }
+                            if (waitTimeCount > 0) {
+                                const avgWaitTimeMinutes = Math.round(totalWaitTime / waitTimeCount / (1000 * 60));
+                                existingTicket.waitingTime = avgWaitTimeMinutes;
+                            }
                         }
                         // Add the new email to the ticket's email array
                         existingTicket.email.push(newEmail);
                         // Save the updated ticket
                         ticket = yield existingTicket.save();
+                        console.log("Updated existing ticket:", ticket);
                     }
                     else {
                         // If ticketId is present but ticket not found, create a new one with that ID

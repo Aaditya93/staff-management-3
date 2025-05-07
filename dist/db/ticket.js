@@ -119,12 +119,10 @@ const TicketSchema = new mongoose_1.Schema({
         min: 0,
     },
     lastMailTimeReceived: {
-        type: Number,
-        default: 0,
+        type: String,
     },
     lastMailTimeSent: {
-        type: Number,
-        default: 0,
+        type: String,
     },
     balance: Number,
     isApproved: {

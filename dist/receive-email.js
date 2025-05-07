@@ -22,8 +22,8 @@ const process_email_transform_1 = require("./process-email-transform");
 function processIncomingEmail(emailData) {
     return __awaiter(this, void 0, void 0, function* () {
         const aiData = yield (0, process_email_transform_1.transformEmailData)(emailData.email);
+        console.log("email Data:", emailData.email);
         const analysis = yield (0, gemini_1.analyzeEmail)(aiData);
-        console.log("AI Analysis Result:", analysis);
         let ticketResult = null;
         // Handle ticket creation if it's a travel email
         if (analysis.isTravelEmail && !analysis.isConfirmationEmail) {
