@@ -173,7 +173,7 @@ function handleIncomingEmail(analysisData, emailData) {
                         isNewTicket = true;
                     }
                 }
-                else {
+                else if (analysisData.isInquiryEmail) {
                     // No ticket ID in the email, create a new ticket
                     ticket = yield createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
                     isNewTicket = true;
@@ -181,6 +181,7 @@ function handleIncomingEmail(analysisData, emailData) {
                 return {
                     ticket,
                     isNewTicket,
+                    isInquiryEmail: analysisData.isInquiryEmail,
                 };
             }
             else {
