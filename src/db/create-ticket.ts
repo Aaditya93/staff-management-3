@@ -51,6 +51,7 @@ export interface IEmailAnalysisData {
   companyName: string;
   travelAgent: IPerson;
   salesStaff: IPerson;
+  isInquiryEmail: boolean;
   personnelMentioned?: IPersonWithRole[];
 }
 
@@ -278,7 +279,7 @@ export async function handleIncomingEmail(
           ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
           isNewTicket = true;
         }
-      } else {
+      } else if (analysisData.isInquiryEmail) {
         // No ticket ID in the email, create a new ticket
         ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
         isNewTicket = true;
@@ -287,6 +288,7 @@ export async function handleIncomingEmail(
       return {
         ticket,
         isNewTicket,
+        isInquiryEmail: analysisData.isInquiryEmail,
       };
     } else {
       // Not a travel email

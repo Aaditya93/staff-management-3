@@ -16,11 +16,7 @@ export async function processIncomingEmail(emailData: any) {
   let ticketResult = null;
 
   // Handle ticket creation if it's a travel email
-  if (
-    analysis.isTravelEmail &&
-    !analysis.isConfirmationEmail &&
-    analysis.isInquiryEmail
-  ) {
+  if (analysis.isTravelEmail && !analysis.isConfirmationEmail) {
     try {
       ticketResult = await handleIncomingEmail(analysis, emailData.email);
     } catch (error) {
