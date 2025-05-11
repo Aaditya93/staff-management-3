@@ -238,7 +238,7 @@ export async function handleIncomingEmail(
     let isNewTicket = false;
 
     // Check if this email has a ticket ID and is travel-related
-    if (analysisData.isTravelEmail) {
+    if (analysisData.isTravelEmail || analysisData.hasTicketId) {
       if (
         analysisData.hasTicketId &&
         analysisData.ticketId &&
@@ -325,7 +325,7 @@ export async function handleIncomingEmail(
           ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
           isNewTicket = true;
         }
-      } else if (analysisData.isInquiryEmail) {
+      } else {
         // No ticket ID in the email, create a new ticket
         ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
         isNewTicket = true;
