@@ -35,7 +35,6 @@ function createTicketFromEmail(analysisData, emailData) {
             };
             // Calculate timestamps for email tracking
             let travelAgentUserId = null;
-            const receivedTime = new Date(emailData.receivedDateTime).getTime();
             const TravelAgentUser = yield User_1.default.findOne({
                 email: analysisData.travelAgent.emailId,
             });
@@ -89,7 +88,7 @@ function createTicketFromEmail(analysisData, emailData) {
                 // Default fields
                 isApproved: false, market: "pending", status: "new", estimateTimeToSendPrice: 0, cost: 0, waitingTime: 0, speed: "normal", inbox: emailData.emailType === "received" ? 1 : 0, sent: emailData.emailType === "sent" ? 1 : 0, 
                 // Email tracking
-                lastMailTimeReceived: emailData.emailType === "received" ? receivedTime : 0, lastMailTimeSent: emailData.emailType === "sent" ? receivedTime : 0, 
+                lastMailTimeReceived: emailData.emailType === "received" ? emailData.receivedDateTime : 0, lastMailTimeSent: emailData.emailType === "sent" ? emailData.receivedDateTime : 0, 
                 // Add the first email to the email array
                 email: [
                     {
@@ -130,7 +129,7 @@ function handleIncomingEmail(analysisData, emailData) {
             let ticket;
             let isNewTicket = false;
             // Check if this email has a ticket ID and is travel-related
-            if (analysisData.isTravelEmail || analysisData.hasTicketId) {
+            if (analysisData.isTravelEmail) {
                 if (analysisData.hasTicketId &&
                     analysisData.ticketId &&
                     analysisData.ticketId.length === 24) {
@@ -200,7 +199,7 @@ function handleIncomingEmail(analysisData, emailData) {
                         isNewTicket = true;
                     }
                 }
-                else {
+                else if (analysisData.isInquiryEmail) {
                     // No ticket ID in the email, create a new ticket
                     ticket = yield createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
                     isNewTicket = true;

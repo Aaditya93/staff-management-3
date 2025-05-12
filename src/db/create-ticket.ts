@@ -91,7 +91,7 @@ export async function createTicketFromEmail(
 
     // Calculate timestamps for email tracking
     let travelAgentUserId: string | null = null;
-    const receivedTime = new Date(emailData.receivedDateTime).getTime();
+
     const TravelAgentUser = await User.findOne({
       email: analysisData.travelAgent.emailId,
     });
@@ -192,8 +192,9 @@ export async function createTicketFromEmail(
 
       // Email tracking
       lastMailTimeReceived:
-        emailData.emailType === "received" ? receivedTime : 0,
-      lastMailTimeSent: emailData.emailType === "sent" ? receivedTime : 0,
+        emailData.emailType === "received" ? emailData.receivedDateTime : 0,
+      lastMailTimeSent:
+        emailData.emailType === "sent" ? emailData.receivedDateTime : 0,
 
       // Add the first email to the email array
       email: [
@@ -238,7 +239,7 @@ export async function handleIncomingEmail(
     let isNewTicket = false;
 
     // Check if this email has a ticket ID and is travel-related
-    if (analysisData.isTravelEmail || analysisData.hasTicketId) {
+    if (analysisData.isTravelEmail) {
       if (
         analysisData.hasTicketId &&
         analysisData.ticketId &&
@@ -325,7 +326,7 @@ export async function handleIncomingEmail(
           ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
           isNewTicket = true;
         }
-      } else {
+      } else if (analysisData.isInquiryEmail) {
         // No ticket ID in the email, create a new ticket
         ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
         isNewTicket = true;
