@@ -88,7 +88,7 @@ function createTicketFromEmail(analysisData, emailData) {
                 // Default fields
                 isApproved: false, market: "pending", status: "new", estimateTimeToSendPrice: 0, cost: 0, waitingTime: 0, speed: "normal", inbox: emailData.emailType === "received" ? 1 : 0, sent: emailData.emailType === "sent" ? 1 : 0, 
                 // Email tracking
-                lastMailTimeReceived: emailData.emailType === "received" ? emailData.receivedDateTime : 0, lastMailTimeSent: emailData.emailType === "sent" ? emailData.receivedDateTime : 0, 
+                lastMailTimeReceived: emailData.emailType === "received" ? emailData.receivedDateTime : null, lastMailTimeSent: emailData.emailType === "sent" ? emailData.receivedDateTime : null, 
                 // Add the first email to the email array
                 email: [
                     {
@@ -158,7 +158,7 @@ function handleIncomingEmail(analysisData, emailData) {
                         }
                         else if (emailData.emailType === "sent") {
                             existingTicket.sent += 1;
-                            existingTicket.lastMailTimeSent = emailData.receivedDateTime || "";
+                            existingTicket.lastMailTimeSent = emailData.receivedDateTime;
                         }
                         if (existingTicket.email && existingTicket.email.length > 0) {
                             // Get all emails sorted by timestamp

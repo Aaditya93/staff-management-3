@@ -192,9 +192,9 @@ export async function createTicketFromEmail(
 
       // Email tracking
       lastMailTimeReceived:
-        emailData.emailType === "received" ? emailData.receivedDateTime : 0,
+        emailData.emailType === "received" ? emailData.receivedDateTime : null,
       lastMailTimeSent:
-        emailData.emailType === "sent" ? emailData.receivedDateTime : 0,
+        emailData.emailType === "sent" ? emailData.receivedDateTime : null,
 
       // Add the first email to the email array
       email: [
@@ -272,7 +272,7 @@ export async function handleIncomingEmail(
             existingTicket.lastMailTimeReceived = emailData.receivedDateTime;
           } else if (emailData.emailType === "sent") {
             existingTicket.sent += 1;
-            existingTicket.lastMailTimeSent = emailData.receivedDateTime || "";
+            existingTicket.lastMailTimeSent = emailData.receivedDateTime;
           }
 
           if (existingTicket.email && existingTicket.email.length > 0) {
