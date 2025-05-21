@@ -11,6 +11,7 @@ export async function processIncomingEmail(emailData: any) {
   const aiData = await transformEmailData(emailData.email);
 
   const analysis = await analyzeEmail(aiData);
+  console.log("AI Analysis Result:", analysis);
 
   let ticketResult = null;
 

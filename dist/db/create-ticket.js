@@ -199,7 +199,7 @@ function handleIncomingEmail(analysisData, emailData) {
                         isNewTicket = true;
                     }
                 }
-                else if (analysisData.isInquiryEmail) {
+                else if (analysisData.isInquiryEmail && !analysisData.isSupplierEmail) {
                     // No ticket ID in the email, create a new ticket
                     ticket = yield createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
                     isNewTicket = true;

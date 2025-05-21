@@ -36,6 +36,7 @@ const emailAnalysisConfig = {
       "travelAgent",
       "salesStaff",
       "isInquiryEmail",
+      "isSupplierEmail",
     ],
     properties: {
       destination: {
@@ -100,6 +101,17 @@ const emailAnalysisConfig = {
         description:
           "The actual business/company name mentioned in the email (e.g., 'Your Vacation DMC', not 'yourvacationdmc.com'). Return in lowercase letters. Exclude domain names, email addresses, and URLs. Do not include 'Victoria Tours' as the company name.",
       },
+      isSupplierEmail: {
+        type: "boolean",
+        description:
+          "Whether the email relates to supplier operations, including: " +
+          "1) Payment requests from hotels or service providers (look for 'thanh toán', 'booking', account numbers, payment details) " +
+          "2) Payment confirmations or reports (look for 'BÁO CÁO TIỀN VỀ', payment codes like 'MARAOF250500661', 'STTIOF250500062') " +
+          "3) Travel service offerings from partners (hotels, visa services, etc.) " +
+          "4) B2B marketing/event invitations from industry partners (travel marts, exhibitions) " +
+          "Supplier emails typically contain specific booking codes, payment amounts, account details, or industry event information. " +
+          "These emails are NOT client inquiries about travel packages.",
+      },
 
       travelAgent: {
         type: "object",
@@ -116,6 +128,7 @@ const emailAnalysisConfig = {
           },
         },
       },
+
       salesStaff: {
         type: "object",
         description:
@@ -217,7 +230,7 @@ export const analyzeEmail = async (emailData: {
     13. personnelMentioned: Array of all unique personnel mentioned in the email with their name, emailId, and role if available
     14. isConfirmationEmail: Boolean (true/false) indicating if the email is a confirmation email for travel request. It has Thank You for Your Inquiry! mentioned in the mail
     15. isInquiryEmail: Boolean (true/false) indicating if the email is an inquiry about travel packages, rates, or itineraries
-
+    16. isSupplierEmail: Boolean (true/false) indicating if the email relates to supplier operations (payment requests, confirmations, service offerings, or industry events)
     Look carefully for ticket IDs, booking references, or confirmation numbers in any format.
     For the company name, ensure it's in all lowercase letters and is consistent.
     Identify all personnel mentioned in the email with their full names and email addresses if available.

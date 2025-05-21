@@ -52,6 +52,8 @@ export interface IEmailAnalysisData {
   travelAgent: IPerson;
   salesStaff: IPerson;
   isInquiryEmail: boolean;
+
+  isSupplierEmail: boolean;
   personnelMentioned?: IPersonWithRole[];
 }
 
@@ -326,7 +328,7 @@ export async function handleIncomingEmail(
           ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
           isNewTicket = true;
         }
-      } else if (analysisData.isInquiryEmail) {
+      } else if (analysisData.isInquiryEmail && !analysisData.isSupplierEmail) {
         // No ticket ID in the email, create a new ticket
         ticket = await createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
         isNewTicket = true;
