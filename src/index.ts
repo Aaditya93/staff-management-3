@@ -17,11 +17,13 @@ const startPeriodicEmailProcessing = () => {
     } catch (error) {
       console.error("Error in scheduled email processing:", error);
     }
-  }, 50000); // 5000 milliseconds = 5 seconds
+  }, 10000);
 };
 
 // Start periodic email processing
 startPeriodicEmailProcessing();
 
 // Start the server
-app.listen(PORT, () => {});
+app.listen(PORT, () => {
+  console.log(`Email Server  is running on port ${PORT}`);
+});

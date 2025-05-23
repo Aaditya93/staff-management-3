@@ -5,6 +5,7 @@ import { forwardEmailsToAPI } from "./forward-email";
 
 import { processEmailForAI } from "./process-email-ai"; // Import the processEmailForAI function
 import { processIncomingEmail } from "./receive-email";
+import { sendMessageToQueue } from "./sqs/sqs";
 
 export async function processAllUserEmails() {
   try {
@@ -75,7 +76,11 @@ export async function processAllUserEmails() {
                       email: email,
                     };
 
-                    const result = await processIncomingEmail(emailData);
+                    const result = await sendMessageToQueue(emailData);
+                    console.log(
+                      `Email processed and sent to SQS for ${account.email}:`,
+                      result
+                    );
 
                     return {
                       success: true,

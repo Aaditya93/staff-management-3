@@ -13,7 +13,7 @@ exports.processAllUserEmails = void 0;
 const User_1 = require("./db/User");
 const fetch_emails_1 = require("./fetch-emails");
 const process_email_ai_1 = require("./process-email-ai"); // Import the processEmailForAI function
-const receive_email_1 = require("./receive-email");
+const sqs_1 = require("./sqs/sqs");
 function processAllUserEmails() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -56,7 +56,8 @@ function processAllUserEmails() {
                                             emailId: account.email,
                                             email: email,
                                         };
-                                        const result = yield (0, receive_email_1.processIncomingEmail)(emailData);
+                                        const result = yield (0, sqs_1.sendMessageToQueue)(emailData);
+                                        console.log(`Email processed and sent to SQS for ${account.email}:`, result);
                                         return {
                                             success: true,
                                             emailId: "id" in email ? email.id : "unknown",
