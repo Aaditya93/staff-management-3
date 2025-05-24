@@ -182,8 +182,7 @@ export async function createTicketFromEmail(
 
       // Default fields
       isApproved: false,
-      market: "pending",
-      status: "new",
+      status: "pending",
 
       estimateTimeToSendPrice: 0,
       cost: 0,
@@ -321,7 +320,6 @@ export async function handleIncomingEmail(
 
           // Save the updated ticket
           ticket = await existingTicket.save();
-          console.log("Updated existing ticket:", ticket);
         } else {
           // If ticketId is present but ticket not found, create a new one with that ID
 

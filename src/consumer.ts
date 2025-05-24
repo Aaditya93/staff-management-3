@@ -19,11 +19,8 @@ async function processMessages() {
     const messages = await receiveMessagesFromQueue(10, 60, 20);
 
     if (messages.length === 0) {
-      console.log("No messages to process");
       return;
     }
-
-    console.log(`Processing ${messages.length} messages`);
 
     // Process each message
     for (const message of messages) {
@@ -37,7 +34,6 @@ async function processMessages() {
         const messageBody: MessageBody = JSON.parse(message.Body);
 
         await processIncomingEmail(messageBody);
-        console.log("Processing message:", messageBody);
 
         // Add your message processing logic here
         // For example: analyze email content, update database, etc.
@@ -49,9 +45,6 @@ async function processMessages() {
 
     // Delete processed messages from the queue
     await deleteMessagesFromQueue(messages);
-    console.log(
-      `Successfully processed and deleted ${messages.length} messages`
-    );
   } catch (error) {
     console.error("Error in message processing cycle:", error);
   }

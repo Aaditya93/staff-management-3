@@ -57,7 +57,7 @@ function processAllUserEmails() {
                                             email: email,
                                         };
                                         const result = yield (0, sqs_1.sendMessageToQueue)(emailData);
-                                        console.log(`Email processed and sent to SQS for ${account.email}:`, result);
+                                        console.log(`Email processed and sent to queue for user ${user.name} (${account.email}):`, result);
                                         return {
                                             success: true,
                                             emailId: "id" in email ? email.id : "unknown",

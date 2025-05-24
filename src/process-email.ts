@@ -77,10 +77,6 @@ export async function processAllUserEmails() {
                     };
 
                     const result = await sendMessageToQueue(emailData);
-                    console.log(
-                      `Email processed and sent to SQS for ${account.email}:`,
-                      result
-                    );
 
                     return {
                       success: true,

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
-    "start": "concurrently \"node dist/index.js\" \"node dist/index1.js\"",
+    "start": "concurrently \"node dist/server.js\" \"node dist/consumer.js\"",
     "dev": "npm run build && npm run start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -106,6 +106,7 @@ function createTicketFromEmail(analysisData, emailData) {
                     },
                 ] }));
             const savedTicket = yield newTicket.save();
+            console.log("Created new ticket:", savedTicket);
             return savedTicket;
         }
         catch (error) {

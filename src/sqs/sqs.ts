@@ -67,7 +67,6 @@ export async function receiveMessagesFromQueue(
     const command = new ReceiveMessageCommand(params);
     const response = await sqsClient.send(command);
 
-    console.log(`Received ${response.Messages?.length || 0} messages from SQS`);
     return response.Messages || [];
   } catch (error) {
     console.error("Error receiving messages from SQS:", error);
@@ -90,7 +89,6 @@ export async function deleteMessageFromQueue(receiptHandle: string) {
     const command = new DeleteMessageCommand(params);
     const response = await sqsClient.send(command);
 
-    console.log("Message deleted from SQS");
     return response;
   } catch (error) {
     console.error("Error deleting message from SQS:", error);
@@ -124,9 +122,6 @@ export async function deleteMessagesFromQueue(
     // Log summary of delete operations
     const fulfilled = results.filter((r) => r.status === "fulfilled").length;
     const rejected = results.filter((r) => r.status === "rejected").length;
-    console.log(
-      `Deleted ${fulfilled} messages, failed to delete ${rejected} messages`
-    );
 
     return results;
   } catch (error) {
