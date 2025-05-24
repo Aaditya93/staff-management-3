@@ -86,7 +86,7 @@ function createTicketFromEmail(analysisData, emailData) {
                     emailId: analysisData.salesStaff.emailId,
                 }, 
                 // Default fields
-                isApproved: false, market: "pending", status: "new", estimateTimeToSendPrice: 0, cost: 0, waitingTime: 0, speed: "normal", inbox: emailData.emailType === "received" ? 1 : 0, sent: emailData.emailType === "sent" ? 1 : 0, 
+                isApproved: false, status: "pending", estimateTimeToSendPrice: 0, cost: 0, waitingTime: 0, speed: "normal", inbox: emailData.emailType === "received" ? 1 : 0, sent: emailData.emailType === "sent" ? 1 : 0, 
                 // Email tracking
                 lastMailTimeReceived: emailData.emailType === "received" ? emailData.receivedDateTime : null, lastMailTimeSent: emailData.emailType === "sent" ? emailData.receivedDateTime : null, 
                 // Add the first email to the email array
@@ -106,7 +106,6 @@ function createTicketFromEmail(analysisData, emailData) {
                     },
                 ] }));
             const savedTicket = yield newTicket.save();
-            console.log("Created new ticket:", savedTicket);
             return savedTicket;
         }
         catch (error) {
@@ -192,7 +191,6 @@ function handleIncomingEmail(analysisData, emailData) {
                         existingTicket.email.push(newEmail);
                         // Save the updated ticket
                         ticket = yield existingTicket.save();
-                        console.log("Updated existing ticket:", ticket);
                     }
                     else {
                         // If ticketId is present but ticket not found, create a new one with that ID

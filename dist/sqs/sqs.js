@@ -53,7 +53,6 @@ function sendMessageToQueue(messageBody) {
 }
 exports.sendMessageToQueue = sendMessageToQueue;
 function receiveMessagesFromQueue(maxMessages = 10, visibilityTimeout = 30, waitTimeSeconds = 5) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const params = {
@@ -64,7 +63,6 @@ function receiveMessagesFromQueue(maxMessages = 10, visibilityTimeout = 30, wait
             };
             const command = new client_sqs_1.ReceiveMessageCommand(params);
             const response = yield sqsClient.send(command);
-            console.log(`Received ${((_a = response.Messages) === null || _a === void 0 ? void 0 : _a.length) || 0} messages from SQS`);
             return response.Messages || [];
         }
         catch (error) {
@@ -88,7 +86,6 @@ function deleteMessageFromQueue(receiptHandle) {
             };
             const command = new client_sqs_1.DeleteMessageCommand(params);
             const response = yield sqsClient.send(command);
-            console.log("Message deleted from SQS");
             return response;
         }
         catch (error) {
@@ -120,7 +117,6 @@ function deleteMessagesFromQueue(messages) {
             // Log summary of delete operations
             const fulfilled = results.filter((r) => r.status === "fulfilled").length;
             const rejected = results.filter((r) => r.status === "rejected").length;
-            console.log(`Deleted ${fulfilled} messages, failed to delete ${rejected} messages`);
             return results;
         }
         catch (error) {
