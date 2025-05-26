@@ -56,6 +56,7 @@ function processAllUserEmails() {
                                             emailId: account.email,
                                             email: email,
                                         };
+                                        console.log(emailData);
                                         const result = yield (0, sqs_1.sendMessageToQueue)(emailData);
                                         return {
                                             success: true,

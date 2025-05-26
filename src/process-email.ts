@@ -75,6 +75,7 @@ export async function processAllUserEmails() {
                       emailId: account.email,
                       email: email,
                     };
+                    console.log(emailData);
 
                     const result = await sendMessageToQueue(emailData);
 
