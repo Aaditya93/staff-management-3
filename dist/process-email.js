@@ -56,8 +56,9 @@ function processAllUserEmails() {
                                             emailId: account.email,
                                             email: email,
                                         };
-                                        console.log(emailData);
                                         const result = yield (0, sqs_1.sendMessageToQueue)(emailData);
+                                        console.log(`Email ID ${"id" in email ? email.id : "unknown"} processed and sent to queue successfully:`, result);
+                                        // Forward the email to the API
                                         return {
                                             success: true,
                                             emailId: "id" in email ? email.id : "unknown",
