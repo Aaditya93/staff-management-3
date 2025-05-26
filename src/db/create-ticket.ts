@@ -162,6 +162,7 @@ export async function createTicketFromEmail(
           emailData.emailType === "sent"
             ? emailData.from.email
             : emailData.to[0].email,
+        id: emailData.userId,
       },
       createdBy: {
         id: emailData.userId,

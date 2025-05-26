@@ -37,6 +37,7 @@ function processAllUserEmails() {
                                     : new Date(account.emailUpdatedAt).toISOString()
                                 : undefined,
                         });
+                        console.log(`Fetched emails for user ${user.name} (${account.email})`, result.emails);
                         if (result.error) {
                             console.error(`Error fetching email for ${account.email}:`, result.error);
                         }
@@ -56,8 +57,8 @@ function processAllUserEmails() {
                                             emailId: account.email,
                                             email: email,
                                         };
+                                        console.log(`Processing email for user ${user.name} (${account.email})`, emailData);
                                         const result = yield (0, sqs_1.sendMessageToQueue)(emailData);
-                                        console.log(`Email ID ${"id" in email ? email.id : "unknown"} processed and sent to queue successfully:`, result);
                                         // Forward the email to the API
                                         return {
                                             success: true,

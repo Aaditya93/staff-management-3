@@ -73,6 +73,7 @@ function createTicketFromEmail(analysisData, emailData) {
                     emailId: emailData.emailType === "sent"
                         ? emailData.from.email
                         : emailData.to[0].email,
+                    id: emailData.userId,
                 }, createdBy: {
                     id: emailData.userId,
                     name: emailData.emailType === "sent"
