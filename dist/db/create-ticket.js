@@ -129,7 +129,7 @@ function handleIncomingEmail(analysisData, emailData) {
             let ticket;
             let isNewTicket = false;
             // Check if this email has a ticket ID and is travel-related
-            if (analysisData.isTravelEmail) {
+            if (analysisData.isTravelEmail || analysisData.hasTicketId) {
                 if (analysisData.hasTicketId &&
                     analysisData.ticketId &&
                     analysisData.ticketId.length === 24) {
@@ -198,7 +198,7 @@ function handleIncomingEmail(analysisData, emailData) {
                         isNewTicket = true;
                     }
                 }
-                else if (analysisData.isInquiryEmail && !analysisData.isSupplierEmail) {
+                else if (!analysisData.isSupplierEmail) {
                     // No ticket ID in the email, create a new ticket
                     ticket = yield createTicketFromEmail(analysisData, emailData); // UNCOMMENTED
                     isNewTicket = true;

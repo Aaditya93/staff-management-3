@@ -60,7 +60,7 @@ const startPeriodicMessageProcessing = () => {
     // Set interval to poll for messages every 15 seconds
     setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
         yield processMessages();
-    }), 1500);
+    }), 5000);
     // Also process messages immediately on startup
     processMessages();
 };
