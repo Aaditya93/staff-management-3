@@ -15,8 +15,7 @@ interface EmailTo {
 
 interface EmailEntry {
   id: string;
-  emailSummary: string;
-  rating: number;
+  preview?: string; // Optional preview field for email entries
   weblink?: string;
   emailType?: string;
   from: EmailFrom;
@@ -24,7 +23,6 @@ interface EmailEntry {
   timestamp: Date; // Optional timestamp for email entries
 }
 
-// Add interfaces for personnel types
 interface PersonnelInfo {
   id?: string;
   name: string;
@@ -35,9 +33,8 @@ interface PersonnelInfo {
 export interface ITicket extends Document {
   companyName: string;
   _id: string;
-  userId: string;
-  receivedDateTime: string;
-  sentDateTime?: string;
+  receivedDateTime: Date;
+  sentDateTime?: Date;
   pax: number;
   destination: string;
   arrivalDate?: Date;
@@ -47,6 +44,7 @@ export interface ITicket extends Document {
   salesInCharge: PersonnelInfo; // Changed to PersonnelInfo type
   travelAgent: PersonnelInfo; // Added new field
   createdBy: PersonnelInfo;
+  teamLead?: PersonnelInfo; // Optional field for team lead
   market: string;
   status: string;
   estimateTimeToSendPrice: number;
@@ -56,10 +54,11 @@ export interface ITicket extends Document {
   speed: string;
   inbox: number;
   sent: number;
-  lastMailTimeReceived: string;
-  lastMailTimeSent: string;
+  lastMailTimeReceived: Date;
+  lastMailTimeSent: Date;
   balance?: number;
   email: EmailEntry[];
+  review: Review;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -95,15 +94,11 @@ const EmailEntrySchema = new Schema(
       type: String,
       required: true,
     },
-
-    emailSummary: {
+    preview: {
       type: String,
-      required: true,
+      required: false, // Optional field for email preview
     },
-    rating: {
-      type: Number,
-      default: 0,
-    },
+
     weblink: String,
     emailType: String,
     timestamp: {
@@ -137,12 +132,118 @@ const PersonnelSchema = new Schema(
   },
   { _id: false }
 );
+// First, update the Review interface to match our schema changes
+interface Review {
+  attitude: number;
+  knowledge: number;
+  speed: number;
+  reviewTitle?: string;
+  positiveText?: string;
+  negativeText?: string;
+  userRole?: string;
+  reviewDate: Date;
+  replies?: ReplyEntry[];
+  helpfulCount?: number;
+  notHelpfulCount?: number;
+  voterIds?: Map<string, boolean>; // userId -> isHelpful
+}
 
+interface ReplyEntry {
+  text: string;
+  authorId: string;
+  authorName: string;
+  createdAt: Date;
+}
+
+// Then update the schema
+const ReplyEntrySchema = new Schema(
+  {
+    text: {
+      type: String,
+      required: true,
+    },
+    authorId: {
+      type: String,
+      required: true,
+    },
+    authorName: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
+
+const ReviewSchema = new Schema(
+  {
+    attitude: {
+      type: Number,
+      min: 1,
+      max: 5,
+      required: true,
+    },
+    knowledge: {
+      type: Number,
+      min: 1,
+      max: 5,
+      required: true,
+    },
+    speed: {
+      type: Number,
+      min: 1,
+      max: 5,
+      required: true,
+    },
+    reviewTitle: {
+      type: String,
+      required: false,
+    },
+    positiveText: {
+      type: String,
+      required: false,
+    },
+    negativeText: {
+      type: String,
+      required: false,
+    },
+    userRole: {
+      type: String,
+      required: false,
+    },
+    reviewDate: {
+      type: Date,
+      default: Date.now,
+    },
+    // New fields for replies and helpfulness
+    replies: [ReplyEntrySchema],
+    helpfulCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    notHelpfulCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    // Store who voted and how they voted in an efficient map structure
+    voterIds: {
+      type: Map,
+      of: Boolean, // true = helpful, false = not helpful
+      default: new Map(),
+    },
+  },
+  { _id: true }
+);
 // Define the schema for the Ticket model
 const TicketSchema = new Schema<ITicket>(
   {
-    receivedDateTime: String,
-    sentDateTime: String,
+    receivedDateTime: Date,
+    sentDateTime: Date,
     pax: {
       type: Number,
       default: 0,
@@ -154,7 +255,6 @@ const TicketSchema = new Schema<ITicket>(
       lowercase: true,
       index: true,
     },
-
     cost: {
       type: Number,
       default: 0,
@@ -196,10 +296,11 @@ const TicketSchema = new Schema<ITicket>(
       min: 0,
     },
     lastMailTimeReceived: {
-      type: String,
+      type: Date,
     },
+
     lastMailTimeSent: {
-      type: String,
+      type: Date,
     },
     balance: Number,
     isApproved: {
@@ -207,6 +308,17 @@ const TicketSchema = new Schema<ITicket>(
       default: false,
       index: true,
     },
+    teamLead: {
+      name: {
+        type: String,
+      },
+      emailId: {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+    },
+    review: ReviewSchema,
     createdBy: {
       type: PersonnelSchema,
     },

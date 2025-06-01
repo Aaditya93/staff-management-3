@@ -157,7 +157,7 @@ export async function fetchAllEmails(
     // Add query parameters
     const queryParams = [
       `$top=${pageSize}`,
-      "$select=id,subject,body,receivedDateTime,sentDateTime,sender,from,isRead,toRecipients,hasAttachments,parentFolderId,ccRecipients,bccRecipients,categories,conversationId,importance,flag,webLink,replyTo",
+      "$select=id,subject,body,bodyPreview,receivedDateTime,sentDateTime,sender,from,isRead,toRecipients,hasAttachments,parentFolderId,ccRecipients,bccRecipients,categories,conversationId,importance,flag,webLink,replyTo",
       "$orderby=receivedDateTime desc",
     ];
 

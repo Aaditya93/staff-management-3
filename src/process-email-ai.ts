@@ -23,6 +23,7 @@ interface EmailObject {
   webLink?: string;
   hasAttachments?: boolean;
   categories?: string[];
+  bodyPreview?: string;
   sender?: {
     emailAddress?: EmailAddress;
   };
@@ -44,6 +45,7 @@ interface ProcessedEmail {
   importance: string;
   hasAttachments: boolean;
   categories: string[];
+  preview?: string; // Optional preview field
   emailType: "sent" | "received";
   userId: string; // Add userId to the processed email
   userName: string; // Add userName to the processed email
@@ -130,6 +132,7 @@ function processEmailForAI(
       emailId: emailId || "",
       userName: userName,
       userId: userId,
+      preview: email.bodyPreview || bodyText.slice(0, 100) || "No Preview",
       subject: email.subject || "No Subject",
       bodyText: bodyText || "No Content",
       receivedDateTime: timestamp,

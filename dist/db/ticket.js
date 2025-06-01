@@ -28,13 +28,9 @@ const EmailEntrySchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
-    emailSummary: {
+    preview: {
         type: String,
-        required: true,
-    },
-    rating: {
-        type: Number,
-        default: 0,
+        required: false, // Optional field for email preview
     },
     weblink: String,
     emailType: String,
@@ -63,10 +59,87 @@ const PersonnelSchema = new mongoose_1.Schema({
         lowercase: true,
     },
 }, { _id: false });
+// Then update the schema
+const ReplyEntrySchema = new mongoose_1.Schema({
+    text: {
+        type: String,
+        required: true,
+    },
+    authorId: {
+        type: String,
+        required: true,
+    },
+    authorName: {
+        type: String,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+}, { _id: false });
+const ReviewSchema = new mongoose_1.Schema({
+    attitude: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: true,
+    },
+    knowledge: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: true,
+    },
+    speed: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: true,
+    },
+    reviewTitle: {
+        type: String,
+        required: false,
+    },
+    positiveText: {
+        type: String,
+        required: false,
+    },
+    negativeText: {
+        type: String,
+        required: false,
+    },
+    userRole: {
+        type: String,
+        required: false,
+    },
+    reviewDate: {
+        type: Date,
+        default: Date.now,
+    },
+    // New fields for replies and helpfulness
+    replies: [ReplyEntrySchema],
+    helpfulCount: {
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    notHelpfulCount: {
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    // Store who voted and how they voted in an efficient map structure
+    voterIds: {
+        type: Map,
+        of: Boolean, // true = helpful, false = not helpful
+        default: new Map(),
+    },
+}, { _id: true });
 // Define the schema for the Ticket model
 const TicketSchema = new mongoose_1.Schema({
-    receivedDateTime: String,
-    sentDateTime: String,
+    receivedDateTime: Date,
+    sentDateTime: Date,
     pax: {
         type: Number,
         default: 0,
@@ -119,10 +192,10 @@ const TicketSchema = new mongoose_1.Schema({
         min: 0,
     },
     lastMailTimeReceived: {
-        type: String,
+        type: Date,
     },
     lastMailTimeSent: {
-        type: String,
+        type: Date,
     },
     balance: Number,
     isApproved: {
@@ -130,6 +203,17 @@ const TicketSchema = new mongoose_1.Schema({
         default: false,
         index: true,
     },
+    teamLead: {
+        name: {
+            type: String,
+        },
+        emailId: {
+            type: String,
+            trim: true,
+            lowercase: true,
+        },
+    },
+    review: ReviewSchema,
     createdBy: {
         type: PersonnelSchema,
     },

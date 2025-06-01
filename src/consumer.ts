@@ -22,7 +22,6 @@ async function processMessages() {
     const messages = await receiveMessagesFromQueue(10, 60, 20);
 
     if (messages.length === 0) {
-      console.log(`[${new Date().toISOString()}] No messages to process`);
       return;
     }
 
@@ -59,7 +58,7 @@ const startPeriodicMessageProcessing = () => {
   // Set interval to poll for messages every 15 seconds
   setInterval(async () => {
     await processMessages();
-  }, 2000);
+  }, 500);
 
   // Also process messages immediately on startup
   processMessages();

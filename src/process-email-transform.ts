@@ -71,13 +71,6 @@ interface ProcessedEmail {
  * @param email The raw email object
  * @returns A simplified JSON object with essential email data
  */
-// ...existing code...
-
-/**
- * Processes email data to create a simplified JSON structure for AI processing
- * @param email The raw email object
- * @returns A simplified JSON object with essential email data
- */
 /**
  * Processes email data to create a simplified JSON structure for AI processing
  * @param email The raw email object

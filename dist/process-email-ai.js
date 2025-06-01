@@ -51,6 +51,7 @@ function processEmailForAI(userId, userName, emailId, email) {
             emailId: emailId || "",
             userName: userName,
             userId: userId,
+            preview: email.bodyPreview || bodyText.slice(0, 100) || "No Preview",
             subject: email.subject || "No Subject",
             bodyText: bodyText || "No Content",
             receivedDateTime: timestamp,

@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMessagesFromQueue = exports.deleteMessageFromQueue = exports.receiveMessagesFromQueue = exports.sendMessageToQueue = void 0;
 const client_sqs_1 = require("@aws-sdk/client-sqs");
-const uuid_1 = require("uuid");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const region = process.env.AWS_REGION;
@@ -37,8 +36,9 @@ function sendMessageToQueue(messageBody) {
             const params = {
                 QueueUrl: queueUrl,
                 MessageBody: JSON.stringify(messageBody),
-                MessageGroupId: "Staff-management", // Required for FIFO queues
-                MessageDeduplicationId: (0, uuid_1.v4)(), // Unique ID for message deduplication
+                // Removed FIFO-specific attributes:
+                // - MessageGroupId
+                // - MessageDeduplicationId
             };
             // Send the message
             const command = new client_sqs_1.SendMessageCommand(params);

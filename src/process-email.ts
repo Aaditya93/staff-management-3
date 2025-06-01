@@ -2,7 +2,7 @@ import { getAllUsers, updateUserEmailTimestamp } from "./db/User";
 
 import { fetchEmailById, fetchAllEmails } from "./fetch-emails";
 import { forwardEmailsToAPI } from "./forward-email";
-
+import { extractTicketId, isConfirmationEmail } from "./ticket-id";
 import { processEmailForAI } from "./process-email-ai"; // Import the processEmailForAI function
 import { processIncomingEmail } from "./receive-email";
 import { sendMessageToQueue } from "./sqs/sqs";
@@ -59,6 +59,7 @@ export async function processAllUserEmails() {
                   email
                 )
               );
+              console.log(`Processed ${processedEmails}`);
 
               // Filter out any emails that returned with errors
               const validProcessedEmails = processedEmails.filter(
@@ -76,6 +77,52 @@ export async function processAllUserEmails() {
                       email: email,
                     };
 
+                    if ("emailType" in email && email.emailType === "sent") {
+                      // Extract ticket ID from subject and body
+                      const ticketIdFromSubject = extractTicketId(
+                        email.subject || ""
+                      );
+                      const ticketIdFromBody = extractTicketId(
+                        email.bodyText || ""
+                      );
+                      const hasTicketId = !!(
+                        ticketIdFromSubject || ticketIdFromBody
+                      );
+
+                      // Skip if no ticket ID found in sent emails
+                      if (!hasTicketId) {
+                        console.log(
+                          `Skipping sent email without ticket ID: ${
+                            email.id || "unknown"
+                          }`
+                        );
+                        return {
+                          success: true,
+                          emailId: "id" in email ? email.id : "unknown",
+                          skipped: true,
+                          reason: "Sent email without ticket ID",
+                        };
+                      }
+                    }
+                    if (
+                      "subject" in email &&
+                      "bodyText" in email &&
+                      isConfirmationEmail(
+                        email.subject || "",
+                        email.bodyText || ""
+                      )
+                    ) {
+                      console.log(
+                        `Skipping confirmation email: ${email.id || "unknown"}`
+                      );
+                      return {
+                        success: true,
+                        emailId: "id" in email ? email.id : "unknown",
+                        skipped: true,
+                        reason: "Confirmation email",
+                      };
+                    }
+                    console.log(emailData);
                     const result = await sendMessageToQueue(emailData);
 
                     // Forward the email to the API

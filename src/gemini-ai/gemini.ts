@@ -15,7 +15,7 @@ const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
 });
 
-// First, update the response schema to include the personnel fields
+// Optimized response schema with more concise descriptions
 const emailAnalysisConfig = {
   temperature: 0.2,
   topP: 0.8,
@@ -27,12 +27,9 @@ const emailAnalysisConfig = {
     required: [
       "destination",
       "numberOfPersons",
-      "summary",
-      "rating",
-      "hasTicketId",
       "isTravelEmail",
       "companyName",
-      "isConfirmationEmail",
+
       "travelAgent",
       "salesStaff",
       "isInquiryEmail",
@@ -41,116 +38,62 @@ const emailAnalysisConfig = {
     properties: {
       destination: {
         type: "string",
-        description:
-          "The travel destination mentioned in the email. It should be a Country name",
+        description: "Travel destination country",
       },
       arrivalDate: {
         type: "string",
-        description: "Arrival date in DD/MM/YYYY format",
+        description: "Format: DD/MM/YYYY",
       },
       departureDate: {
         type: "string",
-        description: "Departure date in DD/MM/YYYY format",
+        description: "Format: DD/MM/YYYY",
       },
       numberOfPersons: {
         type: "number",
-        description: "Number of people traveling",
+        description: "Number of travelers",
       },
-      summary: {
-        type: "string",
-        description:
-          "A concise and accurate summary of the email content in about 50 words",
-      },
-      rating: {
-        type: "number",
-        description:
-          "Rating from 0-10 based on how helpful and polite the staff was and how well the deal is progressing",
-        minimum: 0,
-        maximum: 10,
-      },
-      hasTicketId: {
-        type: "boolean",
-        description:
-          "Whether the email contains a ticket ID or reference number",
-      },
+
       isInquiryEmail: {
         type: "boolean",
-        description:
-          "Whether the email is an inquiry about travel packages or rates. Usually contains requests for itineraries, pricing, or availability for specific destinations and dates.",
+        description: "Email requests travel packages, pricing, or availability",
       },
-      ticketId: {
-        type: "string",
-        description:
-          "The ticket ID must be exactly 24 characters long and contain only hexadecimal characters (0-9, a-f). " +
-          "Example format: '68021f4013d187f32b23ae9c'. Only extract this if the ID matches this exact pattern. " +
-          "IDs might be labeled as 'TicketID:', 'Reference:', or similar. Return an empty string if no valid ticket ID is found.",
-      },
-      isConfirmationEmail: {
-        type: "boolean",
-        description:
-          "Whether the email is a of recevide Travel request confirmation.It has Thank You for Your Inquiry! menitioned in the mail",
-      },
+
       isTravelEmail: {
         type: "boolean",
-        description:
-          "Whether the email is related to travel booking and packages. If Ticket id is present then this should be true",
+        description: "Related to travel booking (true if ticket ID present)",
       },
-      // For the schema description
       companyName: {
         type: "string",
         description:
-          "The actual business/company name mentioned in the email (e.g., 'Your Vacation DMC', not 'yourvacationdmc.com'). Return in lowercase letters. Exclude domain names, email addresses, and URLs. Do not include 'Victoria Tours' as the company name.",
+          "Business name in lowercase (exclude domains, emails, URLs, 'Victoria Tours')",
       },
       isSupplierEmail: {
         type: "boolean",
         description:
-          "Whether the email relates to supplier operations, including: " +
-          "1) Payment requests from hotels or service providers (look for 'thanh toán', 'booking', account numbers, payment details) " +
-          "2) Payment confirmations or reports (look for 'BÁO CÁO TIỀN VỀ', payment codes like 'MARAOF250500661', 'STTIOF250500062') " +
-          "3) Travel service offerings from partners (hotels, visa services, etc.) " +
-          "4) B2B marketing/event invitations from industry partners (travel marts, exhibitions) " +
-          "Supplier emails typically contain specific booking codes, payment amounts, account details, or industry event information. " +
-          "These emails are NOT client inquiries about travel packages.",
+          "Payment requests/confirmations, booking codes, service offerings, or B2B marketing from partners",
       },
-
       travelAgent: {
         type: "object",
-        description: "Travel agent handling the booking",
         properties: {
-          name: {
-            type: "string",
-            description: "Full name of the travel agent",
-          },
+          name: { type: "string", description: "Agent's full name" },
           emailId: {
             type: "string",
-            description:
-              "Email address of the travel agent. It should not be of Victoria Tours employee",
+            description: "Agent's email (non-Victoria Tours)",
           },
         },
       },
-
       salesStaff: {
         type: "object",
-        description:
-          "Sales staff involved in the transaction or booking process",
         properties: {
-          name: {
-            type: "string",
-            description: "Full name of the sales representative",
-          },
-          emailId: {
-            type: "string",
-            description: "Email address of the sales representative",
-          },
+          name: { type: "string", description: "Sales rep's name" },
+          emailId: { type: "string", description: "Sales rep's email" },
         },
       },
-
-      // Add the personnel information schemas
     },
   },
 };
 
-// Update the prompt in the history for the chat session
+// Optimized prompt in the history
 export const analyzeEmail = async (emailData: {
   bodyText: string;
   emailType: string;
@@ -166,11 +109,9 @@ export const analyzeEmail = async (emailData: {
           role: "user",
           parts: [
             {
-              text: `You are a travel and hospitality AI assistant. Analyze the following email and extract key information about travel plans. 
-              Extract the destination, arrival date, departure date, number of persons traveling, company name (in lowercase letters),
-              provide a concise 100-word summary, and assign a rating from 0-10 based on how helpful/polite 
-              the communication is and how well the deal seems to be progressing. Also determine if the email contains 
-              a ticket ID/reference number and if the email is related to travel booking and packages.`,
+              text: `Analyze this travel email. Extract: destination, dates, travelers, company (lowercase), 
+              and determine if it's travel-related, confirmation, inquiry or supplier email. 
+              Rate communication quality (0-10) and summarize in 50 words.`,
             },
           ],
         },
@@ -178,48 +119,22 @@ export const analyzeEmail = async (emailData: {
           role: "model",
           parts: [
             {
-              text: `I'll analyze the travel email and extract the requested information in JSON format.`,
+              text: `I'll analyze the email and provide structured JSON data.`,
             },
           ],
         },
       ],
     });
 
-    // ...existing code...
+    // Simplified email prompt
     const emailPrompt = `
     Subject: ${emailData.subject}
     From: ${emailData.from.name} <${emailData.from.email}>
-    To: ${emailData.to
-      .map((recipient) => `${recipient.name} <${recipient.email}>`)
-      .join(", ")}
+    To: ${emailData.to.map((r) => `${r.name} <${r.email}>`).join(", ")}
     Type: ${emailData.emailType}
     
-    Body:
-    ${emailData.bodyText}
-    
-    Extract the following information and return it as valid JSON:
-    1. destination: The travel destination mentioned in the email. It should be a Country name.
-    2. arrivalDate: Arrival date in DD/MM/YYYY format
-    3. departureDate: Departure date in DD/MM/YYYY format
-    4. numberOfPersons: Number of people traveling
-    5. summary: A concise and accurate summary of the email content in about 100 words
-    6. rating: Rating from 0-10 based on how helpful/polite the communication is and how well the deal seems to be progressing
-    7. hasTicketId: Boolean (true/false) indicating if the email contains any ticket ID or reference number
-    8. ticketId: The actual ticket ID or reference number if present (empty string if none)
-    9. isTravelEmail: Boolean (true/false) indicating if the email is related to travel booking and packages
-    10. companyName: The company or travel agency name mentioned in the email (convert to all lowercase letters). It should not be 'Victoria Tours'.
-    11. travelAgent: Travel agent handling the booking (with name and emailId). It should not be of victoria Tours employee
-    12. salesStaff: Sales Staff handling the booking (with name and emailId). It Should be  of victoria Tours employee 
-    13. isConfirmationEmail: Boolean (true/false) indicating if the email is a confirmation email for travel request. It has Thank You for Your Inquiry! mentioned in the mail
-    14. isInquiryEmail: Boolean (true/false) indicating if the email is an inquiry about travel packages, rates, or itineraries
-    15. isSupplierEmail: Boolean (true/false) indicating if the email relates to supplier operations (payment requests, confirmations, service offerings, or industry events)
-    Look carefully for ticket IDs, booking references, or confirmation numbers in any format.
-    For the company name, ensure it's in all lowercase letters and is consistent.
-    Identify all personnel mentioned in the email with their full names and email addresses if available.
-    If an email signature is present, extract the contact details from it.
-    `;
-    // ...existing code...
-    // Rest of the function remains the same
+    ${emailData.bodyText}`;
+
     const result = await chatSession.sendMessage(emailPrompt);
 
     try {

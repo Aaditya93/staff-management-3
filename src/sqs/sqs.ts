@@ -37,8 +37,9 @@ export async function sendMessageToQueue(messageBody: MessageBody) {
     const params = {
       QueueUrl: queueUrl,
       MessageBody: JSON.stringify(messageBody),
-      MessageGroupId: "Staff-management", // Required for FIFO queues
-      MessageDeduplicationId: uuid(), // Unique ID for message deduplication
+      // Removed FIFO-specific attributes:
+      // - MessageGroupId
+      // - MessageDeduplicationId
     };
     // Send the message
     const command = new SendMessageCommand(params);
