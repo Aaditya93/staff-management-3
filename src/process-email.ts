@@ -59,7 +59,6 @@ export async function processAllUserEmails() {
                   email
                 )
               );
-              console.log(`Processed ${processedEmails}`);
 
               // Filter out any emails that returned with errors
               const validProcessedEmails = processedEmails.filter(
@@ -112,9 +111,6 @@ export async function processAllUserEmails() {
                         email.bodyText || ""
                       )
                     ) {
-                      console.log(
-                        `Skipping confirmation email: ${email.id || "unknown"}`
-                      );
                       return {
                         success: true,
                         emailId: "id" in email ? email.id : "unknown",
@@ -122,7 +118,7 @@ export async function processAllUserEmails() {
                         reason: "Confirmation email",
                       };
                     }
-                    console.log(emailData);
+
                     const result = await sendMessageToQueue(emailData);
 
                     // Forward the email to the API
