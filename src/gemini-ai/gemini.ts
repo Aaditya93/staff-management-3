@@ -59,7 +59,7 @@ const emailAnalysisConfig = {
       summary: {
         type: "string",
         description:
-          "A concise and accurate summary of the email content in about 100 words",
+          "A concise and accurate summary of the email content in about 50 words",
       },
       rating: {
         type: "number",
@@ -144,23 +144,6 @@ const emailAnalysisConfig = {
           },
         },
       },
-      personnelMentioned: {
-        type: "array",
-        description: "Array of all personnel mentioned in the email",
-        items: {
-          type: "object",
-          properties: {
-            name: {
-              type: "string",
-              description: "Full name of the person",
-            },
-            emailId: {
-              type: "string",
-              description: "Email address of the person",
-            },
-          },
-        },
-      },
 
       // Add the personnel information schemas
     },
@@ -227,10 +210,9 @@ export const analyzeEmail = async (emailData: {
     10. companyName: The company or travel agency name mentioned in the email (convert to all lowercase letters). It should not be 'Victoria Tours'.
     11. travelAgent: Travel agent handling the booking (with name and emailId). It should not be of victoria Tours employee
     12. salesStaff: Sales Staff handling the booking (with name and emailId). It Should be  of victoria Tours employee 
-    13. personnelMentioned: Array of all unique personnel mentioned in the email with their name, emailId, and role if available
-    14. isConfirmationEmail: Boolean (true/false) indicating if the email is a confirmation email for travel request. It has Thank You for Your Inquiry! mentioned in the mail
-    15. isInquiryEmail: Boolean (true/false) indicating if the email is an inquiry about travel packages, rates, or itineraries
-    16. isSupplierEmail: Boolean (true/false) indicating if the email relates to supplier operations (payment requests, confirmations, service offerings, or industry events)
+    13. isConfirmationEmail: Boolean (true/false) indicating if the email is a confirmation email for travel request. It has Thank You for Your Inquiry! mentioned in the mail
+    14. isInquiryEmail: Boolean (true/false) indicating if the email is an inquiry about travel packages, rates, or itineraries
+    15. isSupplierEmail: Boolean (true/false) indicating if the email relates to supplier operations (payment requests, confirmations, service offerings, or industry events)
     Look carefully for ticket IDs, booking references, or confirmation numbers in any format.
     For the company name, ensure it's in all lowercase letters and is consistent.
     Identify all personnel mentioned in the email with their full names and email addresses if available.

@@ -65,16 +65,15 @@ export const getTravelAgentUserByEmail = async (email: string) => {
 export const createTravelAgentUser = async (
   name: string,
   email: string,
-  company: string // Added missing required field
+  company: string
 ) => {
-  // Corrected syntax: removed space and '>'
   try {
     await dbConnect();
     const newUser = new TravelAgentUser({
       name,
       email,
 
-      company, // Added missing required field
+      company,
     });
     const savedUser = await newUser.save();
     return savedUser;
@@ -83,5 +82,4 @@ export const createTravelAgentUser = async (
 
     return null;
   }
-  // Removed unnecessary closing brace and empty lines
 };

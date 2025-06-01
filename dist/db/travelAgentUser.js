@@ -81,15 +81,13 @@ const getTravelAgentUserByEmail = (email) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.getTravelAgentUserByEmail = getTravelAgentUserByEmail;
-const createTravelAgentUser = (name, email, company // Added missing required field
-) => __awaiter(void 0, void 0, void 0, function* () {
-    // Corrected syntax: removed space and '>'
+const createTravelAgentUser = (name, email, company) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, db_1.default)();
         const newUser = new TravelAgentUser({
             name,
             email,
-            company, // Added missing required field
+            company,
         });
         const savedUser = yield newUser.save();
         return savedUser;
@@ -98,6 +96,5 @@ const createTravelAgentUser = (name, email, company // Added missing required fi
         console.error("Error while creating user:", error);
         return null;
     }
-    // Removed unnecessary closing brace and empty lines
 });
 exports.createTravelAgentUser = createTravelAgentUser;

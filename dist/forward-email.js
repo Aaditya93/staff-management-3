@@ -16,11 +16,7 @@ exports.processAllUserEmails = exports.forwardEmailsToAPI = void 0;
 const User_1 = require("./db/User");
 const fetch_emails_1 = require("./fetch-emails");
 const axios_1 = __importDefault(require("axios"));
-// Configure email receiver API URL
 const EMAIL_RECEIVER_API = process.env.EMAIL_RECEIVER_API || "http://localhost:3001/api/email/receive";
-/**
- * Forwards fetched emails to the email receiver API
- */
 function forwardEmailsToAPI(emails, userId, accountEmail) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

@@ -15,8 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleIncomingEmail = exports.createTicketFromEmail = void 0;
 const ticket_1 = __importDefault(require("../db/ticket"));
 const db_1 = __importDefault(require("./db"));
-const travelAgentUser_1 = require("./travelAgentUser");
-const User_1 = __importDefault(require("./User"));
 function createTicketFromEmail(analysisData, emailData) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
@@ -33,22 +31,6 @@ function createTicketFromEmail(analysisData, emailData) {
                 const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
                 return dateRegex.test(dateString);
             };
-            // Calculate timestamps for email tracking
-            let travelAgentUserId = null;
-            const TravelAgentUser = yield User_1.default.findOne({
-                email: analysisData.travelAgent.emailId,
-            });
-            travelAgentUserId = TravelAgentUser === null || TravelAgentUser === void 0 ? void 0 : TravelAgentUser._id.toString();
-            if (!TravelAgentUser && analysisData.travelAgent.emailId) {
-                const travelAgentUser = yield (0, travelAgentUser_1.createTravelAgentUser)(analysisData.travelAgent.name, analysisData.travelAgent.emailId, analysisData.companyName);
-                const user = yield User_1.default.create({
-                    name: analysisData.travelAgent.name,
-                    email: analysisData.travelAgent.emailId,
-                    role: "TravelAgent",
-                    travelAgentId: travelAgentUser === null || travelAgentUser === void 0 ? void 0 : travelAgentUser._id,
-                });
-                travelAgentUserId = user._id.toString();
-            }
             // Create a new ticket document
             const newTicket = new ticket_1.default(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ 
                 // Agent information
@@ -65,7 +47,6 @@ function createTicketFromEmail(analysisData, emailData) {
                 travelAgent: {
                     name: ((_a = analysisData.travelAgent) === null || _a === void 0 ? void 0 : _a.name) || "",
                     emailId: ((_b = analysisData.travelAgent) === null || _b === void 0 ? void 0 : _b.emailId) || "",
-                    id: travelAgentUserId,
                 }, companyName: analysisData.companyName, reservationInCharge: {
                     name: emailData.emailType === "sent"
                         ? emailData.from.name

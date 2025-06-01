@@ -2,13 +2,9 @@ import { getAllUsers, updateUserEmailTimestamp } from "./db/User";
 import { fetchEmailById, fetchAllEmails } from "./fetch-emails";
 import axios from "axios";
 
-// Configure email receiver API URL
 const EMAIL_RECEIVER_API =
   process.env.EMAIL_RECEIVER_API || "http://localhost:3001/api/email/receive";
 
-/**
- * Forwards fetched emails to the email receiver API
- */
 export async function forwardEmailsToAPI(
   emails: any[],
   userId: string,

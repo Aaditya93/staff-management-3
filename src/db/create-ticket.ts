@@ -91,29 +91,6 @@ export async function createTicketFromEmail(
       return dateRegex.test(dateString);
     };
 
-    // Calculate timestamps for email tracking
-    let travelAgentUserId: string | null = null;
-
-    const TravelAgentUser = await User.findOne({
-      email: analysisData.travelAgent.emailId,
-    });
-    travelAgentUserId = TravelAgentUser?._id.toString();
-    if (!TravelAgentUser && analysisData.travelAgent.emailId) {
-      const travelAgentUser = await createTravelAgentUser(
-        analysisData.travelAgent.name,
-        analysisData.travelAgent.emailId,
-        analysisData.companyName
-      );
-
-      const user = await User.create({
-        name: analysisData.travelAgent.name,
-        email: analysisData.travelAgent.emailId,
-        role: "TravelAgent",
-        travelAgentId: travelAgentUser?._id,
-      });
-      travelAgentUserId = user._id.toString();
-    }
-
     // Create a new ticket document
     const newTicket = new Ticket({
       // Agent information
@@ -148,7 +125,6 @@ export async function createTicketFromEmail(
       travelAgent: {
         name: analysisData.travelAgent?.name || "",
         emailId: analysisData.travelAgent?.emailId || "",
-        id: travelAgentUserId,
       },
 
       companyName: analysisData.companyName,

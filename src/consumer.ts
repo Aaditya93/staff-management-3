@@ -4,6 +4,7 @@ import {
   deleteMessagesFromQueue,
   MessageBody,
 } from "./sqs/sqs";
+import { deleteMessageFromQueue } from "./sqs/sqs";
 import { processIncomingEmail } from "./receive-email";
 // Initialize Express app
 const app = express();
@@ -34,6 +35,11 @@ async function processMessages() {
         const messageBody: MessageBody = JSON.parse(message.Body);
 
         await processIncomingEmail(messageBody);
+        if (!message.ReceiptHandle) {
+          console.warn("Message missing receipt handle, cannot delete");
+          return Promise.resolve(null);
+        }
+        await deleteMessageFromQueue(message.ReceiptHandle);
 
         // Add your message processing logic here
         // For example: analyze email content, update database, etc.
@@ -43,8 +49,8 @@ async function processMessages() {
       }
     }
 
-    // Delete processed messages from the queue
-    await deleteMessagesFromQueue(messages);
+    // // Delete processed messages from the queue
+    // await deleteMessagesFromQueue(messages);
   } catch (error) {
     console.error("Error in message processing cycle:", error);
   }
@@ -55,7 +61,7 @@ const startPeriodicMessageProcessing = () => {
   // Set interval to poll for messages every 15 seconds
   setInterval(async () => {
     await processMessages();
-  }, 5000);
+  }, 2000);
 
   // Also process messages immediately on startup
   processMessages();

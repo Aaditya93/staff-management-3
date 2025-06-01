@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const sqs_1 = require("./sqs/sqs");
+const sqs_2 = require("./sqs/sqs");
 const receive_email_1 = require("./receive-email");
 // Initialize Express app
 const app = (0, express_1.default)();
@@ -39,6 +40,11 @@ function processMessages() {
                     // Parse message body
                     const messageBody = JSON.parse(message.Body);
                     yield (0, receive_email_1.processIncomingEmail)(messageBody);
+                    if (!message.ReceiptHandle) {
+                        console.warn("Message missing receipt handle, cannot delete");
+                        return Promise.resolve(null);
+                    }
+                    yield (0, sqs_2.deleteMessageFromQueue)(message.ReceiptHandle);
                     // Add your message processing logic here
                     // For example: analyze email content, update database, etc.
                 }
@@ -47,8 +53,8 @@ function processMessages() {
                     // Continue processing other messages even if one fails
                 }
             }
-            // Delete processed messages from the queue
-            yield (0, sqs_1.deleteMessagesFromQueue)(messages);
+            // // Delete processed messages from the queue
+            // await deleteMessagesFromQueue(messages);
         }
         catch (error) {
             console.error("Error in message processing cycle:", error);
@@ -60,7 +66,7 @@ const startPeriodicMessageProcessing = () => {
     // Set interval to poll for messages every 15 seconds
     setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
         yield processMessages();
-    }), 5000);
+    }), 2000);
     // Also process messages immediately on startup
     processMessages();
 };
