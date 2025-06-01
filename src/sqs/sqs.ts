@@ -52,7 +52,7 @@ export async function sendMessageToQueue(messageBody: MessageBody) {
 }
 
 export async function receiveMessagesFromQueue(
-  maxMessages = 10,
+  maxMessages = 50,
   visibilityTimeout = 30,
   waitTimeSeconds = 5
 ): Promise<Message[]> {

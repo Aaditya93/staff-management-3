@@ -38,10 +38,6 @@ export async function processAllUserEmails() {
                 : undefined,
             }
           );
-          console.log(
-            `Fetched emails for user ${user.name} (${account.email})`,
-            result.emails
-          );
 
           if (result.error) {
             console.error(
@@ -79,10 +75,6 @@ export async function processAllUserEmails() {
                       emailId: account.email,
                       email: email,
                     };
-                    console.log(
-                      `Processing email for user ${user.name} (${account.email})`,
-                      emailData
-                    );
 
                     const result = await sendMessageToQueue(emailData);
 

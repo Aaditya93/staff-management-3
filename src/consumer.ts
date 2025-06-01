@@ -14,48 +14,60 @@ const PORT = process.env.CONSUMER_PORT || 3002;
 app.use(express.json());
 
 // Function to process received SQS messages
+// Function to process received SQS messages
 async function processMessages() {
   try {
-    // Receive messages from SQS queue
-    const messages = await receiveMessagesFromQueue(10, 60, 20);
+    const batchSize = 10; // Maximum allowed by SQS
+    const maxMessages = 50; // Your desired total messages to process
+    let processedCount = 0;
 
-    if (messages.length === 0) {
-      return;
-    }
+    // Process messages in batches until we reach our target or no more messages
+    while (processedCount < maxMessages) {
+      // Receive a batch of messages (max 10)
+      const messages = await receiveMessagesFromQueue(batchSize, 120, 20);
 
-    // Process each message
-    for (const message of messages) {
-      try {
-        if (!message.Body) {
-          console.warn("Message has no body, skipping");
-          continue;
-        }
-
-        // Parse message body
-        const messageBody: MessageBody = JSON.parse(message.Body);
-
-        await processIncomingEmail(messageBody);
-        if (!message.ReceiptHandle) {
-          console.warn("Message missing receipt handle, cannot delete");
-          return Promise.resolve(null);
-        }
-        await deleteMessageFromQueue(message.ReceiptHandle);
-
-        // Add your message processing logic here
-        // For example: analyze email content, update database, etc.
-      } catch (error) {
-        console.error("Error processing individual message:", error);
-        // Continue processing other messages even if one fails
+      if (messages.length === 0) {
+        console.log("No more messages available");
+        break; // Exit loop if no messages left
       }
+
+      console.log(`Processing batch of ${messages.length} messages`);
+
+      // Process each message in the batch
+      for (const message of messages) {
+        try {
+          if (!message.Body) {
+            console.warn("Message has no body, skipping");
+            continue;
+          }
+
+          // Parse message body
+          const messageBody: MessageBody = JSON.parse(message.Body);
+
+          // Process and delete the message
+          await processIncomingEmail(messageBody);
+
+          if (!message.ReceiptHandle) {
+            console.warn("Message missing receipt handle, cannot delete");
+            continue;
+          }
+
+          await deleteMessageFromQueue(message.ReceiptHandle);
+          processedCount++;
+        } catch (error) {
+          console.error("Error processing individual message:", error);
+          // Continue processing other messages even if one fails
+        }
+      }
+
+      console.log(`Processed ${processedCount} messages so far`);
     }
 
-    // // Delete processed messages from the queue
-    // await deleteMessagesFromQueue(messages);
+    console.log(`Finished processing messages, total: ${processedCount}`);
   } catch (error) {
     console.error("Error in message processing cycle:", error);
   }
 }
-
 // Function to start periodic message processing
 const startPeriodicMessageProcessing = () => {
   // Set interval to poll for messages every 15 seconds
