@@ -24,14 +24,17 @@ app.use(express_1.default.json());
 // Function to process received SQS messages
 function processMessages() {
     return __awaiter(this, void 0, void 0, function* () {
+        // Start timer
         try {
             // Receive messages from SQS queue
             const messages = yield (0, sqs_1.receiveMessagesFromQueue)(10, 60, 20);
             if (messages.length === 0) {
+                console.log(`[${new Date().toISOString()}] No messages to process`);
                 return;
             }
             // Process each message
             for (const message of messages) {
+                const messageStartTime = Date.now();
                 try {
                     if (!message.Body) {
                         console.warn("Message has no body, skipping");
@@ -45,19 +48,15 @@ function processMessages() {
                         return Promise.resolve(null);
                     }
                     yield (0, sqs_2.deleteMessageFromQueue)(message.ReceiptHandle);
-                    // Add your message processing logic here
-                    // For example: analyze email content, update database, etc.
                 }
                 catch (error) {
                     console.error("Error processing individual message:", error);
                     // Continue processing other messages even if one fails
                 }
             }
-            // // Delete processed messages from the queue
-            // await deleteMessagesFromQueue(messages);
         }
         catch (error) {
-            console.error("Error in message processing cycle:", error);
+            console.error(`Error in message processing cycle after ms:`, error);
         }
     });
 }
