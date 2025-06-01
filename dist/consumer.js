@@ -22,48 +22,39 @@ const PORT = process.env.CONSUMER_PORT || 3002;
 // Middleware for parsing JSON
 app.use(express_1.default.json());
 // Function to process received SQS messages
-// Function to process received SQS messages
 function processMessages() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const batchSize = 10; // Maximum allowed by SQS
-            const maxMessages = 50; // Your desired total messages to process
-            let processedCount = 0;
-            // Process messages in batches until we reach our target or no more messages
-            while (processedCount < maxMessages) {
-                // Receive a batch of messages (max 10)
-                const messages = yield (0, sqs_1.receiveMessagesFromQueue)(batchSize, 120, 20);
-                if (messages.length === 0) {
-                    console.log("No more messages available");
-                    break; // Exit loop if no messages left
-                }
-                console.log(`Processing batch of ${messages.length} messages`);
-                // Process each message in the batch
-                for (const message of messages) {
-                    try {
-                        if (!message.Body) {
-                            console.warn("Message has no body, skipping");
-                            continue;
-                        }
-                        // Parse message body
-                        const messageBody = JSON.parse(message.Body);
-                        // Process and delete the message
-                        yield (0, receive_email_1.processIncomingEmail)(messageBody);
-                        if (!message.ReceiptHandle) {
-                            console.warn("Message missing receipt handle, cannot delete");
-                            continue;
-                        }
-                        yield (0, sqs_2.deleteMessageFromQueue)(message.ReceiptHandle);
-                        processedCount++;
-                    }
-                    catch (error) {
-                        console.error("Error processing individual message:", error);
-                        // Continue processing other messages even if one fails
-                    }
-                }
-                console.log(`Processed ${processedCount} messages so far`);
+            // Receive messages from SQS queue
+            const messages = yield (0, sqs_1.receiveMessagesFromQueue)(10, 60, 20);
+            if (messages.length === 0) {
+                return;
             }
-            console.log(`Finished processing messages, total: ${processedCount}`);
+            // Process each message
+            for (const message of messages) {
+                try {
+                    if (!message.Body) {
+                        console.warn("Message has no body, skipping");
+                        continue;
+                    }
+                    // Parse message body
+                    const messageBody = JSON.parse(message.Body);
+                    yield (0, receive_email_1.processIncomingEmail)(messageBody);
+                    if (!message.ReceiptHandle) {
+                        console.warn("Message missing receipt handle, cannot delete");
+                        return Promise.resolve(null);
+                    }
+                    yield (0, sqs_2.deleteMessageFromQueue)(message.ReceiptHandle);
+                    // Add your message processing logic here
+                    // For example: analyze email content, update database, etc.
+                }
+                catch (error) {
+                    console.error("Error processing individual message:", error);
+                    // Continue processing other messages even if one fails
+                }
+            }
+            // // Delete processed messages from the queue
+            // await deleteMessagesFromQueue(messages);
         }
         catch (error) {
             console.error("Error in message processing cycle:", error);
