@@ -29,7 +29,6 @@ function processMessages() {
             // Receive messages from SQS queue
             const messages = yield (0, sqs_1.receiveMessagesFromQueue)(10, 60, 20);
             if (messages.length === 0) {
-                console.log(`[${new Date().toISOString()}] No messages to process`);
                 return;
             }
             // Process each message

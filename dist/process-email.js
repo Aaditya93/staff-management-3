@@ -46,7 +46,6 @@ function processAllUserEmails() {
                             if (result.emails && result.emails.length > 0) {
                                 // Process emails through AI processing before forwarding
                                 const processedEmails = result.emails.map((email) => (0, process_email_ai_1.processEmailForAI)(user._id.toString(), user.name, account.email, email));
-                                console.log(`Processed ${processedEmails}`);
                                 // Filter out any emails that returned with errors
                                 const validProcessedEmails = processedEmails.filter((email) => !("error" in email));
                                 // Process each email individually
@@ -77,7 +76,6 @@ function processAllUserEmails() {
                                         if ("subject" in email &&
                                             "bodyText" in email &&
                                             (0, ticket_id_1.isConfirmationEmail)(email.subject || "", email.bodyText || "")) {
-                                            console.log(`Skipping confirmation email: ${email.id || "unknown"}`);
                                             return {
                                                 success: true,
                                                 emailId: "id" in email ? email.id : "unknown",
@@ -85,7 +83,6 @@ function processAllUserEmails() {
                                                 reason: "Confirmation email",
                                             };
                                         }
-                                        console.log(emailData);
                                         const result = yield (0, sqs_1.sendMessageToQueue)(emailData);
                                         // Forward the email to the API
                                         return {

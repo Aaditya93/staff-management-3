@@ -18,6 +18,7 @@ const create_ticket_1 = require("./db/create-ticket");
 const process_email_transform_1 = require("./process-email-transform");
 const ticket_id_1 = require("./ticket-id");
 const ticket_1 = __importDefault(require("./db/ticket"));
+const db_1 = __importDefault(require("./db/db"));
 /**
  * Processes an incoming email with AI analysis and ticket handling
  *
@@ -29,20 +30,21 @@ function processIncomingEmail(emailData) {
     return __awaiter(this, void 0, void 0, function* () {
         // Check if email contains an existing ticket ID
         // Check if email contains an existing ticket ID - check both subject and body
+        console.log("Processing incoming email:", emailData.email);
         const subjectTicketId = emailData.email.subject
             ? (0, ticket_id_1.extractTicketId)(emailData.email.subject)
             : null;
-        const bodyTicketId = emailData.email.body
-            ? (0, ticket_id_1.extractTicketId)(emailData.email.body)
+        const bodyTicketId = emailData.email.bodyText
+            ? (0, ticket_id_1.extractTicketId)(emailData.email.bodyText)
             : null;
         // Use subject ticket ID first if available, otherwise use body ticket ID
         const ticketId = subjectTicketId || bodyTicketId;
+        console.log("Extracted Ticket ID:", ticketId);
         if (ticketId) {
             // If ticket ID exists, add the email to the existing ticket
             try {
-                const existingTicket = yield ticket_1.default.findById({
-                    _id: ticketId,
-                });
+                yield (0, db_1.default)();
+                const existingTicket = yield ticket_1.default.findById(ticketId);
                 if (existingTicket) {
                     // Create a new email entry
                     const newEmail = {

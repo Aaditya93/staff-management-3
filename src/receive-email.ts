@@ -3,6 +3,7 @@ import { createTicketFromEmail } from "./db/create-ticket";
 import { transformEmailData } from "./process-email-transform";
 import { extractTicketId } from "./ticket-id";
 import Ticket from "./db/ticket";
+import dbConnect from "./db/db";
 
 /**
  * Processes an incoming email with AI analysis and ticket handling
@@ -13,22 +14,23 @@ import Ticket from "./db/ticket";
 export async function processIncomingEmail(emailData: any) {
   // Check if email contains an existing ticket ID
   // Check if email contains an existing ticket ID - check both subject and body
+  console.log("Processing incoming email:", emailData.email);
   const subjectTicketId = emailData.email.subject
     ? extractTicketId(emailData.email.subject)
     : null;
-  const bodyTicketId = emailData.email.body
-    ? extractTicketId(emailData.email.body)
+  const bodyTicketId = emailData.email.bodyText
+    ? extractTicketId(emailData.email.bodyText)
     : null;
 
   // Use subject ticket ID first if available, otherwise use body ticket ID
   const ticketId = subjectTicketId || bodyTicketId;
+  console.log("Extracted Ticket ID:", ticketId);
 
   if (ticketId) {
     // If ticket ID exists, add the email to the existing ticket
     try {
-      const existingTicket = await Ticket.findById({
-        _id: ticketId,
-      });
+      await dbConnect();
+      const existingTicket = await Ticket.findById(ticketId);
 
       if (existingTicket) {
         // Create a new email entry
