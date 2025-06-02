@@ -17,7 +17,7 @@ const startPeriodicEmailProcessing = () => {
     } catch (error) {
       console.error("Error in scheduled email processing:", error);
     }
-  }, 5000);
+  }, 15000);
 };
 
 // Start periodic email processing

@@ -27,7 +27,7 @@ function processMessages() {
         // Start timer
         try {
             // Receive messages from SQS queue
-            const messages = yield (0, sqs_1.receiveMessagesFromQueue)(10, 60, 20);
+            const messages = yield (0, sqs_1.receiveMessagesFromQueue)(10, 60, 10);
             if (messages.length === 0) {
                 return;
             }
@@ -64,7 +64,7 @@ const startPeriodicMessageProcessing = () => {
     // Set interval to poll for messages every 15 seconds
     setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
         yield processMessages();
-    }), 500);
+    }), 10000);
     // Also process messages immediately on startup
     processMessages();
 };
