@@ -19,7 +19,7 @@ async function processMessages() {
 
   try {
     // Receive messages from SQS queue
-    const messages = await receiveMessagesFromQueue(10, 60, 20);
+    const messages = await receiveMessagesFromQueue(10, 60, 10);
 
     if (messages.length === 0) {
       return;
@@ -58,7 +58,7 @@ const startPeriodicMessageProcessing = () => {
   // Set interval to poll for messages every 15 seconds
   setInterval(async () => {
     await processMessages();
-  }, 500);
+  }, 10000);
 
   // Also process messages immediately on startup
   processMessages();
