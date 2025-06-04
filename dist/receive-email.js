@@ -30,7 +30,6 @@ function processIncomingEmail(emailData) {
     return __awaiter(this, void 0, void 0, function* () {
         // Check if email contains an existing ticket ID
         // Check if email contains an existing ticket ID - check both subject and body
-        console.log("Processing incoming email:", emailData.email);
         const subjectTicketId = emailData.email.subject
             ? (0, ticket_id_1.extractTicketId)(emailData.email.subject)
             : null;
@@ -39,7 +38,6 @@ function processIncomingEmail(emailData) {
             : null;
         // Use subject ticket ID first if available, otherwise use body ticket ID
         const ticketId = subjectTicketId || bodyTicketId;
-        console.log("Extracted Ticket ID:", ticketId);
         if (ticketId) {
             // If ticket ID exists, add the email to the existing ticket
             try {
@@ -113,7 +111,6 @@ function processIncomingEmail(emailData) {
         // If no ticket ID found or ticket not found, proceed with normal flow
         const aiData = yield (0, process_email_transform_1.transformEmailData)(emailData.email);
         const analysis = yield (0, gemini_1.analyzeEmail)(aiData);
-        console.log("AI Analysis Result:", analysis);
         let ticketResult = null;
         if (analysis.isTravelEmail) {
             try {

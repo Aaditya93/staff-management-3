@@ -27,7 +27,6 @@ const fileManager = new server_1.GoogleAIFileManager(apiKey);
 const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
 });
-// Optimized response schema with more concise descriptions
 const emailAnalysisConfig = {
     temperature: 0.2,
     topP: 0.8,
@@ -41,6 +40,7 @@ const emailAnalysisConfig = {
             "numberOfPersons",
             "isTravelEmail",
             "companyName",
+            "personnelMentioned",
             "travelAgent",
             "salesStaff",
         ],
@@ -84,6 +84,23 @@ const emailAnalysisConfig = {
                 properties: {
                     name: { type: "string", description: "Sales rep's name" },
                     emailId: { type: "string", description: "Sales rep's email" },
+                },
+            },
+            personnelMentioned: {
+                type: "array",
+                description: "Array of personnel from email headers only (From, To, CC fields) - do not extract names from email body content",
+                items: {
+                    type: "object",
+                    properties: {
+                        name: {
+                            type: "string",
+                            description: "Full name of the person from email headers",
+                        },
+                        emailId: {
+                            type: "string",
+                            description: "Email address from From/To/CC fields only",
+                        },
+                    },
                 },
             },
         },

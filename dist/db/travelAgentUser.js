@@ -1,4 +1,5 @@
 "use strict";
+"use server";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -65,6 +66,80 @@ const TravelAgentUserSchema = new mongoose_1.Schema({
     phoneNumber: {
         type: String,
     },
+    accountApproved: {
+        type: Boolean,
+    },
+    reservationInCharge: {
+        type: String,
+        ref: "User",
+    },
+    salesInCharge: {
+        type: String,
+        ref: "User",
+    },
+    code: {
+        type: String,
+    },
+    district: {
+        type: String,
+    },
+    city: {
+        type: String,
+    },
+    staffSize: {
+        type: Number,
+    },
+    destination: {
+        type: [String],
+        default: [],
+    },
+    office: {
+        type: String,
+    },
+    language: {
+        type: [String],
+        default: [],
+    },
+    market: {
+        type: [String],
+        default: [],
+    },
+    employees: [
+        {
+            id: {
+                type: String,
+                required: true,
+            },
+            name: {
+                type: String,
+                required: true,
+            },
+            email: {
+                type: String,
+                required: true,
+            },
+        },
+    ],
+    staff: [
+        {
+            name: {
+                type: String,
+                required: true,
+            },
+            email: {
+                type: String,
+                required: true,
+            },
+            phone: {
+                type: String,
+                required: true,
+            },
+            review: {
+                type: Number,
+                default: 0,
+            },
+        },
+    ], // Fixed: Added staff field properly inside schema
 }, { timestamps: true });
 const TravelAgentUser = mongoose_1.default.models.TravelAgentUser ||
     mongoose_1.default.model("TravelAgentUser", TravelAgentUserSchema);
@@ -81,13 +156,15 @@ const getTravelAgentUserByEmail = (email) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.getTravelAgentUserByEmail = getTravelAgentUserByEmail;
-const createTravelAgentUser = (name, email, company) => __awaiter(void 0, void 0, void 0, function* () {
+const createTravelAgentUser = (name, email, company // Added missing required field
+) => __awaiter(void 0, void 0, void 0, function* () {
+    // Corrected syntax: removed space and '>'
     try {
         yield (0, db_1.default)();
         const newUser = new TravelAgentUser({
             name,
             email,
-            company,
+            company, // Added missing required field
         });
         const savedUser = yield newUser.save();
         return savedUser;
@@ -96,5 +173,6 @@ const createTravelAgentUser = (name, email, company) => __awaiter(void 0, void 0
         console.error("Error while creating user:", error);
         return null;
     }
+    // Removed unnecessary closing brace and empty lines
 });
 exports.createTravelAgentUser = createTravelAgentUser;

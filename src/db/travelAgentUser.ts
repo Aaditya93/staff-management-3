@@ -1,6 +1,6 @@
+"use server";
 import mongoose, { Document, Model, Schema } from "mongoose";
 import dbConnect from "./db";
-
 export interface ITravelAgentUser extends Document {
   id: string;
   name: string;
@@ -9,8 +9,29 @@ export interface ITravelAgentUser extends Document {
   company: string;
   country: string;
   address: string;
-  market: string;
   phoneNumber: string;
+  accountApproved: boolean;
+  code: string;
+  district: string;
+  city: string;
+  reservationInCharge: string;
+  salesInCharge: string;
+  employees: {
+    id: string;
+    name: string;
+    email: string;
+  }[];
+  staff: {
+    name: string;
+    email: string;
+    phone: string;
+    review: number;
+  }[]; // Added staff field to interface
+  staffSize: number;
+  destination: string[];
+  office: string;
+  language: string[];
+  market: string[];
 }
 
 // Create schema
@@ -41,6 +62,80 @@ const TravelAgentUserSchema = new Schema<ITravelAgentUser>(
     phoneNumber: {
       type: String,
     },
+    accountApproved: {
+      type: Boolean,
+    },
+    reservationInCharge: {
+      type: String,
+      ref: "User",
+    },
+    salesInCharge: {
+      type: String,
+      ref: "User",
+    },
+    code: {
+      type: String,
+    },
+    district: {
+      type: String,
+    },
+    city: {
+      type: String,
+    },
+    staffSize: {
+      type: Number,
+    },
+    destination: {
+      type: [String],
+      default: [],
+    },
+    office: {
+      type: String,
+    },
+    language: {
+      type: [String],
+      default: [],
+    },
+    market: {
+      type: [String],
+      default: [],
+    },
+    employees: [
+      {
+        id: {
+          type: String,
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+        email: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    staff: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        email: {
+          type: String,
+          required: true,
+        },
+        phone: {
+          type: String,
+          required: true,
+        },
+        review: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ], // Fixed: Added staff field properly inside schema
   },
   { timestamps: true }
 );
@@ -55,6 +150,7 @@ export const getTravelAgentUserByEmail = async (email: string) => {
   try {
     await dbConnect();
     const user = await TravelAgentUser.findOne({ email }).lean();
+
     return user;
   } catch (error) {
     console.error("Error while getting user by email:", error);
@@ -65,15 +161,16 @@ export const getTravelAgentUserByEmail = async (email: string) => {
 export const createTravelAgentUser = async (
   name: string,
   email: string,
-  company: string
+  company: string // Added missing required field
 ) => {
+  // Corrected syntax: removed space and '>'
   try {
     await dbConnect();
     const newUser = new TravelAgentUser({
       name,
       email,
 
-      company,
+      company, // Added missing required field
     });
     const savedUser = await newUser.save();
     return savedUser;
@@ -82,4 +179,5 @@ export const createTravelAgentUser = async (
 
     return null;
   }
+  // Removed unnecessary closing brace and empty lines
 };

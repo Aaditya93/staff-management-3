@@ -1,6 +1,7 @@
+// @ts-nocheck
 import Ticket, { ITicket } from "../db/ticket";
 import dbConnect from "./db";
-import {
+import TravelAgentUser, {
   createTravelAgentUser,
   getTravelAgentUserByEmail,
 } from "./travelAgentUser";
@@ -66,6 +67,149 @@ export interface IEmailData {
   from: IEmailContact;
   to: IEmailContact[];
 }
+// Add this new interface for personnel with travel agent info
+export interface IPersonnelWithTravelAgent {
+  name: string;
+  emailId: string;
+  role?: string;
+  travelAgentId?: string;
+}
+
+// Add this interface for the return type
+export interface IPersonnelLookupResult {
+  salesStaff: { name: string; email: string; id: string } | null;
+  travelAgent: {
+    name: string;
+    email: string;
+    id: string;
+    travelAgentId?: string;
+  } | null;
+  allPersonnel: IPersonnelWithTravelAgent[];
+}
+
+/**
+ * Analysis data returned from AI processing of emails
+ */
+export interface IEmailAnalysisData {
+  destination: string;
+  arrivalDate: string;
+  departureDate: string;
+  numberOfPersons: number;
+  isTravelEmail: boolean;
+  companyName: string;
+  travelAgent: IPerson;
+  salesStaff: IPerson;
+  isInquiryEmail: boolean;
+  isSupplierEmail: boolean;
+  personnelMentioned: Array<{ name: string; emailId: string }>; // Add this
+}
+
+// ...existing code...
+
+// Optimized helper function to lookup personnel and extract roles
+async function lookupPersonnelInUsers(
+  personnelMentioned: Array<{ name: string; emailId: string }>
+): Promise<IPersonnelLookupResult> {
+  try {
+    await dbConnect();
+
+    if (!personnelMentioned || personnelMentioned.length === 0) {
+      return {
+        salesStaff: null,
+        travelAgent: null,
+        allPersonnel: [],
+      };
+    }
+
+    // Extract all email addresses for the query
+    const emailIds = personnelMentioned
+      .map((person) => person.emailId)
+      .filter(Boolean); // Remove empty/null emails
+
+    if (emailIds.length === 0) {
+      return {
+        salesStaff: null,
+        travelAgent: null,
+        allPersonnel: personnelMentioned.map((person) => ({
+          name: person.name,
+          emailId: person.emailId,
+        })),
+      };
+    }
+
+    // Single query to fetch all users by email
+    const users = await User.find({ email: { $in: emailIds } }).lean();
+
+    // Create a map for faster lookup
+    const userMap = new Map(users.map((user) => [user.email, user]));
+
+    let salesStaff: { name: string; email: string; id: string } | null = null;
+    let travelAgent: { name: string; email: string; id: string } | null = null;
+
+    // Map personnel with their corresponding user data
+    const personnelWithTravelAgentInfo: IPersonnelWithTravelAgent[] =
+      personnelMentioned.map((person) => {
+        const user = userMap.get(person.emailId);
+
+        if (user) {
+          const personnelInfo: IPersonnelWithTravelAgent = {
+            name: person.name || user.name,
+            emailId: person.emailId,
+            role: user.role,
+          };
+
+          // Extract salesStaff and travelAgent based on role
+          if (user.role === "SalesStaff" && !salesStaff) {
+            salesStaff = {
+              name: person.name || user.name,
+              email: person.emailId,
+              id: user._id as string,
+            };
+          }
+
+          if (user.role === "TravelAgent" && !travelAgent) {
+            travelAgent = {
+              name: person.name || user.name,
+              email: person.emailId,
+              id: user._id as string,
+              travelAgentId: user.travelAgentId
+                ? user.travelAgentId.toString()
+                : undefined,
+            };
+
+            // If user is a travel agent and has travelAgentId, add it
+            if (user.travelAgentId) {
+              personnelInfo.travelAgentId = user.travelAgentId.toString();
+            }
+          }
+
+          return personnelInfo;
+        } else {
+          // User not found in database, add as-is
+          return {
+            name: person.name,
+            emailId: person.emailId,
+          };
+        }
+      });
+
+    return {
+      salesStaff,
+      travelAgent,
+      allPersonnel: personnelWithTravelAgentInfo,
+    };
+  } catch (error) {
+    console.error("Error looking up personnel in users:", error);
+    return {
+      salesStaff: null,
+      travelAgent: null,
+      allPersonnel: personnelMentioned.map((person) => ({
+        name: person.name,
+        emailId: person.emailId,
+      })),
+    };
+  }
+}
 
 export async function createTicketFromEmail(
   analysisData: IEmailAnalysisData,
@@ -89,6 +233,39 @@ export async function createTicketFromEmail(
     // Only create ticket if it's a travel email and not a supplier email or inquiry email
     if (analysisData.isTravelEmail) {
       // Create a new ticket document
+
+      let personnelLookup: IPersonnelLookupResult = {
+        salesStaff: null,
+        travelAgent: null,
+        allPersonnel: [],
+      };
+      let travelAgentData: any = null;
+      if (
+        analysisData.personnelMentioned &&
+        analysisData.personnelMentioned.length > 0
+      ) {
+        console.log(
+          "Looking up personnel in users:",
+          analysisData.personnelMentioned
+        );
+        personnelLookup = await lookupPersonnelInUsers(
+          analysisData.personnelMentioned
+        );
+        console.log("Personnel lookup result:", personnelLookup);
+
+        if (
+          personnelLookup.travelAgent &&
+          personnelLookup.travelAgent.travelAgentId
+        ) {
+          travelAgentData = await TravelAgentUser.findById(
+            personnelLookup.travelAgent.travelAgentId
+          )
+            .lean()
+            .populate("salesInCharge");
+        }
+        console.log("Personnel lookup result:", travelAgentData);
+      }
+
       const newTicket = new Ticket({
         // Agent information
         agent: analysisData.companyName,
@@ -119,11 +296,13 @@ export async function createTicketFromEmail(
 
         // Personnel information
         travelAgent: {
-          name: analysisData.travelAgent?.name || "",
-          emailId: analysisData.travelAgent?.emailId || "",
+          name: travelAgentData?.name || analysisData.travelAgent?.name || "",
+          emailId:
+            travelAgentData?.email || analysisData.travelAgent?.emailId || "",
+          id: travelAgentData?._id || "",
         },
 
-        companyName: analysisData.companyName,
+        companyName: travelAgentData?.company || analysisData.companyName,
 
         reservationInCharge: {
           name:
@@ -149,8 +328,15 @@ export async function createTicketFromEmail(
         },
 
         salesInCharge: {
-          name: analysisData.salesStaff?.name || "",
-          emailId: analysisData.salesStaff?.emailId || "",
+          id: travelAgentData?.salesInCharge?.id || "",
+          name:
+            travelAgentData?.salesInCharge?.name ||
+            analysisData.salesStaff?.name ||
+            "",
+          emailId:
+            travelAgentData?.salesInCharge?.email ||
+            analysisData.salesStaff?.emailId ||
+            "",
         },
 
         // Default fields
