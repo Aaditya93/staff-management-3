@@ -244,24 +244,17 @@ export async function createTicketFromEmail(
         analysisData.personnelMentioned &&
         analysisData.personnelMentioned.length > 0
       ) {
-        console.log(
-          "Looking up personnel in users:",
-          analysisData.personnelMentioned
-        );
         personnelLookup = await lookupPersonnelInUsers(
           analysisData.personnelMentioned
         );
-        console.log("Personnel lookup result:", personnelLookup);
 
         if (
           personnelLookup.travelAgent &&
           personnelLookup.travelAgent.travelAgentId
         ) {
-          travelAgentData = await TravelAgentUser.findById(
-            personnelLookup.travelAgent.travelAgentId
-          )
+          travelAgentData = await User.findById(personnelLookup.travelAgent.id)
             .lean()
-            .populate("salesInCharge");
+            .populate("travelAgentId");
         }
         console.log("Personnel lookup result:", travelAgentData);
       }
@@ -302,7 +295,8 @@ export async function createTicketFromEmail(
           id: travelAgentData?._id || "",
         },
 
-        companyName: travelAgentData?.company || analysisData.companyName,
+        companyName:
+          travelAgentData?.travelAgentId.company || analysisData.companyName,
 
         reservationInCharge: {
           name:

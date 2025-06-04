@@ -16,7 +16,6 @@ exports.createTicketFromEmail = void 0;
 // @ts-nocheck
 const ticket_1 = __importDefault(require("../db/ticket"));
 const db_1 = __importDefault(require("./db"));
-const travelAgentUser_1 = __importDefault(require("./travelAgentUser"));
 const User_1 = __importDefault(require("./User"));
 // ...existing code...
 // Optimized helper function to lookup personnel and extract roles
@@ -138,14 +137,12 @@ function createTicketFromEmail(analysisData, emailData) {
                 let travelAgentData = null;
                 if (analysisData.personnelMentioned &&
                     analysisData.personnelMentioned.length > 0) {
-                    console.log("Looking up personnel in users:", analysisData.personnelMentioned);
                     personnelLookup = yield lookupPersonnelInUsers(analysisData.personnelMentioned);
-                    console.log("Personnel lookup result:", personnelLookup);
                     if (personnelLookup.travelAgent &&
                         personnelLookup.travelAgent.travelAgentId) {
-                        travelAgentData = yield travelAgentUser_1.default.findById(personnelLookup.travelAgent.travelAgentId)
+                        travelAgentData = yield User_1.default.findById(personnelLookup.travelAgent.id)
                             .lean()
-                            .populate("salesInCharge");
+                            .populate("travelAgentId");
                     }
                     console.log("Personnel lookup result:", travelAgentData);
                 }
@@ -167,7 +164,7 @@ function createTicketFromEmail(analysisData, emailData) {
                         name: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.name) || ((_a = analysisData.travelAgent) === null || _a === void 0 ? void 0 : _a.name) || "",
                         emailId: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.email) || ((_b = analysisData.travelAgent) === null || _b === void 0 ? void 0 : _b.emailId) || "",
                         id: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData._id) || "",
-                    }, companyName: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.company) || analysisData.companyName, reservationInCharge: {
+                    }, companyName: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.travelAgentId.company) || analysisData.companyName, reservationInCharge: {
                         name: emailData.emailType === "sent"
                             ? emailData.from.name
                             : ((_c = emailData.to[0]) === null || _c === void 0 ? void 0 : _c.name) || "",
