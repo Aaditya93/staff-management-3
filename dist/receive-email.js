@@ -113,6 +113,7 @@ function processIncomingEmail(emailData) {
         // If no ticket ID found or ticket not found, proceed with normal flow
         const aiData = yield (0, process_email_transform_1.transformEmailData)(emailData.email);
         const analysis = yield (0, gemini_1.analyzeEmail)(aiData);
+        console.log("AI Analysis Result:", analysis);
         let ticketResult = null;
         if (analysis.isTravelEmail) {
             try {
