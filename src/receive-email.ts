@@ -119,6 +119,7 @@ export async function processIncomingEmail(emailData: any) {
   // If no ticket ID found or ticket not found, proceed with normal flow
   const aiData = await transformEmailData(emailData.email);
   const analysis = await analyzeEmail(aiData);
+  console.log("AI Analysis Result:", analysis);
 
   let ticketResult = null;
 

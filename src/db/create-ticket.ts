@@ -90,7 +90,7 @@ export async function createTicketFromEmail(
     if (
       analysisData.isTravelEmail &&
       !analysisData.isSupplierEmail &&
-      !analysisData.isInquiryEmail
+      analysisData.isInquiryEmail
     ) {
       // Create a new ticket document
       const newTicket = new Ticket({
