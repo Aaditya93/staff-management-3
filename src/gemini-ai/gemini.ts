@@ -70,7 +70,13 @@ const emailAnalysisConfig = {
       isSupplierEmail: {
         type: "boolean",
         description:
-          "Payment requests/confirmations, booking codes, service offerings, or B2B marketing from partners",
+          "Whether the email relates to supplier operations, including: " +
+          "1) Payment requests from hotels or service providers (look for 'thanh toán', 'booking', account numbers, payment details) " +
+          "2) Payment confirmations or reports (look for 'BÁO CÁO TIỀN VỀ', payment codes like 'MARAOF250500661', 'STTIOF250500062') " +
+          "3) Travel service offerings from partners (hotels, visa services, etc.) " +
+          "4) B2B marketing/event invitations from industry partners (travel marts, exhibitions) " +
+          "Supplier emails typically contain specific booking codes, payment amounts, account details, or industry event information. " +
+          "These emails are NOT client inquiries about travel packages.",
       },
       travelAgent: {
         type: "object",
