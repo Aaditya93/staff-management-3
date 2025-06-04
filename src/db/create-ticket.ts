@@ -87,7 +87,7 @@ export async function createTicketFromEmail(
     };
 
     // Only create ticket if it's a travel email and not a supplier email or inquiry email
-    if (analysisData.isTravelEmail && analysisData.isInquiryEmail) {
+    if (analysisData.isTravelEmail) {
       // Create a new ticket document
       const newTicket = new Ticket({
         // Agent information

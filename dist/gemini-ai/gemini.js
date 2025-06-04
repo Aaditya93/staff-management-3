@@ -43,8 +43,6 @@ const emailAnalysisConfig = {
             "companyName",
             "travelAgent",
             "salesStaff",
-            "isInquiryEmail",
-            "isSupplierEmail",
         ],
         properties: {
             destination: {
@@ -63,10 +61,6 @@ const emailAnalysisConfig = {
                 type: "number",
                 description: "Number of travelers",
             },
-            isInquiryEmail: {
-                type: "boolean",
-                description: "Email requests travel packages, pricing, or availability",
-            },
             isTravelEmail: {
                 type: "boolean",
                 description: "Related to travel booking (true if ticket ID present)",
@@ -74,10 +68,6 @@ const emailAnalysisConfig = {
             companyName: {
                 type: "string",
                 description: "Business name in lowercase (exclude domains, emails, URLs, 'Victoria Tours')",
-            },
-            isSupplierEmail: {
-                type: "boolean",
-                description: "Only return true if you are EXTREMELY confident this email is from a supplier/vendor. Must contain clear evidence like: payment requests with amounts, booking confirmation codes, invoice numbers, or B2B service offerings. If there's ANY doubt, return false.",
             },
             travelAgent: {
                 type: "object",
