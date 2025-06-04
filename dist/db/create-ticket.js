@@ -32,9 +32,7 @@ function createTicketFromEmail(analysisData, emailData) {
                 return dateRegex.test(dateString);
             };
             // Only create ticket if it's a travel email and not a supplier email or inquiry email
-            if (analysisData.isTravelEmail &&
-                !analysisData.isSupplierEmail &&
-                analysisData.isInquiryEmail) {
+            if (analysisData.isTravelEmail && analysisData.isInquiryEmail) {
                 // Create a new ticket document
                 const newTicket = new ticket_1.default(Object.assign(Object.assign(Object.assign({ 
                     // Agent information
