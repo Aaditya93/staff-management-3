@@ -43,9 +43,30 @@ const userSchema = new mongoose_1.default.Schema({
     office: {
         type: String,
     },
-    rating: {
+    department: {
+        type: String,
+    },
+    bio: {
+        type: String,
+    },
+    status: {
+        type: String,
+    },
+    attitude: {
+        type: Number,
+    },
+    knowledge: {
+        type: Number,
+    },
+    speed: {
+        type: Number,
+    },
+    reviewcount: {
         type: Number,
         default: 0,
+    },
+    phoneNumber: {
+        type: String,
     },
     position: {
         type: String,
@@ -58,6 +79,28 @@ const userSchema = new mongoose_1.default.Schema({
     destination: {
         type: [String],
         default: [],
+    },
+    teamLeader: {
+        name: String,
+        email: String,
+    },
+    language: {
+        type: [String],
+        default: [],
+    },
+    market: {
+        type: [String],
+        default: [],
+    },
+    reservationInCharge: {
+        id: String,
+        name: String,
+        email: String,
+    },
+    salesInCharge: {
+        id: String,
+        name: String,
+        email: String,
     },
     provider: String,
     image: String,

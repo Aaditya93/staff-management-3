@@ -39,7 +39,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTravelAgentUser = exports.getTravelAgentUserByEmail = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const db_1 = __importDefault(require("./db"));
-// Create schema
 const TravelAgentUserSchema = new mongoose_1.Schema({
     name: {
         type: String,

@@ -1,11 +1,7 @@
 // @ts-nocheck
 import Ticket, { ITicket } from "../db/ticket";
 import dbConnect from "./db";
-import TravelAgentUser, {
-  createTravelAgentUser,
-  getTravelAgentUserByEmail,
-} from "./travelAgentUser";
-
+import TravelAgentUser from "./travelAgentUser";
 import User from "./User";
 /**
  * Creates a new ticket from analyzed email data and raw email information
@@ -254,7 +250,10 @@ export async function createTicketFromEmail(
         ) {
           travelAgentData = await User.findById(personnelLookup.travelAgent.id)
             .lean()
-            .populate("travelAgentId");
+            .populate({
+              path: "travelAgentId",
+              model: TravelAgentUser.modelName || "TravelAgentUser",
+            });
         }
         console.log("Personnel lookup result:", travelAgentData);
       }

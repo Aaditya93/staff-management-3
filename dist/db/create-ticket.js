@@ -16,6 +16,7 @@ exports.createTicketFromEmail = void 0;
 // @ts-nocheck
 const ticket_1 = __importDefault(require("../db/ticket"));
 const db_1 = __importDefault(require("./db"));
+const travelAgentUser_1 = __importDefault(require("./travelAgentUser"));
 const User_1 = __importDefault(require("./User"));
 // ...existing code...
 // Optimized helper function to lookup personnel and extract roles
@@ -142,7 +143,10 @@ function createTicketFromEmail(analysisData, emailData) {
                         personnelLookup.travelAgent.travelAgentId) {
                         travelAgentData = yield User_1.default.findById(personnelLookup.travelAgent.id)
                             .lean()
-                            .populate("travelAgentId");
+                            .populate({
+                            path: "travelAgentId",
+                            model: travelAgentUser_1.default.modelName || "TravelAgentUser",
+                        });
                     }
                     console.log("Personnel lookup result:", travelAgentData);
                 }

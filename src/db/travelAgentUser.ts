@@ -1,6 +1,7 @@
 "use server";
 import mongoose, { Document, Model, Schema } from "mongoose";
 import dbConnect from "./db";
+// Create schema
 export interface ITravelAgentUser extends Document {
   id: string;
   name: string;
@@ -34,7 +35,6 @@ export interface ITravelAgentUser extends Document {
   market: string[];
 }
 
-// Create schema
 const TravelAgentUserSchema = new Schema<ITravelAgentUser>(
   {
     name: {
