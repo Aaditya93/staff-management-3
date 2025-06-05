@@ -27,7 +27,7 @@ function processMessages() {
         // Start timer
         try {
             // Receive messages from SQS queue
-            const messages = yield (0, sqs_1.receiveMessagesFromQueue)(10, 60, 10);
+            const messages = yield (0, sqs_1.receiveMessagesFromQueue)(10, 120, 10);
             if (messages.length === 0) {
                 return;
             }

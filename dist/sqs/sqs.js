@@ -52,7 +52,7 @@ function sendMessageToQueue(messageBody) {
     });
 }
 exports.sendMessageToQueue = sendMessageToQueue;
-function receiveMessagesFromQueue(maxMessages = 50, visibilityTimeout = 30, waitTimeSeconds = 5) {
+function receiveMessagesFromQueue(maxMessages = 50, visibilityTimeout = 120, waitTimeSeconds = 5) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const params = {

@@ -54,7 +54,7 @@ export async function sendMessageToQueue(messageBody: MessageBody) {
 
 export async function receiveMessagesFromQueue(
   maxMessages = 50,
-  visibilityTimeout = 30,
+  visibilityTimeout = 120,
   waitTimeSeconds = 5
 ): Promise<Message[]> {
   try {
