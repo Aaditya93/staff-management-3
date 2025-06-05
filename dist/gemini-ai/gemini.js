@@ -22,6 +22,28 @@ const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 if (!apiKey) {
     throw new Error("API key is not defined");
 }
+const DESTINATION_OPTIONS = [
+    "Vietnam",
+    "Singapore",
+    "Thailand",
+    "Malaysia",
+    "Indonesia",
+    "China",
+    "Taiwan",
+    "Nepal",
+    "Sri Lanka",
+    "India",
+    "Italy",
+    "Kazakhstan",
+    "Uzbekistan",
+    "Cambodia",
+    "Laos",
+    "Myanmar",
+    "Pakistan",
+    "Philippines",
+    "Kyrgyzstan",
+    "Azerbaijan",
+];
 const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
 const fileManager = new server_1.GoogleAIFileManager(apiKey);
 const model = genAI.getGenerativeModel({
@@ -47,7 +69,8 @@ const emailAnalysisConfig = {
         properties: {
             destination: {
                 type: "string",
-                description: "Travel destination country",
+                description: `Travel destination country. Must be one of: ${DESTINATION_OPTIONS.join(", ")}. If not found in email, use empty string.`,
+                enum: DESTINATION_OPTIONS,
             },
             arrivalDate: {
                 type: "string",

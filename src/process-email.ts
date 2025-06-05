@@ -90,11 +90,9 @@ export async function processAllUserEmails() {
 
                       // Skip if no ticket ID found in sent emails
                       if (!hasTicketId) {
-                        console.log(
-                          `Skipping sent email without ticket ID: ${
-                            email.id || "unknown"
-                          }`
-                        );
+                        console.log`Skipping sent email without ticket ID: ${
+                          email.id || "unknown"
+                        }`;
                         return {
                           success: true,
                           emailId: "id" in email ? email.id : "unknown",
