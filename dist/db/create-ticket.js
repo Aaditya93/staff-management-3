@@ -168,7 +168,7 @@ function createTicketFromEmail(analysisData, emailData) {
                         name: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.name) || ((_a = analysisData.travelAgent) === null || _a === void 0 ? void 0 : _a.name) || "",
                         emailId: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.email) || ((_b = analysisData.travelAgent) === null || _b === void 0 ? void 0 : _b.emailId) || "",
                         id: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData._id) || "",
-                    }, companyName: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.travelAgentId.company) || analysisData.companyName, reservationInCharge: {
+                    }, companyName: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.travelAgentId.company) || "Not assigned", reservationInCharge: {
                         name: emailData.emailType === "sent"
                             ? emailData.from.name
                             : ((_c = emailData.to[0]) === null || _c === void 0 ? void 0 : _c.name) || "",

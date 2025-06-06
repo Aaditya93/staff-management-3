@@ -294,8 +294,7 @@ export async function createTicketFromEmail(
           id: travelAgentData?._id || "",
         },
 
-        companyName:
-          travelAgentData?.travelAgentId.company || analysisData.companyName,
+        companyName: travelAgentData?.travelAgentId.company || "Not assigned",
 
         reservationInCharge: {
           name:

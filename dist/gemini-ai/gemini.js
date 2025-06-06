@@ -43,6 +43,18 @@ const DESTINATION_OPTIONS = [
     "Philippines",
     "Kyrgyzstan",
     "Azerbaijan",
+    "Japan",
+    "South Korea",
+    "Hong Kong",
+    "United Arab Emirates",
+    "Saudi Arabia",
+    "Qatar",
+    "Bahrain",
+    "Russia",
+    "Turkey",
+    "Armenia",
+    "Georgia",
+    "Azerbaijan",
 ];
 const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
 const fileManager = new server_1.GoogleAIFileManager(apiKey);

@@ -12,6 +12,7 @@ const DESTINATION_OPTIONS = [
   "Singapore",
   "Thailand",
   "Malaysia",
+
   "Indonesia",
   "China",
   "Taiwan",
@@ -27,6 +28,18 @@ const DESTINATION_OPTIONS = [
   "Pakistan",
   "Philippines",
   "Kyrgyzstan",
+  "Azerbaijan",
+  "Japan",
+  "South Korea",
+  "Hong Kong",
+  "United Arab Emirates",
+  "Saudi Arabia",
+  "Qatar",
+  "Bahrain",
+  "Russia",
+  "Turkey",
+  "Armenia",
+  "Georgia",
   "Azerbaijan",
 ];
 const genAI = new GoogleGenerativeAI(apiKey);
