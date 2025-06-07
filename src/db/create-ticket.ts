@@ -294,17 +294,17 @@ export async function createTicketFromEmail(
           id: travelAgentData?._id || "",
         },
 
-        companyName: travelAgentData?.travelAgentId.company || "Not assigned",
+        companyName: travelAgentData?.travelAgentId.company || "No Name",
 
         reservationInCharge: {
           name:
             emailData.emailType === "sent"
               ? emailData.from.name
-              : emailData.to[0]?.name || "",
+              : emailData.to[0]?.name || "No Name",
           emailId:
             emailData.emailType === "sent"
               ? emailData.from.email
-              : emailData.to[0]?.email || "",
+              : emailData.to[0]?.email || "No Email",
           id: emailData.userId,
         },
         createdBy: {
@@ -312,11 +312,11 @@ export async function createTicketFromEmail(
           name:
             emailData.emailType === "sent"
               ? emailData.from.name
-              : emailData.to[0]?.name || "",
+              : emailData.to[0]?.name || "No Name",
           emailId:
             emailData.emailType === "sent"
               ? emailData.from.email
-              : emailData.to[0]?.email || "",
+              : emailData.to[0]?.email || "No Email",
         },
 
         salesInCharge: {
@@ -324,11 +324,11 @@ export async function createTicketFromEmail(
           name:
             travelAgentData?.salesInCharge?.name ||
             analysisData.salesStaff?.name ||
-            "",
+            "No Name",
           emailId:
             travelAgentData?.salesInCharge?.email ||
             analysisData.salesStaff?.emailId ||
-            "",
+            "No Email",
         },
 
         // Default fields
