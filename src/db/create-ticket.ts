@@ -255,7 +255,6 @@ export async function createTicketFromEmail(
               model: TravelAgentUser.modelName || "TravelAgentUser",
             });
         }
-        console.log("Personnel lookup result:", travelAgentData);
       }
 
       const newTicket = new Ticket({
@@ -298,14 +297,18 @@ export async function createTicketFromEmail(
 
         reservationInCharge: {
           name:
-            emailData.emailType === "sent"
+            travelAgentData?.reservationInCharge?.name ||
+            (emailData.emailType === "sent"
               ? emailData.from.name
-              : emailData.to[0]?.name || "No Name",
+              : emailData.to[0]?.name) ||
+            "No Name",
           emailId:
-            emailData.emailType === "sent"
+            travelAgentData?.reservationInCharge?.email ||
+            (emailData.emailType === "sent"
               ? emailData.from.email
-              : emailData.to[0]?.email || "No Email",
-          id: emailData.userId,
+              : emailData.to[0]?.email) ||
+            "No Email",
+          id: travelAgentData?.reservationInCharge?.id || emailData.userId,
         },
         createdBy: {
           id: emailData.userId,
@@ -369,14 +372,9 @@ export async function createTicketFromEmail(
 
       // Save the ticket and return it
       const savedTicket = await newTicket.save();
-      console.log("Ticket created successfully:", savedTicket);
+
       return savedTicket;
     } else {
-      console.log("Email doesn't qualify for ticket creation:", {
-        isTravelEmail: analysisData.isTravelEmail,
-        isSupplierEmail: analysisData.isSupplierEmail,
-        isInquiryEmail: analysisData.isInquiryEmail,
-      });
       return null;
     }
   } catch (error) {
