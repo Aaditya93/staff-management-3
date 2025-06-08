@@ -112,7 +112,7 @@ function lookupPersonnelInUsers(personnelMentioned) {
     });
 }
 function createTicketFromEmail(analysisData, emailData) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield (0, db_1.default)();
@@ -148,7 +148,6 @@ function createTicketFromEmail(analysisData, emailData) {
                             model: travelAgentUser_1.default.modelName || "TravelAgentUser",
                         });
                     }
-                    console.log("Personnel lookup result:", travelAgentData);
                 }
                 const newTicket = new ticket_1.default(Object.assign(Object.assign(Object.assign({ 
                     // Agent information
@@ -165,36 +164,30 @@ function createTicketFromEmail(analysisData, emailData) {
                 })), { pax: analysisData.numberOfPersons, 
                     // Personnel information
                     travelAgent: {
-                        name: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.name) || ((_a = analysisData.travelAgent) === null || _a === void 0 ? void 0 : _a.name) || "",
-                        emailId: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.email) || ((_b = analysisData.travelAgent) === null || _b === void 0 ? void 0 : _b.emailId) || "",
+                        name: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.name) || "No Name",
+                        emailId: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.email) || ((_a = analysisData.travelAgent) === null || _a === void 0 ? void 0 : _a.emailId) || "",
                         id: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData._id) || "",
                     }, companyName: (travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.travelAgentId.company) || "No Name", reservationInCharge: {
-                        name: ((_c = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.reservationInCharge) === null || _c === void 0 ? void 0 : _c.name) ||
-                            (emailData.emailType === "sent"
-                                ? emailData.from.name
-                                : (_d = emailData.to[0]) === null || _d === void 0 ? void 0 : _d.name) ||
-                            "No Name",
-                        emailId: ((_e = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.reservationInCharge) === null || _e === void 0 ? void 0 : _e.email) ||
+                        name: ((_b = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.reservationInCharge) === null || _b === void 0 ? void 0 : _b.name) || "No Name",
+                        emailId: ((_c = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.reservationInCharge) === null || _c === void 0 ? void 0 : _c.email) ||
                             (emailData.emailType === "sent"
                                 ? emailData.from.email
-                                : (_f = emailData.to[0]) === null || _f === void 0 ? void 0 : _f.email) ||
+                                : (_d = emailData.to[0]) === null || _d === void 0 ? void 0 : _d.email) ||
                             "No Email",
-                        id: ((_g = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.reservationInCharge) === null || _g === void 0 ? void 0 : _g.id) || emailData.userId,
+                        id: ((_e = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.reservationInCharge) === null || _e === void 0 ? void 0 : _e.id) || emailData.userId,
                     }, createdBy: {
                         id: emailData.userId,
                         name: emailData.emailType === "sent"
                             ? emailData.from.name
-                            : ((_h = emailData.to[0]) === null || _h === void 0 ? void 0 : _h.name) || "No Name",
+                            : ((_f = emailData.to[0]) === null || _f === void 0 ? void 0 : _f.name) || "No Name",
                         emailId: emailData.emailType === "sent"
                             ? emailData.from.email
-                            : ((_j = emailData.to[0]) === null || _j === void 0 ? void 0 : _j.email) || "No Email",
+                            : ((_g = emailData.to[0]) === null || _g === void 0 ? void 0 : _g.email) || "No Email",
                     }, salesInCharge: {
-                        id: ((_k = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.salesInCharge) === null || _k === void 0 ? void 0 : _k.id) || "",
-                        name: ((_l = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.salesInCharge) === null || _l === void 0 ? void 0 : _l.name) ||
-                            ((_m = analysisData.salesStaff) === null || _m === void 0 ? void 0 : _m.name) ||
-                            "No Name",
-                        emailId: ((_o = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.salesInCharge) === null || _o === void 0 ? void 0 : _o.email) ||
-                            ((_p = analysisData.salesStaff) === null || _p === void 0 ? void 0 : _p.emailId) ||
+                        id: ((_h = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.salesInCharge) === null || _h === void 0 ? void 0 : _h.id) || "",
+                        name: ((_j = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.salesInCharge) === null || _j === void 0 ? void 0 : _j.name) || "No Name",
+                        emailId: ((_k = travelAgentData === null || travelAgentData === void 0 ? void 0 : travelAgentData.salesInCharge) === null || _k === void 0 ? void 0 : _k.email) ||
+                            ((_l = analysisData.salesStaff) === null || _l === void 0 ? void 0 : _l.emailId) ||
                             "No Email",
                     }, 
                     // Default fields
@@ -220,15 +213,9 @@ function createTicketFromEmail(analysisData, emailData) {
                     ] }));
                 // Save the ticket and return it
                 const savedTicket = yield newTicket.save();
-                console.log("Ticket created successfully:", savedTicket);
                 return savedTicket;
             }
             else {
-                console.log("Email doesn't qualify for ticket creation:", {
-                    isTravelEmail: analysisData.isTravelEmail,
-                    isSupplierEmail: analysisData.isSupplierEmail,
-                    isInquiryEmail: analysisData.isInquiryEmail,
-                });
                 return null;
             }
         }

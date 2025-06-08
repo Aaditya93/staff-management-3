@@ -287,7 +287,7 @@ export async function createTicketFromEmail(
 
         // Personnel information
         travelAgent: {
-          name: travelAgentData?.name || analysisData.travelAgent?.name || "",
+          name: travelAgentData?.name || "No Name",
           emailId:
             travelAgentData?.email || analysisData.travelAgent?.emailId || "",
           id: travelAgentData?._id || "",
@@ -296,12 +296,7 @@ export async function createTicketFromEmail(
         companyName: travelAgentData?.travelAgentId.company || "No Name",
 
         reservationInCharge: {
-          name:
-            travelAgentData?.reservationInCharge?.name ||
-            (emailData.emailType === "sent"
-              ? emailData.from.name
-              : emailData.to[0]?.name) ||
-            "No Name",
+          name: travelAgentData?.reservationInCharge?.name || "No Name",
           emailId:
             travelAgentData?.reservationInCharge?.email ||
             (emailData.emailType === "sent"
@@ -324,10 +319,7 @@ export async function createTicketFromEmail(
 
         salesInCharge: {
           id: travelAgentData?.salesInCharge?.id || "",
-          name:
-            travelAgentData?.salesInCharge?.name ||
-            analysisData.salesStaff?.name ||
-            "No Name",
+          name: travelAgentData?.salesInCharge?.name || "No Name",
           emailId:
             travelAgentData?.salesInCharge?.email ||
             analysisData.salesStaff?.emailId ||
