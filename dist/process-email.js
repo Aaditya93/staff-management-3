@@ -44,8 +44,22 @@ function processAllUserEmails() {
                         else {
                             yield (0, User_1.updateUserEmailTimestamp)(user._id.toString(), account.email);
                             if (result.emails && result.emails.length > 0) {
+                                const nonBlockedEmails = result.emails.filter((email) => {
+                                    var _a, _b;
+                                    // Check if sender email is in the block list
+                                    const senderEmail = (_b = (_a = email.from) === null || _a === void 0 ? void 0 : _a.emailAddress) === null || _b === void 0 ? void 0 : _b.address;
+                                    if (senderEmail &&
+                                        user.blockEmails &&
+                                        user.blockEmails.length > 0) {
+                                        const isBlocked = user.blockEmails.some((blockedEmail) => blockedEmail.toLowerCase() === senderEmail);
+                                        if (isBlocked) {
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                });
                                 // Process emails through AI processing before forwarding
-                                const processedEmails = result.emails.map((email) => (0, process_email_ai_1.processEmailForAI)(user._id.toString(), user.name, account.email, email));
+                                const processedEmails = nonBlockedEmails.map((email) => (0, process_email_ai_1.processEmailForAI)(user._id.toString(), user.name, account.email, email));
                                 // Filter out any emails that returned with errors
                                 const validProcessedEmails = processedEmails.filter((email) => !("error" in email));
                                 // Process each email individually
@@ -64,7 +78,6 @@ function processAllUserEmails() {
                                             const hasTicketId = !!(ticketIdFromSubject || ticketIdFromBody);
                                             // Skip if no ticket ID found in sent emails
                                             if (!hasTicketId) {
-                                                console.log `Skipping sent email without ticket ID: ${email.id || "unknown"}`;
                                                 return {
                                                     success: true,
                                                     emailId: "id" in email ? email.id : "unknown",

@@ -1,5 +1,5 @@
+"use server";
 import mongoose from "mongoose";
-
 import dbConnect from "./db";
 const accountSchema = new mongoose.Schema(
   {
@@ -53,10 +53,12 @@ const userSchema = new mongoose.Schema(
     },
     reviewcount: {
       type: Number,
-      default: 0,
     },
     phoneNumber: {
       type: String,
+    },
+    review: {
+      type: Number,
     },
 
     position: {
@@ -83,6 +85,10 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    blockEmails: {
+      type: [String],
+      default: [],
+    },
     reservationInCharge: {
       id: String,
       name: String,
@@ -100,6 +106,7 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 const User = (mongoose.models?.User ||
   mongoose.model("User", userSchema)) as ReturnType<typeof mongoose.model<any>>;
 

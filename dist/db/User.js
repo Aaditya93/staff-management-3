@@ -1,4 +1,5 @@
 "use strict";
+"use server";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -63,10 +64,12 @@ const userSchema = new mongoose_1.default.Schema({
     },
     reviewcount: {
         type: Number,
-        default: 0,
     },
     phoneNumber: {
         type: String,
+    },
+    review: {
+        type: Number,
     },
     position: {
         type: String,
@@ -89,6 +92,10 @@ const userSchema = new mongoose_1.default.Schema({
         default: [],
     },
     market: {
+        type: [String],
+        default: [],
+    },
+    blockEmails: {
         type: [String],
         default: [],
     },

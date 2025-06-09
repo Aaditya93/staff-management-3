@@ -50,8 +50,28 @@ export async function processAllUserEmails() {
               account.email
             );
             if (result.emails && result.emails.length > 0) {
+              const nonBlockedEmails = result.emails.filter((email) => {
+                // Check if sender email is in the block list
+                const senderEmail = email.from?.emailAddress?.address;
+                if (
+                  senderEmail &&
+                  user.blockEmails &&
+                  user.blockEmails.length > 0
+                ) {
+                  const isBlocked: boolean = user.blockEmails.some(
+                    (blockedEmail: string) =>
+                      blockedEmail.toLowerCase() === senderEmail
+                  );
+
+                  if (isBlocked) {
+                    return false;
+                  }
+                }
+                return true;
+              });
+
               // Process emails through AI processing before forwarding
-              const processedEmails = result.emails.map((email) =>
+              const processedEmails = nonBlockedEmails.map((email) =>
                 processEmailForAI(
                   (user._id as any).toString(),
                   user.name,
@@ -90,9 +110,6 @@ export async function processAllUserEmails() {
 
                       // Skip if no ticket ID found in sent emails
                       if (!hasTicketId) {
-                        console.log`Skipping sent email without ticket ID: ${
-                          email.id || "unknown"
-                        }`;
                         return {
                           success: true,
                           emailId: "id" in email ? email.id : "unknown",
