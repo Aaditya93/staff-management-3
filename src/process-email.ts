@@ -1,4 +1,8 @@
-import { getAllUsers, updateUserEmailTimestamp } from "./db/User";
+import {
+  getAllUsers,
+  getAllUsersWithUpdate,
+  updateUserEmailTimestamp,
+} from "./db/User";
 
 import { fetchEmailById, fetchAllEmails } from "./fetch-emails";
 import { forwardEmailsToAPI } from "./forward-email";
@@ -10,7 +14,7 @@ import { sendMessageToQueue } from "./sqs/sqs";
 export async function processAllUserEmails() {
   try {
     // Get all users
-    const users = await getAllUsers();
+    const users = await getAllUsersWithUpdate();
 
     // Process each user
     for (const user of users) {
@@ -45,10 +49,6 @@ export async function processAllUserEmails() {
               result.error
             );
           } else {
-            await updateUserEmailTimestamp(
-              (user._id as any).toString(),
-              account.email
-            );
             if (result.emails && result.emails.length > 0) {
               const nonBlockedEmails = result.emails.filter((email) => {
                 // Check if sender email is in the block list

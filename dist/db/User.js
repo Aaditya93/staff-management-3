@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserEmailTimestamp = exports.getAllUsers = exports.emailVerified = exports.getUserByEmail = exports.getUserById = void 0;
+exports.updateUserEmailTimestamp = exports.getAllUsers = exports.getAllUsersWithUpdate = exports.emailVerified = exports.getUserByEmail = exports.getUserById = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const db_1 = __importDefault(require("./db"));
 const accountSchema = new mongoose_1.default.Schema({
@@ -162,6 +162,50 @@ function emailVerified(id) {
     });
 }
 exports.emailVerified = emailVerified;
+const getAllUsersWithUpdate = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield (0, db_1.default)();
+        const users = yield User.find({ role: "ReservationStaff" }).lean();
+        // Collect all updates to be executed later
+        const pendingUpdates = new Map();
+        const updateUserEmailTimestamp = (id, email) => __awaiter(void 0, void 0, void 0, function* () {
+            const timestamp = new Date();
+            const key = `${id}-${email}`;
+            // Store the update to be executed later
+            pendingUpdates.set(key, { id, email, timestamp });
+        });
+        const executeBulkUpdates = () => __awaiter(void 0, void 0, void 0, function* () {
+            try {
+                // Convert pending updates to bulk operations
+                const bulkOps = Array.from(pendingUpdates.values()).map(({ id, email, timestamp }) => ({
+                    updateOne: {
+                        filter: { _id: id },
+                        update: {
+                            $set: {
+                                [`accounts.$[elem].emailUpdatedAt`]: timestamp,
+                            },
+                        },
+                        arrayFilters: [{ "elem.email": email }],
+                    },
+                }));
+                // Execute all updates in a single bulk operation
+                const result = yield User.bulkWrite(bulkOps);
+                // Clear pending updates
+                pendingUpdates.clear();
+            }
+            catch (error) {
+                console.error("Error executing bulk updates:", error);
+                throw error;
+            }
+        });
+        return users;
+    }
+    catch (error) {
+        console.error("Error while getting all users:", error);
+        return [];
+    }
+});
+exports.getAllUsersWithUpdate = getAllUsersWithUpdate;
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, db_1.default)();

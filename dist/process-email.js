@@ -19,7 +19,7 @@ function processAllUserEmails() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Get all users
-            const users = yield (0, User_1.getAllUsers)();
+            const users = yield (0, User_1.getAllUsersWithUpdate)();
             // Process each user
             for (const user of users) {
                 // Skip if user has no accounts
@@ -42,7 +42,6 @@ function processAllUserEmails() {
                             console.error(`Error fetching email for ${account.email}:`, result.error);
                         }
                         else {
-                            yield (0, User_1.updateUserEmailTimestamp)(user._id.toString(), account.email);
                             if (result.emails && result.emails.length > 0) {
                                 const nonBlockedEmails = result.emails.filter((email) => {
                                     var _a, _b;

@@ -154,6 +154,60 @@ export async function emailVerified(id: string) {
   }
 }
 
+export const getAllUsersWithUpdate = async () => {
+  try {
+    await dbConnect();
+    const users = await User.find({ role: "ReservationStaff" }).lean();
+
+    // Collect all updates to be executed later
+    const pendingUpdates = new Map<
+      string,
+      { id: string; email: string; timestamp: Date }
+    >();
+
+    const updateUserEmailTimestamp = async (id: string, email: string) => {
+      const timestamp = new Date();
+      const key = `${id}-${email}`;
+
+      // Store the update to be executed later
+      pendingUpdates.set(key, { id, email, timestamp });
+    };
+
+    const executeBulkUpdates = async () => {
+      try {
+        // Convert pending updates to bulk operations
+        const bulkOps = Array.from(pendingUpdates.values()).map(
+          ({ id, email, timestamp }) => ({
+            updateOne: {
+              filter: { _id: id },
+              update: {
+                $set: {
+                  [`accounts.$[elem].emailUpdatedAt`]: timestamp,
+                },
+              },
+              arrayFilters: [{ "elem.email": email }],
+            },
+          })
+        );
+
+        // Execute all updates in a single bulk operation
+        const result = await User.bulkWrite(bulkOps);
+
+        // Clear pending updates
+        pendingUpdates.clear();
+      } catch (error) {
+        console.error("Error executing bulk updates:", error);
+        throw error;
+      }
+    };
+
+    return users;
+  } catch (error) {
+    console.error("Error while getting all users:", error);
+    return [];
+  }
+};
+
 export const getAllUsers = async () => {
   try {
     await dbConnect();
