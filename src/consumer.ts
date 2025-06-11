@@ -58,7 +58,7 @@ const startPeriodicMessageProcessing = () => {
   // Set interval to poll for messages every 15 seconds
   setInterval(async () => {
     await processMessages();
-  }, 10000);
+  }, 15000);
 
   // Also process messages immediately on startup
   processMessages();
