@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // @ts-nocheck
 const express_1 = __importDefault(require("express"));
+const process_email_1 = require("./process-email");
 const api_1 = require("./hotel/api");
 const multer_1 = __importDefault(require("multer"));
 const ai_1 = require("./hotel/ai"); // adjust path as needed
@@ -46,10 +47,8 @@ app.post("/hotels", upload.single("file"), (req, res) => __awaiter(void 0, void 
                 .status(400)
                 .json({ success: false, message: "Missing required fields or file" });
         }
-        console.log("Processing file:", file.originalname, "Type:", file.mimetype, "Size:", file.size);
         // Pass the file path directly to extractHotelData (not the file object)
         const extractResult = yield (0, ai_1.extractHotelData)(file.path);
-        console.log("Extract result:", extractResult);
         if (!extractResult ||
             !extractResult.hotels ||
             extractResult.hotels.length === 0) {
@@ -87,7 +86,20 @@ app.post("/hotels", upload.single("file"), (req, res) => __awaiter(void 0, void 
         });
     }
 }));
+const startPeriodicEmailProcessing = () => {
+    // Set interval to call processAllUserEmails every 5 seconds
+    setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            yield (0, process_email_1.processAllUserEmails)();
+        }
+        catch (error) {
+            console.error("Error in scheduled email processing:", error);
+        }
+    }), 15000);
+};
+// Start periodic email processing
+startPeriodicEmailProcessing();
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Email Server is running on port ${PORT}`);
+    console.log(`Email Server  is running on port ${PORT}`);
 });

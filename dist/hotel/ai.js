@@ -181,7 +181,6 @@ function getMimeTypeFromFile(filePath) {
     if (!ext || ext === ".") {
         // Check if there's a file with a different name pattern
         const basename = path_1.default.basename(filePath);
-        console.log(`Debugging: basename = ${basename}, filePath = ${filePath}`);
         // Try to extract extension from basename if it contains dots
         const parts = basename.split(".");
         if (parts.length > 1) {
@@ -215,9 +214,6 @@ const extractHotelData = (filePath) => __awaiter(void 0, void 0, void 0, functio
     if (!fs_1.default.existsSync(filePath)) {
         throw new Error("File does not exist at the provided path");
     }
-    console.log(`Debugging: Full file path = ${filePath}`);
-    console.log(`Debugging: File basename = ${path_1.default.basename(filePath)}`);
-    console.log(`Debugging: Path extname = ${path_1.default.extname(filePath)}`);
     // Determine MIME type from file extension
     const mimeType = getMimeTypeFromFile(filePath);
     // Check if the file type is supported
@@ -225,11 +221,9 @@ const extractHotelData = (filePath) => __awaiter(void 0, void 0, void 0, functio
         const ext = path_1.default.extname(filePath) || "unknown";
         throw new Error(`Unsupported file format: ${ext}. Please upload PDF, image (JPG, PNG, GIF, BMP, WebP, TIFF), or document files (DOC, DOCX, XLS, XLSX, TXT).`);
     }
-    console.log(`Processing file: ${filePath} with MIME type: ${mimeType}`);
     try {
         // Upload file to Gemini
         const uploadedFile = yield (0, exports.uploadToGemini)(filePath, mimeType);
-        console.log(`File uploaded successfully. URI: ${uploadedFile.uri}`);
         const chatSession = model.startChat({
             generationConfig,
             history: [
@@ -343,7 +337,6 @@ Example:
         // Clean up: delete the uploaded file from Gemini (optional)
         try {
             yield fileManager.deleteFile(uploadedFile.name);
-            console.log("Successfully deleted uploaded file from Gemini");
         }
         catch (deleteError) {
             console.warn("Could not delete uploaded file from Gemini:", deleteError);

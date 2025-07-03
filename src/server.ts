@@ -19,7 +19,11 @@ declare global {
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3001;
-const cors = require("cors");
+app.use(
+  cors({
+    origin: "victoriatour.vn", // Replace with your frontend domain
+  })
+);
 // Middleware for parsing JSON
 app.use(express.json());
 app.use(cors());
