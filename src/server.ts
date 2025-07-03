@@ -22,17 +22,21 @@ const app = express();
 
 const PORT = process.env.PORT || 3001;
 
-// app.use(cors()); // Comment out the existing cors() middleware
-
-// Use a simpler CORS configuration
+// Allow all origins for testing
 app.use(cors());
 
 // Middleware for parsing JSON
 app.use(express.json());
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = "tmp/uploads/";
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Configure multer to preserve the original file extension
 const storage = multer.diskStorage({
-  destination: "tmp/uploads/",
+  destination: uploadsDir,
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext);
@@ -42,11 +46,20 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Add a simple health check route
+app.get("/health", (req, res) => {
+  res.json({ status: "OK", message: "Server is running" });
+});
+
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), async (req, res) => {
   try {
     const { supplierId, country, city, currency } = req.body;
     const file = req.file;
+
+    console.log("Received request to /hotels");
+    console.log("Body:", req.body);
+    console.log("File:", file ? file.originalname : "No file");
 
     if (!file || !supplierId || !country || !city || !currency) {
       return res
@@ -54,8 +67,19 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
         .json({ success: false, message: "Missing required fields or file" });
     }
 
+    console.log(
+      "Processing file:",
+      file.originalname,
+      "Type:",
+      file.mimetype,
+      "Size:",
+      file.size
+    );
+
     // Pass the file path directly to extractHotelData (not the file object)
     const extractResult = await extractHotelData(file.path);
+
+    console.log("Extract result:", extractResult);
 
     if (
       !extractResult ||
@@ -115,7 +139,9 @@ const startPeriodicEmailProcessing = () => {
 // Start periodic email processing
 startPeriodicEmailProcessing();
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Email Server  is running on port ${PORT}`);
+// IMPORTANT: Bind to all interfaces (0.0.0.0) for EC2
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(
+    `Email Server is running on port ${PORT} and accessible from all interfaces`
+  );
 });

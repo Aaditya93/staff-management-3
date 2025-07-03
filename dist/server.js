@@ -24,16 +24,18 @@ const cors_1 = __importDefault(require("cors"));
 // Initialize Express app
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
-// app.use(cors()); // Comment out the existing cors() middleware
-// Use a simpler CORS configuration
-app.use((0, cors_1.default)({
-    origin: ["victoriatour.vn", "http://localhost:3000"],
-}));
+// Allow all origins for testing
+app.use((0, cors_1.default)());
 // Middleware for parsing JSON
 app.use(express_1.default.json());
+// Create uploads directory if it doesn't exist
+const uploadsDir = "tmp/uploads/";
+if (!fs_1.default.existsSync(uploadsDir)) {
+    fs_1.default.mkdirSync(uploadsDir, { recursive: true });
+}
 // Configure multer to preserve the original file extension
 const storage = multer_1.default.diskStorage({
-    destination: "tmp/uploads/",
+    destination: uploadsDir,
     filename: (req, file, cb) => {
         const ext = path_1.default.extname(file.originalname);
         const name = path_1.default.basename(file.originalname, ext);
@@ -41,18 +43,27 @@ const storage = multer_1.default.diskStorage({
     },
 });
 const upload = (0, multer_1.default)({ storage: storage });
+// Add a simple health check route
+app.get("/health", (req, res) => {
+    res.json({ status: "OK", message: "Server is running" });
+});
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { supplierId, country, city, currency } = req.body;
         const file = req.file;
+        console.log("Received request to /hotels");
+        console.log("Body:", req.body);
+        console.log("File:", file ? file.originalname : "No file");
         if (!file || !supplierId || !country || !city || !currency) {
             return res
                 .status(400)
                 .json({ success: false, message: "Missing required fields or file" });
         }
+        console.log("Processing file:", file.originalname, "Type:", file.mimetype, "Size:", file.size);
         // Pass the file path directly to extractHotelData (not the file object)
         const extractResult = yield (0, ai_1.extractHotelData)(file.path);
+        console.log("Extract result:", extractResult);
         if (!extractResult ||
             !extractResult.hotels ||
             extractResult.hotels.length === 0) {
@@ -103,7 +114,7 @@ const startPeriodicEmailProcessing = () => {
 };
 // Start periodic email processing
 startPeriodicEmailProcessing();
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Email Server  is running on port ${PORT}`);
+// IMPORTANT: Bind to all interfaces (0.0.0.0) for EC2
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Email Server is running on port ${PORT} and accessible from all interfaces`);
 });
