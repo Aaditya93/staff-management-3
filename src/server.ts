@@ -57,10 +57,6 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
     const { supplierId, country, city, currency } = req.body;
     const file = req.file;
 
-    console.log("Received request to /hotels");
-    console.log("Body:", req.body);
-    console.log("File:", file ? file.originalname : "No file");
-
     if (!file || !supplierId || !country || !city || !currency) {
       return res
         .status(400)
