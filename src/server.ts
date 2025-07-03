@@ -25,11 +25,7 @@ const PORT = process.env.PORT || 3001;
 // app.use(cors()); // Comment out the existing cors() middleware
 
 // Use a simpler CORS configuration
-app.use(
-  cors({
-    origin: ["victoriatour.vn", "http://localhost:3000"],
-  })
-);
+app.use(cors());
 
 // Middleware for parsing JSON
 app.use(express.json());
