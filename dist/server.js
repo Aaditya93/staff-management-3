@@ -20,13 +20,15 @@ const multer_1 = __importDefault(require("multer"));
 const ai_1 = require("./hotel/ai"); // adjust path as needed
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const cors_1 = __importDefault(require("cors"));
 // Initialize Express app
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
-const cors = require("cors");
+app.use((0, cors_1.default)({
+    origin: "victoriatour.vn", // Replace with your frontend domain
+}));
 // Middleware for parsing JSON
 app.use(express_1.default.json());
-app.use(cors());
 // Configure multer to preserve the original file extension
 const storage = multer_1.default.diskStorage({
     destination: "tmp/uploads/",

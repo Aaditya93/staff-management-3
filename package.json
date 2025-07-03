@@ -15,10 +15,12 @@
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.816.0",
     "@google/generative-ai": "^0.24.1",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.1",
     "@types/multer": "^2.0.0",
     "axios": "^1.9.0",
     "cors": "^2.8.5",
+    "cros": "^1.1.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "mongoose": "^8.14.1",

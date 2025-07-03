@@ -6,6 +6,7 @@ import multer from "multer";
 import { extractHotelData } from "./hotel/ai"; // adjust path as needed
 import fs from "fs";
 import path from "path";
+import cors from "cors";
 
 // Extend Express Request type to include 'file' property from multer
 declare global {
@@ -18,6 +19,7 @@ declare global {
 
 // Initialize Express app
 const app = express();
+
 const PORT = process.env.PORT || 3001;
 app.use(
   cors({
@@ -26,7 +28,6 @@ app.use(
 );
 // Middleware for parsing JSON
 app.use(express.json());
-app.use(cors());
 
 // Configure multer to preserve the original file extension
 const storage = multer.diskStorage({
