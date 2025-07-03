@@ -21,6 +21,7 @@ const ai_1 = require("./hotel/ai"); // adjust path as needed
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const cors_1 = __importDefault(require("cors"));
+const http_1 = __importDefault(require("http"));
 // Initialize Express app
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
@@ -45,7 +46,20 @@ const storage = multer_1.default.diskStorage({
 const upload = (0, multer_1.default)({ storage: storage });
 // Add a simple health check route
 app.get("/health", (req, res) => {
-    res.json({ status: "OK", message: "Server is running" });
+    res.json({
+        status: "OK",
+        message: "Server is running",
+        timestamp: new Date().toISOString(),
+    });
+});
+// Add root route
+app.get("/", (req, res) => {
+    res.json({
+        status: "OK",
+        message: "Email Scanner Server",
+        endpoints: ["/health", "/hotels"],
+        timestamp: new Date().toISOString(),
+    });
 });
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -111,7 +125,22 @@ const startPeriodicEmailProcessing = () => {
 };
 // Start periodic email processing
 startPeriodicEmailProcessing();
-// IMPORTANT: Bind to all interfaces (0.0.0.0) for EC2
-app.listen(PORT, () => {
+// Create HTTP server and explicitly bind to all interfaces
+const server = http_1.default.createServer(app);
+server.listen(PORT, "0.0.0.0", () => {
     console.log(`Email Server is running on port ${PORT} and accessible from all interfaces`);
+    console.log(`Local access: http://localhost:${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+});
+// Handle server errors
+server.on("error", (error) => {
+    console.error("Server error:", error);
+});
+// Graceful shutdown
+process.on("SIGTERM", () => {
+    console.log("SIGTERM received, shutting down gracefully");
+    server.close(() => {
+        console.log("Process terminated");
+        process.exit(0);
+    });
 });

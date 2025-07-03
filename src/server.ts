@@ -7,6 +7,7 @@ import { extractHotelData } from "./hotel/ai"; // adjust path as needed
 import fs from "fs";
 import path from "path";
 import cors from "cors";
+import http from "http";
 
 // Extend Express Request type to include 'file' property from multer
 declare global {
@@ -48,7 +49,21 @@ const upload = multer({ storage: storage });
 
 // Add a simple health check route
 app.get("/health", (req, res) => {
-  res.json({ status: "OK", message: "Server is running" });
+  res.json({
+    status: "OK",
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Add root route
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Email Scanner Server",
+    endpoints: ["/health", "/hotels"],
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // API route for creating hotels
@@ -135,9 +150,27 @@ const startPeriodicEmailProcessing = () => {
 // Start periodic email processing
 startPeriodicEmailProcessing();
 
-// IMPORTANT: Bind to all interfaces (0.0.0.0) for EC2
-app.listen(PORT, () => {
+// Create HTTP server and explicitly bind to all interfaces
+const server = http.createServer(app);
+
+server.listen(PORT, "0.0.0.0", () => {
   console.log(
     `Email Server is running on port ${PORT} and accessible from all interfaces`
   );
+  console.log(`Local access: http://localhost:${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
+});
+
+// Handle server errors
+server.on("error", (error) => {
+  console.error("Server error:", error);
+});
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, shutting down gracefully");
+  server.close(() => {
+    console.log("Process terminated");
+    process.exit(0);
+  });
 });
