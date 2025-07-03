@@ -112,6 +112,6 @@ const startPeriodicEmailProcessing = () => {
 // Start periodic email processing
 startPeriodicEmailProcessing();
 // IMPORTANT: Bind to all interfaces (0.0.0.0) for EC2
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, () => {
     console.log(`Email Server is running on port ${PORT} and accessible from all interfaces`);
 });
