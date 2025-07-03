@@ -3,11 +3,13 @@ import express from "express";
 import { processAllUserEmails } from "./process-email";
 import { createHotels, CreateHotelsInput } from "./hotel/api";
 import multer from "multer";
-import { extractHotelData } from "./hotel/ai"; // adjust path as needed
+import { extractHotelData } from "./hotel/ai";
 import fs from "fs";
 import path from "path";
 import cors from "cors";
 import http from "http";
+import https from "https";
+import { execSync } from "child_process";
 
 // Extend Express Request type to include 'file' property from multer
 declare global {
@@ -20,14 +22,13 @@ declare global {
 
 // Initialize Express app
 const app = express();
+const PORT = Number(process.env.PORT) || 3001;
+const HTTPS_PORT = Number(process.env.HTTPS_PORT) || 443;
 
-const PORT = process.env.PORT || 3001;
-
-// Allow all origins for testing
+// Middleware
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cors());
-
-// Middleware for parsing JSON
-app.use(express.json());
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = "tmp/uploads/";
@@ -41,7 +42,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext);
-    cb(null, `${name}-${Date.now()}${ext}`); // Append timestamp to avoid name collisions
+    cb(null, `${name}-${Date.now()}${ext}`);
   },
 });
 
@@ -87,7 +88,6 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
       file.size
     );
 
-    // Pass the file path directly to extractHotelData (not the file object)
     const extractResult = await extractHotelData(file.path);
 
     console.log("Extract result:", extractResult);
@@ -112,14 +112,12 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
       currency: currency.trim(),
     });
 
-    // Clean up uploaded file
     fs.unlinkSync(file.path);
 
     res.status(result.success ? 200 : 400).json(result);
   } catch (error) {
     console.error("Error in /hotels endpoint:", error);
 
-    // Clean up uploaded file on error
     if (req.file) {
       try {
         fs.unlinkSync(req.file.path);
@@ -132,12 +130,23 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
       success: false,
       message: "Internal server error",
       details: error.message,
+      timestamp: new Date().toISOString(),
     });
   }
 });
 
+// Error handling middleware
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error("❌ Unhandled error:", err);
+  res.status(500).json({
+    success: false,
+    error: "Internal server error",
+    message: err.message || "An unexpected error occurred",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 const startPeriodicEmailProcessing = () => {
-  // Set interval to call processAllUserEmails every 5 seconds
   setInterval(async () => {
     try {
       await processAllUserEmails();
@@ -150,27 +159,117 @@ const startPeriodicEmailProcessing = () => {
 // Start periodic email processing
 startPeriodicEmailProcessing();
 
-// Create HTTP server and explicitly bind to all interfaces
-const server = http.createServer(app);
+// HTTPS setup with auto-certificate creation
+try {
+  const sslDir = path.join(__dirname, "ssl");
+  const keyPath = path.join(sslDir, "key.pem");
+  const certPath = path.join(sslDir, "cert.pem");
 
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(
-    `Email Server is running on port ${PORT} and accessible from all interfaces`
+  if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
+    console.log(
+      "🔒 SSL certificates not found. Creating self-signed certificates..."
+    );
+
+    try {
+      if (!fs.existsSync(sslDir)) {
+        fs.mkdirSync(sslDir, { recursive: true });
+        console.log("📁 Created ssl directory");
+      }
+
+      const openSSLCommand = `openssl req -x509 -newkey rsa:4096 -keyout "${keyPath}" -out "${certPath}" -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"`;
+
+      console.log("🔐 Generating SSL certificates...");
+      execSync(openSSLCommand, { stdio: "inherit" });
+
+      console.log("✅ SSL certificates created successfully!");
+      console.log(`   - Private key: ${keyPath}`);
+      console.log(`   - Certificate: ${certPath}`);
+    } catch (certError) {
+      console.error("❌ Failed to create SSL certificates:", certError);
+      console.log(
+        "📝 Please install OpenSSL and try again, or create certificates manually:"
+      );
+      console.log("   mkdir -p ssl");
+      console.log(
+        "   openssl req -x509 -newkey rsa:4096 -keyout ssl/key.pem -out ssl/cert.pem -days 365 -nodes"
+      );
+      console.log("⚠️  Falling back to HTTP server...");
+
+      // Fallback to HTTP if SSL fails
+      const httpServer = http.createServer(app);
+      httpServer.listen(PORT, "0.0.0.0", () => {
+        console.log(`✅ HTTP Server running on port ${PORT}`);
+        console.log(`🌐 Email Scanner Server accessible at:`);
+        console.log(`   - http://localhost:${PORT}`);
+        console.log(
+          `   - http://ec2-47-129-32-58.ap-southeast-1.compute.amazonaws.com:${PORT}`
+        );
+        console.log(`📊 API Endpoints:`);
+        console.log(`   - GET  /health (health check)`);
+        console.log(`   - POST /hotels (hotel data processing)`);
+      });
+      return;
+    }
+  } else {
+    console.log("✅ SSL certificates found");
+  }
+
+  const sslOptions = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  };
+
+  // Start HTTPS server
+  https.createServer(sslOptions, app).listen(HTTPS_PORT, "0.0.0.0", () => {
+    console.log(`✅ HTTPS Server running on port ${HTTPS_PORT}`);
+    console.log(`🔒 Secure Email Scanner Server accessible at:`);
+    console.log(`   - https://localhost:${HTTPS_PORT}`);
+    console.log(
+      `   - https://ec2-47-129-32-58.ap-southeast-1.compute.amazonaws.com`
+    );
+    console.log(`📊 API Endpoints (HTTPS):`);
+    console.log(`   - GET  /health (health check)`);
+    console.log(`   - POST /hotels (hotel data processing)`);
+    console.log(
+      "⚠️  Note: Using self-signed certificate. Browsers will show security warning."
+    );
+  });
+
+  // Also start HTTP server for development/testing
+  const httpServer = http.createServer(app);
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ HTTP Server also running on port ${PORT} for testing`);
+    console.log(`🌐 HTTP access: http://localhost:${PORT}`);
+  });
+} catch (error) {
+  console.error(
+    "❌ Failed to start HTTPS server:",
+    error instanceof Error ? error.message : String(error)
   );
-  console.log(`Local access: http://localhost:${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
-});
+  console.log("⚠️  Falling back to HTTP server...");
 
-// Handle server errors
-server.on("error", (error) => {
-  console.error("Server error:", error);
-});
+  // Fallback to HTTP server
+  const httpServer = http.createServer(app);
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ HTTP Server running on port ${PORT}`);
+    console.log(`🌐 Email Scanner Server accessible at:`);
+    console.log(`   - http://localhost:${PORT}`);
+    console.log(
+      `   - http://ec2-47-129-32-58.ap-southeast-1.compute.amazonaws.com:${PORT}`
+    );
+    console.log(`📊 API Endpoints:`);
+    console.log(`   - GET  /health (health check)`);
+    console.log(`   - POST /hotels (hotel data processing)`);
+  });
+}
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
   console.log("SIGTERM received, shutting down gracefully");
-  server.close(() => {
-    console.log("Process terminated");
-    process.exit(0);
-  });
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  console.log("SIGINT received, shutting down gracefully");
+  process.exit(0);
 });
