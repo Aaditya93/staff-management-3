@@ -23,7 +23,19 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(
   cors({
-    origin: "victoriatour.vn", // Replace with your frontend domain
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = ["victoriatour.vn", "http://localhost:3000"]; // Add your production domain here
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
   })
 );
 // Middleware for parsing JSON
