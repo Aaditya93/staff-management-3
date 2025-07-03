@@ -28,10 +28,11 @@ const child_process_1 = require("child_process");
 const app = (0, express_1.default)();
 const PORT = Number(process.env.PORT) || 3001;
 const HTTPS_PORT = Number(process.env.HTTPS_PORT) || 443;
+// CORS configuration for bukxe.com
+app.use((0, cors_1.default)());
 // Middleware
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "10mb" }));
-app.use((0, cors_1.default)());
 // Create uploads directory if it doesn't exist
 const uploadsDir = "tmp/uploads/";
 if (!fs_1.default.existsSync(uploadsDir)) {
@@ -51,7 +52,8 @@ const upload = (0, multer_1.default)({ storage: storage });
 app.get("/health", (req, res) => {
     res.json({
         status: "OK",
-        message: "Server is running",
+        message: "Bukxe Email Scanner Server is running",
+        domain: "bukxe.com",
         timestamp: new Date().toISOString(),
     });
 });
@@ -59,7 +61,8 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
     res.json({
         status: "OK",
-        message: "Email Scanner Server",
+        message: "Bukxe Email Scanner Server",
+        domain: "bukxe.com",
         endpoints: ["/health", "/hotels"],
         timestamp: new Date().toISOString(),
     });
@@ -135,22 +138,22 @@ const startPeriodicEmailProcessing = () => {
 };
 // Start periodic email processing
 startPeriodicEmailProcessing();
-// HTTPS setup with auto-certificate creation
+// HTTPS setup with auto-certificate creation for bukxe.com
 try {
     const sslDir = path_1.default.join(__dirname, "ssl");
     const keyPath = path_1.default.join(sslDir, "key.pem");
     const certPath = path_1.default.join(sslDir, "cert.pem");
     if (!fs_1.default.existsSync(keyPath) || !fs_1.default.existsSync(certPath)) {
-        console.log("🔒 SSL certificates not found. Creating self-signed certificates...");
+        console.log("🔒 SSL certificates not found. Creating self-signed certificates for bukxe.com...");
         try {
             if (!fs_1.default.existsSync(sslDir)) {
                 fs_1.default.mkdirSync(sslDir, { recursive: true });
                 console.log("📁 Created ssl directory");
             }
-            const openSSLCommand = `openssl req -x509 -newkey rsa:4096 -keyout "${keyPath}" -out "${certPath}" -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"`;
-            console.log("🔐 Generating SSL certificates...");
+            const openSSLCommand = `openssl req -x509 -newkey rsa:4096 -keyout "${keyPath}" -out "${certPath}" -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Bukxe/CN=bukxe.com"`;
+            console.log("🔐 Generating SSL certificates for bukxe.com...");
             (0, child_process_1.execSync)(openSSLCommand, { stdio: "inherit" });
-            console.log("✅ SSL certificates created successfully!");
+            console.log("✅ SSL certificates created successfully for bukxe.com!");
             console.log(`   - Private key: ${keyPath}`);
             console.log(`   - Certificate: ${certPath}`);
         }
@@ -158,15 +161,15 @@ try {
             console.error("❌ Failed to create SSL certificates:", certError);
             console.log("📝 Please install OpenSSL and try again, or create certificates manually:");
             console.log("   mkdir -p ssl");
-            console.log("   openssl req -x509 -newkey rsa:4096 -keyout ssl/key.pem -out ssl/cert.pem -days 365 -nodes");
+            console.log(`   openssl req -x509 -newkey rsa:4096 -keyout ssl/key.pem -out ssl/cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Bukxe/CN=bukxe.com"`);
             console.log("⚠️  Falling back to HTTP server...");
             // Fallback to HTTP if SSL fails
             const httpServer = http_1.default.createServer(app);
             httpServer.listen(PORT, "0.0.0.0", () => {
                 console.log(`✅ HTTP Server running on port ${PORT}`);
-                console.log(`🌐 Email Scanner Server accessible at:`);
+                console.log(`🌐 Bukxe Email Scanner Server accessible at:`);
                 console.log(`   - http://localhost:${PORT}`);
-                console.log(`   - http://ec2-47-129-32-58.ap-southeast-1.compute.amazonaws.com:${PORT}`);
+                console.log(`   - http://bukxe.com:${PORT}`);
                 console.log(`📊 API Endpoints:`);
                 console.log(`   - GET  /health (health check)`);
                 console.log(`   - POST /hotels (hotel data processing)`);
@@ -175,7 +178,7 @@ try {
         }
     }
     else {
-        console.log("✅ SSL certificates found");
+        console.log("✅ SSL certificates found for bukxe.com");
     }
     const sslOptions = {
         key: fs_1.default.readFileSync(keyPath),
@@ -184,9 +187,9 @@ try {
     // Start HTTPS server
     https_1.default.createServer(sslOptions, app).listen(HTTPS_PORT, "0.0.0.0", () => {
         console.log(`✅ HTTPS Server running on port ${HTTPS_PORT}`);
-        console.log(`🔒 Secure Email Scanner Server accessible at:`);
+        console.log(`🔒 Secure Bukxe Email Scanner Server accessible at:`);
         console.log(`   - https://localhost:${HTTPS_PORT}`);
-        console.log(`   - https://ec2-47-129-32-58.ap-southeast-1.compute.amazonaws.com`);
+        console.log(`   - https://bukxe.com`);
         console.log(`📊 API Endpoints (HTTPS):`);
         console.log(`   - GET  /health (health check)`);
         console.log(`   - POST /hotels (hotel data processing)`);
@@ -196,7 +199,7 @@ try {
     const httpServer = http_1.default.createServer(app);
     httpServer.listen(PORT, "0.0.0.0", () => {
         console.log(`✅ HTTP Server also running on port ${PORT} for testing`);
-        console.log(`🌐 HTTP access: http://localhost:${PORT}`);
+        console.log(`🌐 HTTP access: http://bukxe.com:${PORT}`);
     });
 }
 catch (error) {
@@ -206,9 +209,9 @@ catch (error) {
     const httpServer = http_1.default.createServer(app);
     httpServer.listen(PORT, "0.0.0.0", () => {
         console.log(`✅ HTTP Server running on port ${PORT}`);
-        console.log(`🌐 Email Scanner Server accessible at:`);
+        console.log(`🌐 Bukxe Email Scanner Server accessible at:`);
         console.log(`   - http://localhost:${PORT}`);
-        console.log(`   - http://ec2-47-129-32-58.ap-southeast-1.compute.amazonaws.com:${PORT}`);
+        console.log(`   - http://bukxe.com:${PORT}`);
         console.log(`📊 API Endpoints:`);
         console.log(`   - GET  /health (health check)`);
         console.log(`   - POST /hotels (hotel data processing)`);
