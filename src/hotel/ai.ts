@@ -246,12 +246,11 @@ export const extractHotelDataFromFile = async (file: File | Blob) => {
     const fileBuffer = await file.arrayBuffer();
     fs.writeFileSync(tempPath, Buffer.from(fileBuffer));
 
-    console.log(`Uploading file to Gemini: ${fileName} (${fileType})`);
 
     // Upload file to Gemini
     uploadedFile = await uploadToGemini(tempPath, fileType);
 
-    console.log("File uploaded successfully, starting chat session...");
+
 
     const chatSession = model.startChat({
       generationConfig,
@@ -330,7 +329,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       ],
     });
 
-    console.log("Sending message to Gemini...");
+
 
     const result = await chatSession.sendMessage(
       `Extract all hotel data from this document following the specified format.
@@ -343,7 +342,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
     );
 
     const responseText = result.response.text();
-    console.log("Received response from Gemini, parsing JSON...");
+
 
     if (!responseText || responseText.trim() === "") {
       throw new Error("Empty response from AI model");
@@ -351,16 +350,13 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
 
     const jsonResponse = JSON.parse(responseText);
 
-    console.log(
-      `Successfully extracted ${jsonResponse.hotels.length} hotel records`
-    );
 
     // Clean up: delete the uploaded file from Gemini
     try {
       await fileManager.deleteFile(uploadedFile.name);
-      console.log("Cleaned up uploaded file from Gemini");
+
     } catch (deleteError) {
-      console.warn("Could not delete uploaded file from Gemini:", deleteError);
+
     }
 
     return jsonResponse;
@@ -371,7 +367,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
     if (uploadedFile) {
       try {
         await fileManager.deleteFile(uploadedFile.name);
-        console.log("Cleaned up uploaded file on error");
+
       } catch (deleteError) {
         console.warn("Could not delete uploaded file on error:", deleteError);
       }
@@ -383,7 +379,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
     try {
       if (fs.existsSync(tempPath)) {
         fs.unlinkSync(tempPath);
-        console.log("Cleaned up temporary file");
+
       }
     } catch (cleanupError) {
       console.warn("Could not delete temporary file:", cleanupError);
@@ -454,12 +450,12 @@ export const extractHotelData = async (filePath: string) => {
   let uploadedFile;
 
   try {
-    console.log(`Uploading file to Gemini: ${fileName} (${mimeType})`);
+
 
     // Upload file to Gemini
     uploadedFile = await uploadToGemini(filePath, mimeType);
 
-    console.log("File uploaded successfully, starting chat session...");
+
 
     const chatSession = model.startChat({
       generationConfig,
@@ -538,7 +534,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       ],
     });
 
-    console.log("Sending message to Gemini...");
+
 
     const result = await chatSession.sendMessage(
       `Extract all hotel data from this document following the specified format.
@@ -551,7 +547,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
     );
 
     const responseText = result.response.text();
-    console.log("Received response from Gemini, parsing JSON...");
+
 
     if (!responseText || responseText.trim() === "") {
       throw new Error("Empty response from AI model");
@@ -559,14 +555,11 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
 
     const jsonResponse = JSON.parse(responseText);
 
-    console.log(
-      `Successfully extracted ${jsonResponse.hotels.length} hotel records`
-    );
-
+    
     // Clean up: delete the uploaded file from Gemini
     try {
       await fileManager.deleteFile(uploadedFile.name);
-      console.log("Cleaned up uploaded file from Gemini");
+
     } catch (deleteError) {
       console.warn("Could not delete uploaded file from Gemini:", deleteError);
     }
@@ -579,7 +572,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
     if (uploadedFile) {
       try {
         await fileManager.deleteFile(uploadedFile.name);
-        console.log("Cleaned up uploaded file on error");
+
       } catch (deleteError) {
         console.warn("Could not delete uploaded file on error:", deleteError);
       }

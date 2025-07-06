@@ -227,10 +227,8 @@ const extractHotelDataFromFile = (file) => __awaiter(void 0, void 0, void 0, fun
         // Save the file to the temporary directory
         const fileBuffer = yield file.arrayBuffer();
         fs_1.default.writeFileSync(tempPath, Buffer.from(fileBuffer));
-        console.log(`Uploading file to Gemini: ${fileName} (${fileType})`);
         // Upload file to Gemini
         uploadedFile = yield (0, exports.uploadToGemini)(tempPath, fileType);
-        console.log("File uploaded successfully, starting chat session...");
         const chatSession = model.startChat({
             generationConfig,
             history: [
@@ -307,7 +305,6 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
                 },
             ],
         });
-        console.log("Sending message to Gemini...");
         const result = yield chatSession.sendMessage(`Extract all hotel data from this document following the specified format.
       - Create SEPARATE hotel objects for each unique combination of hotel, room category, pricing period, and price.
       - Each hotel object should contain the room category information directly at the hotel level, not nested.
@@ -316,19 +313,15 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       - DO NOT return duplicate hotel objects. Each object in the hotels array must be unique.
       - Return ONLY valid JSON without any markdown formatting.`);
         const responseText = result.response.text();
-        console.log("Received response from Gemini, parsing JSON...");
         if (!responseText || responseText.trim() === "") {
             throw new Error("Empty response from AI model");
         }
         const jsonResponse = JSON.parse(responseText);
-        console.log(`Successfully extracted ${jsonResponse.hotels.length} hotel records`);
         // Clean up: delete the uploaded file from Gemini
         try {
             yield fileManager.deleteFile(uploadedFile.name);
-            console.log("Cleaned up uploaded file from Gemini");
         }
         catch (deleteError) {
-            console.warn("Could not delete uploaded file from Gemini:", deleteError);
         }
         return jsonResponse;
     }
@@ -338,7 +331,6 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
         if (uploadedFile) {
             try {
                 yield fileManager.deleteFile(uploadedFile.name);
-                console.log("Cleaned up uploaded file on error");
             }
             catch (deleteError) {
                 console.warn("Could not delete uploaded file on error:", deleteError);
@@ -351,7 +343,6 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
         try {
             if (fs_1.default.existsSync(tempPath)) {
                 fs_1.default.unlinkSync(tempPath);
-                console.log("Cleaned up temporary file");
             }
         }
         catch (cleanupError) {
@@ -421,10 +412,8 @@ const extractHotelData = (filePath) => __awaiter(void 0, void 0, void 0, functio
         mimeType = "text/plain";
     let uploadedFile;
     try {
-        console.log(`Uploading file to Gemini: ${fileName} (${mimeType})`);
         // Upload file to Gemini
         uploadedFile = yield (0, exports.uploadToGemini)(filePath, mimeType);
-        console.log("File uploaded successfully, starting chat session...");
         const chatSession = model.startChat({
             generationConfig,
             history: [
@@ -501,7 +490,6 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
                 },
             ],
         });
-        console.log("Sending message to Gemini...");
         const result = yield chatSession.sendMessage(`Extract all hotel data from this document following the specified format.
       - Create SEPARATE hotel objects for each unique combination of hotel, room category, pricing period, and price.
       - Each hotel object should contain the room category information directly at the hotel level, not nested.
@@ -510,16 +498,13 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       - DO NOT return duplicate hotel objects. Each object in the hotels array must be unique.
       - Return ONLY valid JSON without any markdown formatting.`);
         const responseText = result.response.text();
-        console.log("Received response from Gemini, parsing JSON...");
         if (!responseText || responseText.trim() === "") {
             throw new Error("Empty response from AI model");
         }
         const jsonResponse = JSON.parse(responseText);
-        console.log(`Successfully extracted ${jsonResponse.hotels.length} hotel records`);
         // Clean up: delete the uploaded file from Gemini
         try {
             yield fileManager.deleteFile(uploadedFile.name);
-            console.log("Cleaned up uploaded file from Gemini");
         }
         catch (deleteError) {
             console.warn("Could not delete uploaded file from Gemini:", deleteError);
@@ -532,7 +517,6 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
         if (uploadedFile) {
             try {
                 yield fileManager.deleteFile(uploadedFile.name);
-                console.log("Cleaned up uploaded file on error");
             }
             catch (deleteError) {
                 console.warn("Could not delete uploaded file on error:", deleteError);
