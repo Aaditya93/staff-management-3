@@ -163,92 +163,104 @@ app.use((err: any, req: any, res: any, next: any) => {
 // // Start periodic email processing
 // startPeriodicEmailProcessing();
 
-// HTTPS setup with auto-certificate creation for bukxe.com
-try {
-  const sslDir = path.join(__dirname, "ssl");
-  const keyPath = path.join(sslDir, "key.pem");
-  const certPath = path.join(sslDir, "cert.pem");
+// Production SSL setup
+const isProduction = process.env.NODE_ENV === 'production';
+const useSSL = process.env.USE_SSL === 'true' || isProduction;
 
-  if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
-    console.log(
-      "🔒 SSL certificates not found. Creating self-signed certificates for bukxe.com..."
-    );
+if (useSSL) {
+  try {
+    // Production SSL certificate paths (for Let's Encrypt)
+    const sslDir = process.env.SSL_DIR || '/etc/letsencrypt/live/bukxe.com';
+    const keyPath = process.env.SSL_KEY_PATH || path.join(sslDir, 'privkey.pem');
+    const certPath = process.env.SSL_CERT_PATH || path.join(sslDir, 'fullchain.pem');
 
-    try {
-      if (!fs.existsSync(sslDir)) {
-        fs.mkdirSync(sslDir, { recursive: true });
-        console.log("📁 Created ssl directory");
+    if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
+      console.log("🔒 SSL certificates not found.");
+      
+      if (isProduction) {
+        console.error("❌ Production SSL certificates are required!");
+        console.log("🔧 To get Let's Encrypt certificates, run:");
+        console.log("   sudo apt update && sudo apt install certbot");
+        console.log("   sudo certbot certonly --standalone -d bukxe.com");
+        console.log("   sudo chown -R $USER:$USER /etc/letsencrypt/live/bukxe.com/");
+        console.log("   Or set SSL_KEY_PATH and SSL_CERT_PATH environment variables");
+        
+        // In production, fall back to HTTP instead of exiting
+        console.log("⚠️  Starting HTTP server as fallback...");
+        startHttpServer();
+        return;
+      } else {
+        console.log("🔧 Development mode: Creating self-signed certificates...");
+        
+        if (!fs.existsSync(sslDir)) {
+          fs.mkdirSync(sslDir, { recursive: true });
+        }
+
+        const openSSLCommand = `openssl req -x509 -newkey rsa:4096 -keyout "${keyPath}" -out "${certPath}" -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Bukxe/CN=bukxe.com"`;
+
+        try {
+          execSync(openSSLCommand, { stdio: "inherit" });
+          console.log("✅ Development SSL certificates created!");
+        } catch (certError) {
+          console.error("❌ Failed to create SSL certificates:", certError);
+          console.log("⚠️  Falling back to HTTP server...");
+          startHttpServer();
+          return;
+        }
       }
-
-      const openSSLCommand = `openssl req -x509 -newkey rsa:4096 -keyout "${keyPath}" -out "${certPath}" -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Bukxe/CN=bukxe.com"`;
-
-      console.log("🔐 Generating SSL certificates for bukxe.com...");
-      execSync(openSSLCommand, { stdio: "inherit" });
-
-      console.log("✅ SSL certificates created successfully for bukxe.com!");
-      console.log(`   - Private key: ${keyPath}`);
-      console.log(`   - Certificate: ${certPath}`);
-    } catch (certError) {
-      console.error("❌ Failed to create SSL certificates:", certError);
-      console.log(
-        "📝 Please install OpenSSL and try again, or create certificates manually:"
-      );
-      console.log("   mkdir -p ssl");
-      console.log(
-        `   openssl req -x509 -newkey rsa:4096 -keyout ssl/key.pem -out ssl/cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Bukxe/CN=bukxe.com"`
-      );
-      console.log("⚠️  Falling back to HTTP server...");
-
-      // Fallback to HTTP if SSL fails
-      const httpServer = http.createServer(app);
-      httpServer.listen(PORT, "0.0.0.0", () => {
-        console.log(`✅ HTTP Server running on port ${PORT}`);
-        console.log(`🌐 Bukxe Email Scanner Server accessible at:`);
-        console.log(`   - http://localhost:${PORT}`);
-        console.log(`   - http://bukxe.com:${PORT}`);
-        console.log(`📊 API Endpoints:`);
-        console.log(`   - GET  /health (health check)`);
-        console.log(`   - POST /hotels (hotel data processing)`);
-      });
-      return;
+    } else {
+      console.log("✅ SSL certificates found");
     }
-  } else {
-    console.log("✅ SSL certificates found for bukxe.com");
+
+    const sslOptions = {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    };
+
+    // Start HTTPS server
+    https.createServer(sslOptions, app).listen(HTTPS_PORT, "0.0.0.0", () => {
+      console.log(`✅ HTTPS Server running on port ${HTTPS_PORT}`);
+      console.log(`🔒 Secure Bukxe Email Scanner Server accessible at:`);
+      console.log(`   - https://bukxe.com`);
+      if (!isProduction) {
+        console.log(`   - https://localhost:${HTTPS_PORT}`);
+      }
+      console.log(`📊 API Endpoints (HTTPS):`);
+      console.log(`   - GET  /health (health check)`);
+      console.log(`   - POST /hotels (hotel data processing)`);
+      
+      if (!isProduction) {
+        console.log("⚠️  Note: Using self-signed certificate in development mode.");
+      }
+    });
+
+    // In production, also start HTTP server for redirects
+    if (isProduction) {
+      const httpRedirectApp = express();
+      httpRedirectApp.use((req, res) => {
+        res.redirect(301, `https://${req.headers.host}${req.url}`);
+      });
+      
+      httpRedirectApp.listen(PORT, "0.0.0.0", () => {
+        console.log(`✅ HTTP Redirect Server running on port ${PORT}`);
+        console.log(`🔄 Redirecting HTTP traffic to HTTPS`);
+      });
+    } else {
+      // Development: also start HTTP server
+      startHttpServer();
+    }
+
+  } catch (error) {
+    console.error("❌ Failed to start HTTPS server:", error);
+    console.log("⚠️  Falling back to HTTP server...");
+    startHttpServer();
   }
+} else {
+  console.log("🔧 SSL disabled, starting HTTP server only");
+  startHttpServer();
+}
 
-  const sslOptions = {
-    key: fs.readFileSync(keyPath),
-    cert: fs.readFileSync(certPath),
-  };
-
-  // Start HTTPS server
-  https.createServer(sslOptions, app).listen(HTTPS_PORT, "0.0.0.0", () => {
-    console.log(`✅ HTTPS Server running on port ${HTTPS_PORT}`);
-    console.log(`🔒 Secure Bukxe Email Scanner Server accessible at:`);
-    console.log(`   - https://localhost:${HTTPS_PORT}`);
-    console.log(`   - https://bukxe.com`);
-    console.log(`📊 API Endpoints (HTTPS):`);
-    console.log(`   - GET  /health (health check)`);
-    console.log(`   - POST /hotels (hotel data processing)`);
-    console.log(
-      "⚠️  Note: Using self-signed certificate. Browsers will show security warning."
-    );
-  });
-
-  // Also start HTTP server for development/testing
-  const httpServer = http.createServer(app);
-  httpServer.listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ HTTP Server also running on port ${PORT} for testing`);
-    console.log(`🌐 HTTP access: http://bukxe.com:${PORT}`);
-  });
-} catch (error) {
-  console.error(
-    "❌ Failed to start HTTPS server:",
-    error instanceof Error ? error.message : String(error)
-  );
-  console.log("⚠️  Falling back to HTTP server...");
-
-  // Fallback to HTTP server
+function startHttpServer() {
   const httpServer = http.createServer(app);
   httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`✅ HTTP Server running on port ${PORT}`);
