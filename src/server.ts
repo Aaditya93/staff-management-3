@@ -74,10 +74,10 @@ app.get("/", (req, res) => {
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), async (req, res) => {
   try {
-    const { supplierId, country, city, currency } = req.body;
+    const { supplierId, country, city, currency,createdBy,requestId } = req.body;
     const file = req.file;
 
-    if (!file || !supplierId || !country || !city || !currency) {
+    if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId) {
       return res
         .status(400)
         .json({ success: false, message: "Missing required fields or file" });
@@ -92,36 +92,29 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
       file.size
     );
 
-    const extractResult = await extractHotelData(file.path);
-
-    console.log("Extract result:", extractResult);
-
-    if (
-      !extractResult ||
-      !extractResult.hotels ||
-      extractResult.hotels.length === 0
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "No hotel data found in the file. Please check if the file contains valid hotel data and is in the correct format.",
-      });
-    }
-
-    const result = await createHotels({
-      hotels: extractResult.hotels,
-      supplierId: supplierId.trim(),
-      country: country.trim(),
-      city: city.trim(),
-      currency: currency.trim(),
+    // Pass the required parameters to extractHotelData, but do not await it
+    extractHotelData(
+      file.path,
+      supplierId,
+      country,
+      city,
+      currency,
+      requestId,
+      createdBy
+    ).catch((error) => {
+      console.error("Error in background hotel extraction:", error);
     });
 
-    fs.unlinkSync(file.path);
-
-    res.status(result.success ? 200 : 400).json(result);
+    // Immediately respond to the client that processing has started
+    res.status(202).json({
+      success: true,
+      message: "Hotel data extraction and processing has started. You will be notified when it is complete.",
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
     console.error("Error in /hotels endpoint:", error);
 
+    // Clean up the uploaded file on error (backup cleanup)
     if (req.file) {
       try {
         fs.unlinkSync(req.file.path);
@@ -150,18 +143,18 @@ app.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-const startPeriodicEmailProcessing = () => {
-  setInterval(async () => {
-    try {
-      await processAllUserEmails();
-    } catch (error) {
-      console.error("Error in scheduled email processing:", error);
-    }
-  }, 15000);
-};
+// const startPeriodicEmailProcessing = () => {
+//   setInterval(async () => {
+//     try {
+//       await processAllUserEmails();
+//     } catch (error) {
+//       console.error("Error in scheduled email processing:", error);
+//     }
+//   }, 15000);
+// };
 
-// Start periodic email processing
-startPeriodicEmailProcessing();
+// // Start periodic email processing
+// startPeriodicEmailProcessing();
 
 // Production SSL setup
 const isProduction = process.env.NODE_ENV === 'production';

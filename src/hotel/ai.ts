@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import fs from "fs";
 import path from "path";
+import { createHotels } from "./api";
+import HotelRequest from "../db/HotelRequest";
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 if (!apiKey) {
@@ -22,7 +24,7 @@ export const uploadToGemini = async (filePath: string, mimeType: string) => {
 };
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
+  model: "gemini-2.0-flash",
 });
 
 const generationConfig = {
@@ -388,7 +390,15 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
 };
 
 // Original function to handle file paths (keeping for backward compatibility)
-export const extractHotelData = async (filePath: string) => {
+export const extractHotelData = async (
+  filePath: string,
+  supplierId: string,
+  country: string,
+  city: string,
+  currency: string,
+  requestId: string,
+  createdBy: string,
+) => {
   if (!filePath) {
     throw new Error("No file path provided");
   }
@@ -450,12 +460,11 @@ export const extractHotelData = async (filePath: string) => {
   let uploadedFile;
 
   try {
-
-
     // Upload file to Gemini
     uploadedFile = await uploadToGemini(filePath, mimeType);
 
-
+    // Track start time
+    const startTime = Date.now();
 
     const chatSession = model.startChat({
       generationConfig,
@@ -534,8 +543,6 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       ],
     });
 
-
-
     const result = await chatSession.sendMessage(
       `Extract all hotel data from this document following the specified format.
       - Create SEPARATE hotel objects for each unique combination of hotel, room category, pricing period, and price.
@@ -546,6 +553,16 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       - Return ONLY valid JSON without any markdown formatting.`
     );
 
+    // Track end time and log duration
+    const endTime = Date.now();
+    const durationMs = endTime - startTime;
+    console.log(`AI action time taken: ${durationMs} ms`);
+
+    // Log token usage if available
+    if (result.response.usage) {
+      console.log("AI token usage:", result.response.usage);
+    }
+
     const responseText = result.response.text();
 
 
@@ -555,27 +572,39 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
 
     const jsonResponse = JSON.parse(responseText);
 
-    
-    // Clean up: delete the uploaded file from Gemini
+    // Add hotel creation logic here
+    const createResult = await createHotels({
+      hotels: jsonResponse.hotels,
+      supplierId: supplierId.trim(),
+      country: country.trim(),
+      city: city.trim(),
+      currency: currency.trim(),
+      createdBy: createdBy.trim(),
+    });
+    console.log("Hotels created successfully:", createResult);
+
+    // Clean up the uploaded file from server
     try {
-      await fileManager.deleteFile(uploadedFile.name);
-
-    } catch (deleteError) {
-      console.warn("Could not delete uploaded file from Gemini:", deleteError);
+      fs.unlinkSync(filePath);
+    } catch (cleanupError) {
+      console.error("Error cleaning up file:", cleanupError);
     }
+    const  updateStatus = await HotelRequest.findByIdAndUpdate(
+      requestId,
+      { isComplete: true },
+      { new: true }
+    );
+    console.log("Hotel request status updated:", updateStatus);
 
-    return jsonResponse;
+    return ;
   } catch (error) {
     console.error("Error in extractHotelData:", error);
 
-    // Clean up on error
-    if (uploadedFile) {
-      try {
-        await fileManager.deleteFile(uploadedFile.name);
-
-      } catch (deleteError) {
-        console.warn("Could not delete uploaded file on error:", deleteError);
-      }
+    // Clean up the uploaded file on error
+    try {
+      fs.unlinkSync(filePath);
+    } catch (cleanupError) {
+      console.error("Error cleaning up file on error:", cleanupError);
     }
 
     throw error;

@@ -18,6 +18,8 @@ const generative_ai_1 = require("@google/generative-ai");
 const server_1 = require("@google/generative-ai/server");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const api_1 = require("./api");
+const HotelRequest_1 = __importDefault(require("../db/HotelRequest"));
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 if (!apiKey) {
     throw new Error("API key is not defined");
@@ -34,7 +36,7 @@ const uploadToGemini = (filePath, mimeType) => __awaiter(void 0, void 0, void 0,
 });
 exports.uploadToGemini = uploadToGemini;
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    model: "gemini-2.0-flash",
 });
 const generationConfig = {
     temperature: 0.4,
@@ -352,7 +354,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
 });
 exports.extractHotelDataFromFile = extractHotelDataFromFile;
 // Original function to handle file paths (keeping for backward compatibility)
-const extractHotelData = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
+const extractHotelData = (filePath, supplierId, country, city, currency, requestId, createdBy) => __awaiter(void 0, void 0, void 0, function* () {
     if (!filePath) {
         throw new Error("No file path provided");
     }
@@ -414,6 +416,8 @@ const extractHotelData = (filePath) => __awaiter(void 0, void 0, void 0, functio
     try {
         // Upload file to Gemini
         uploadedFile = yield (0, exports.uploadToGemini)(filePath, mimeType);
+        // Track start time
+        const startTime = Date.now();
         const chatSession = model.startChat({
             generationConfig,
             history: [
@@ -497,30 +501,48 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       - Only include VAT and surcharge fields if they are explicitly mentioned in the document.
       - DO NOT return duplicate hotel objects. Each object in the hotels array must be unique.
       - Return ONLY valid JSON without any markdown formatting.`);
+        // Track end time and log duration
+        const endTime = Date.now();
+        const durationMs = endTime - startTime;
+        console.log(`AI action time taken: ${durationMs} ms`);
+        // Log token usage if available
+        if (result.response.usage) {
+            console.log("AI token usage:", result.response.usage);
+        }
         const responseText = result.response.text();
         if (!responseText || responseText.trim() === "") {
             throw new Error("Empty response from AI model");
         }
         const jsonResponse = JSON.parse(responseText);
-        // Clean up: delete the uploaded file from Gemini
+        // Add hotel creation logic here
+        const createResult = yield (0, api_1.createHotels)({
+            hotels: jsonResponse.hotels,
+            supplierId: supplierId.trim(),
+            country: country.trim(),
+            city: city.trim(),
+            currency: currency.trim(),
+            createdBy: createdBy.trim(),
+        });
+        console.log("Hotels created successfully:", createResult);
+        // Clean up the uploaded file from server
         try {
-            yield fileManager.deleteFile(uploadedFile.name);
+            fs_1.default.unlinkSync(filePath);
         }
-        catch (deleteError) {
-            console.warn("Could not delete uploaded file from Gemini:", deleteError);
+        catch (cleanupError) {
+            console.error("Error cleaning up file:", cleanupError);
         }
-        return jsonResponse;
+        const updateStatus = yield HotelRequest_1.default.findByIdAndUpdate(requestId, { isComplete: true }, { new: true });
+        console.log("Hotel request status updated:", updateStatus);
+        return;
     }
     catch (error) {
         console.error("Error in extractHotelData:", error);
-        // Clean up on error
-        if (uploadedFile) {
-            try {
-                yield fileManager.deleteFile(uploadedFile.name);
-            }
-            catch (deleteError) {
-                console.warn("Could not delete uploaded file on error:", deleteError);
-            }
+        // Clean up the uploaded file on error
+        try {
+            fs_1.default.unlinkSync(filePath);
+        }
+        catch (cleanupError) {
+            console.error("Error cleaning up file on error:", cleanupError);
         }
         throw error;
     }

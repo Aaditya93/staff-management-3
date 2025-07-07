@@ -35,7 +35,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
             };
         }
         yield (0, db_1.default)();
-        const { hotels, supplierId, country, city, currency } = input;
+        const { hotels, supplierId, country, city, currency, createdBy } = input;
         if (!hotels || !Array.isArray(hotels) || hotels.length === 0) {
             return {
                 success: false,
@@ -70,9 +70,11 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                     vat: hotelData.vat || undefined,
                     surcharge: hotelData.surcharge || [],
                     isActive: true,
+                    createdBy: createdBy
                 };
                 // Create new hotel room category record
                 const result = yield hotel_1.default.create(hotelDocument);
+                console.log(`Processed hotel ${hotelData.hotelName} - ${hotelData.category}:`, result._id);
                 newRecords++;
             }
             catch (error) {

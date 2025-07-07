@@ -54,6 +54,7 @@ export interface CreateHotelsInput {
   country?: string;
   city?: string;
   currency?: string;
+  createdBy?: string; // Optional, can be used for tracking
 }
 
 export interface CreateHotelsResult {
@@ -79,7 +80,7 @@ export const createHotels = async (
 
     await dbConnect();
 
-    const { hotels, supplierId, country, city, currency } = input;
+    const { hotels, supplierId, country, city, currency, createdBy } = input;
 
     if (!hotels || !Array.isArray(hotels) || hotels.length === 0) {
       return {
@@ -119,10 +120,15 @@ export const createHotels = async (
           vat: hotelData.vat || undefined,
           surcharge: hotelData.surcharge || [],
           isActive: true,
+          createdBy: createdBy 
         };
 
         // Create new hotel room category record
         const result = await Hotel.create(hotelDocument);
+        console.log(
+          `Processed hotel ${hotelData.hotelName} - ${hotelData.category}:`,
+          result._id
+        );
 
         newRecords++;
       } catch (error) {

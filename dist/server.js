@@ -14,8 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // @ts-nocheck
 const express_1 = __importDefault(require("express"));
-const process_email_1 = require("./process-email");
-const api_1 = require("./hotel/api");
 const multer_1 = __importDefault(require("multer"));
 const ai_1 = require("./hotel/ai");
 const fs_1 = __importDefault(require("fs"));
@@ -70,36 +68,28 @@ app.get("/", (req, res) => {
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { supplierId, country, city, currency } = req.body;
+        const { supplierId, country, city, currency, createdBy, requestId } = req.body;
         const file = req.file;
-        if (!file || !supplierId || !country || !city || !currency) {
+        if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId) {
             return res
                 .status(400)
                 .json({ success: false, message: "Missing required fields or file" });
         }
         console.log("Processing file:", file.originalname, "Type:", file.mimetype, "Size:", file.size);
-        const extractResult = yield (0, ai_1.extractHotelData)(file.path);
-        console.log("Extract result:", extractResult);
-        if (!extractResult ||
-            !extractResult.hotels ||
-            extractResult.hotels.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "No hotel data found in the file. Please check if the file contains valid hotel data and is in the correct format.",
-            });
-        }
-        const result = yield (0, api_1.createHotels)({
-            hotels: extractResult.hotels,
-            supplierId: supplierId.trim(),
-            country: country.trim(),
-            city: city.trim(),
-            currency: currency.trim(),
+        // Pass the required parameters to extractHotelData, but do not await it
+        (0, ai_1.extractHotelData)(file.path, supplierId, country, city, currency, requestId, createdBy).catch((error) => {
+            console.error("Error in background hotel extraction:", error);
         });
-        fs_1.default.unlinkSync(file.path);
-        res.status(result.success ? 200 : 400).json(result);
+        // Immediately respond to the client that processing has started
+        res.status(202).json({
+            success: true,
+            message: "Hotel data extraction and processing has started. You will be notified when it is complete.",
+            timestamp: new Date().toISOString(),
+        });
     }
     catch (error) {
         console.error("Error in /hotels endpoint:", error);
+        // Clean up the uploaded file on error (backup cleanup)
         if (req.file) {
             try {
                 fs_1.default.unlinkSync(req.file.path);
@@ -126,18 +116,17 @@ app.use((err, req, res, next) => {
         timestamp: new Date().toISOString(),
     });
 });
-const startPeriodicEmailProcessing = () => {
-    setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            yield (0, process_email_1.processAllUserEmails)();
-        }
-        catch (error) {
-            console.error("Error in scheduled email processing:", error);
-        }
-    }), 15000);
-};
-// Start periodic email processing
-startPeriodicEmailProcessing();
+// const startPeriodicEmailProcessing = () => {
+//   setInterval(async () => {
+//     try {
+//       await processAllUserEmails();
+//     } catch (error) {
+//       console.error("Error in scheduled email processing:", error);
+//     }
+//   }, 15000);
+// };
+// // Start periodic email processing
+// startPeriodicEmailProcessing();
 // Production SSL setup
 const isProduction = process.env.NODE_ENV === 'production';
 const useSSL = process.env.USE_SSL === 'true' || isProduction;
