@@ -24,7 +24,7 @@ export const uploadToGemini = async (filePath: string, mimeType: string) => {
 };
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
 });
 
 const generationConfig = {
@@ -144,22 +144,26 @@ const generationConfig = {
                 properties: {
                   percentage: {
                     type: "number",
-                    description: "Surcharge percentage (e.g., 10 for 10%). Leave as 0 if fixed amount.",
+                    description:
+                      "Surcharge percentage (e.g., 10 for 10%). Leave empty if fixed amount is specified instead of percentage.",
                   },
                   date: {
                     type: "array",
                     items: {
                       type: "string",
                     },
-                    description: "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally.",
+                    description:
+                      "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally or for specific conditions rather than dates.",
                   },
                   description: {
                     type: "string",
-                    description: "Complete description for surcharge including amount, conditions, and age ranges.",
+                    description:
+                      "Complete description for surcharge including amount, conditions, and age ranges. Examples: 'Holiday surcharge', 'Peak season surcharge', 'VND 235,000/night for child 5-11 years sharing bed with parents including breakfast', 'VND 470,000/night for child until 18 years with extra bed including breakfast', 'VND 770,000 for 3rd adult/child over 11 years halfboard package'",
                   },
                 },
               },
-              description: "Array of surcharges including child policies and additional charges. Empty array if no surcharges mentioned.",
+              description:
+                "Array of surcharges including child policies and additional charges. Include all surcharge information in the description field when percentage or specific dates are not applicable. Only include if surcharges or child policies are mentioned in the document.",
             },
           },
         },
@@ -264,9 +268,13 @@ hotelInfo (once): hotelName, starsCategory (number), vat (1.1=10%, 1.2=20%, defa
 roomCategories (per room/period): category, fromDate/toDate (DD-MM-YYYY), price, extraBed {adult, child}, meals, surcharge (array, only if mentioned)
 
 Rules:
+- Only use low season and high season prices, ignore walk-in prices
 - One hotelInfo per document
 - Separate roomCategories for each room type/pricing period
 - Include galaDinner/surcharge only if explicitly stated
+- Extract extraBed prices: look for "Extrabed", "Extra bed", "Giường phụ" sections
+- Extract surcharges: look for "Surcharge", "Phụ thu", holiday fees, festival charges, child policies
+- Extract child pricing policies as surcharges with age ranges in description
 - Return valid JSON only`,
             },
            
@@ -278,24 +286,44 @@ Rules:
             {
               text: `{
                 "hotelInfo": {
-                  "hotelName": "LA SINFONIA CITADEL HOTEL",
+                  "hotelName": "EDEN OCEAN VIEW HOTEL",
                   "starsCategory": 4,
                   "vat": 1,
-                  "promotions": ["Apply additional Early Bird discount of 5%"]
+                  "promotions": ["F.O.C 16-1 Maximum 4 rooms", "Rates inclusive of breakfast, 5% service charge and government tax"]
                 },
                 "roomCategories": [
                   {
-                    "category": "Executive internal window",
-                    "fromDate": "01-05-2025",
-                    "toDate": "30-07-2025",
-                    "price": 1550000,
+                    "category": "Classic Double",
+                    "fromDate": "01-01-2025",
+                    "toDate": "20-04-2025",
+                    "price": 750000,
                     "extraBed": {
-                      "adult": 600000,
-                      "child": 500000,
-                      "breakfastWithoutExtraBed": 0
+                      "adult": 300000,
+                      "child": 150000
                     },
-                    "meals": "Fullboard",
-                    "surcharge": []
+                    "meals": "Breakfast",
+                    "surcharge": [
+                      {
+                        "description": "Children under 6 years old: Free",
+                        "percentage": null,
+                        "date": []
+                      },
+                      {
+                        "description": "Children 6-11 years old: VND 150,000",
+                        "percentage": null,
+                        "date": []
+                      },
+                      {
+                        "description": "12 years and above: VND 300,000",
+                        "percentage": null,
+                        "date": []
+                      },
+                      {
+                        "description": "Holiday surcharge: VND 200,000/room/night",
+                        "percentage": null,
+                        "date": ["01-01-2025", "29-01-2025 to 31-01-2025", "07-04-2025", "30-04-2025", "01-05-2025", "02-09-2025", "03-09-2025"]
+                      }
+                    ]
                   }
                 ]
               }`,
