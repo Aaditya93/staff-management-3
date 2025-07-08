@@ -35,47 +35,80 @@ const generationConfig = {
   responseMimeType: "application/json",
   responseSchema: {
     type: "object",
-    required: ["hotels"],
+    required: ["hotelInfo", "roomCategories"],
     properties: {
-      hotels: {
+      hotelInfo: {
+        type: "object",
+        required: ["hotelName", "starsCategory", "vat"],
+        properties: {
+          hotelName: {
+            type: "string",
+            description: "Name of the hotel",
+          },
+          starsCategory: {
+            type: "number",
+            description: "Star rating of the hotel (e.g., 4, 5, 3)",
+          },
+          vat: {
+            type: "number",
+            description: "VAT multiplier (e.g., 1.1 for 10% VAT, 1.2 for 20% VAT). If not mentioned, vat is 1",
+          },
+          galaDinner: {
+            type: "object",
+            properties: {
+              adult: {
+                type: "number",
+                description: "Gala dinner price for adults",
+              },
+              child: {
+                type: "number",
+                description: "Gala dinner price for children",
+              },
+              date: {
+                type: "string",
+                description: "Date of gala dinner in DD-MM-YYYY format",
+              },
+              childAgeRange: {
+                type: "string",
+                description: "Age range for children",
+              },
+            },
+            description: "Gala dinner information - only include if explicitly mentioned in the document"
+          },
+          promotions: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+            description: "Hotel promotions or special offers (empty array if none)",
+          },
+        },
+      },
+      roomCategories: {
         type: "array",
         items: {
           type: "object",
           required: [
-            "hotelName",
-            "starsCategory",
             "category",
             "fromDate",
             "toDate",
             "price",
             "extraBed",
             "meals",
-            "vat",
             "surcharge",
           ],
           properties: {
-            hotelName: {
-              type: "string",
-              description: "Name of the hotel",
-            },
-            starsCategory: {
-              type: "number",
-              description: "Star rating of the hotel (e.g., 4, 5, 3)",
-            },
             category: {
               type: "string",
-              description:
-                "Room category (e.g., Deluxe Internal Window, Superior, Standard)",
+              description: "Room category (e.g., Deluxe Internal Window, Superior, Standard)",
             },
             fromDate: {
               type: "string",
-              description:
-                "Start date of pricing period in DD-MM-YYYY format (e.g., '01-07-2025')",
+              description: "Start date of pricing period in DD-MM-YYYY format (e.g., '01-07-2025')",
             },
             toDate: {
               type: "string",
-              description:
-                "End date of pricing period in DD-MM-YYYY format (e.g., '01-09-2025')",
+              description: "End date of pricing period in DD-MM-YYYY format (e.g., '01-09-2025')",
             },
             price: {
               type: "number",
@@ -95,20 +128,13 @@ const generationConfig = {
                 },
                 breakfastWithoutExtraBed: {
                   type: "number",
-                  description:
-                    "Breakfast price without extra bed (if specified, otherwise 0)",
+                  description: "Breakfast price without extra bed (if specified, otherwise 0)",
                 },
               },
             },
             meals: {
               type: "string",
-              description:
-                "Meal plan (e.g., Fullboard, Halfboard, Breakfast, Dinner) Halfboard means breakfast and dinner included, Fullboard means all meals included",
-            },
-            vat: {
-              type: "number",
-              description:
-                "VAT multiplier (e.g., 1.1 for 10% VAT, 1.2 for 20% VAT). If not mentioned, vat is 1",
+              description: "Meal plan (e.g., Fullboard, Halfboard, Breakfast, Dinner)",
             },
             surcharge: {
               type: "array",
@@ -118,58 +144,22 @@ const generationConfig = {
                 properties: {
                   percentage: {
                     type: "number",
-                    description:
-                      "Surcharge percentage (e.g., 10 for 10%). Leave as 0 if fixed amount.",
+                    description: "Surcharge percentage (e.g., 10 for 10%). Leave as 0 if fixed amount.",
                   },
                   date: {
                     type: "array",
                     items: {
                       type: "string",
                     },
-                    description:
-                      "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally.",
+                    description: "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally.",
                   },
                   description: {
                     type: "string",
-                    description:
-                      "Complete description for surcharge including amount, conditions, and age ranges.",
+                    description: "Complete description for surcharge including amount, conditions, and age ranges.",
                   },
                 },
               },
-              description:
-                "Array of surcharges including child policies and additional charges. Empty array if no surcharges mentioned.",
-            },
-            galaDinner: {
-              type: "object",
-              properties: {
-                adult: {
-                  type: "number",
-                  description:
-                    "Gala dinner price for adults (0 if not mentioned)",
-                },
-                child: {
-                  type: "number",
-                  description:
-                    "Gala dinner price for children (0 if not mentioned)",
-                },
-                date: {
-                  type: "string",
-                  description: "Date of gala dinner (empty if not mentioned)",
-                },
-                childAgeRange: {
-                  type: "string",
-                  description:
-                    "Age range for children (empty if not mentioned)",
-                },
-              },
-            },
-            promotions: {
-              type: "array",
-              items: {
-                type: "string",
-              },
-              description:
-                "Hotel promotions or special offers (empty array if none)",
+              description: "Array of surcharges including child policies and additional charges. Empty array if no surcharges mentioned.",
             },
           },
         },
@@ -178,218 +168,6 @@ const generationConfig = {
   },
 };
 
-// Function to handle File/Blob objects
-export const extractHotelDataFromFile = async (file: File | Blob) => {
-  if (!file) {
-    throw new Error("No file provided");
-  }
-
-  // Validate file type
-  const fileType = file.type;
-  const fileName = (file as File).name?.toLowerCase() || "unknown";
-
-  const validTypes = [
-    "application/pdf",
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/gif",
-    "image/bmp",
-    "image/webp",
-    "image/tiff",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "text/plain",
-  ];
-
-  const validExtensions = [
-    ".pdf",
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".bmp",
-    ".webp",
-    ".tiff",
-    ".doc",
-    ".docx",
-    ".xls",
-    ".xlsx",
-    ".txt",
-  ];
-
-  const isValidType = validTypes.includes(fileType);
-  const isValidExtension = validExtensions.some((ext) =>
-    fileName.endsWith(ext)
-  );
-
-  if (!isValidType && !isValidExtension) {
-    throw new Error(
-      "Unsupported file format. Please upload PDF, image, or document files."
-    );
-  }
-
-  // Create a temporary path to save the file
-  const tempDir = path.join(process.cwd(), "tmp/uploads");
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
-  const tempPath = path.join(
-    tempDir,
-    (file as File).name || `file_${Date.now()}`
-  );
-
-  let uploadedFile;
-
-  try {
-    // Save the file to the temporary directory
-    const fileBuffer = await file.arrayBuffer();
-    fs.writeFileSync(tempPath, Buffer.from(fileBuffer));
-
-
-    // Upload file to Gemini
-    uploadedFile = await uploadToGemini(tempPath, fileType);
-
-
-
-    const chatSession = model.startChat({
-      generationConfig,
-      history: [
-        {
-          role: "user",
-          parts: [
-            {
-              fileData: {
-                mimeType: uploadedFile.mimeType,
-                fileUri: uploadedFile.uri,
-              },
-            },
-            {
-              text: `Extract all hotel information from this document. For each hotel, create SEPARATE hotel objects for EACH room category/pricing combination.
-
-IMPORTANT: Each hotel object should contain only ONE room category as a flat structure. If a hotel has multiple room types or pricing options, create multiple hotel objects with the same hotel details but different room category information.
-
-For each hotel object, extract these fields directly at the hotel level:
-1. hotelName - exact name as written
-2. starsCategory - as number (e.g., 4, 5)
-3. category - room type name (e.g., "Deluxe Internal Window", "Superior")
-4. fromDate - start date of pricing period in DD-MM-YYYY format
-5. toDate - end date of pricing period in DD-MM-YYYY format
-6. price - base room price
-7. extraBed - object with adult and child extra bed prices
-8. meals - meal type as string (e.g., "Fullboard", "Halfboard", "Breakfast", "Dinner")
-9. vat - VAT multiplier ONLY if explicitly mentioned (1 if not mentioned)
-10. surcharge - array of surcharge objects ONLY if surcharges are mentioned
-11. galaDinner - optional object with adult/child prices, date, and age range
-12. promotions - array of promotional offers
-
-VAT and Surcharge Guidelines:
-- Only include surcharge if the document mentions additional charges for specific dates/reasons
-- Surcharge should include percentage, applicable dates array, and description
-- 10% VAT should be represented as 1.10, 20% VAT as 1.20, etc. If not mentioned, vat is 1.
-
-Return ONLY valid JSON, no markdown formatting or additional text.`,
-            },
-          ],
-        },
-        {
-          role: "model",
-          parts: [
-            {
-              text: `{
-                "hotels": [
-                  {
-                    "hotelName": "LA SINFONIA CITADEL HOTEL",
-                    "starsCategory": 4,
-                    "category": "Executive internal window",
-                    "fromDate": "01-05-2025",
-                    "toDate": "30-07-2025",
-                    "price": 1550000,
-                    "extraBed": {
-                      "adult": 600000,
-                      "child": 500000,
-                      "breakfastWithoutExtraBed": 0
-                    },
-                    "vat": 1,
-                    "meals": "Fullboard",
-                    "surcharge": [],
-                    "galaDinner": {
-                      "adult": 0,
-                      "child": 0,
-                      "date": "",
-                      "childAgeRange": ""
-                    },
-                    "promotions": ["Apply additional Early Bird discount of 5%"]
-                  }
-                ]
-              }`,
-            },
-          ],
-        },
-      ],
-    });
-
-
-
-    const result = await chatSession.sendMessage(
-      `Extract all hotel data from this document following the specified format.
-      - Create SEPARATE hotel objects for each unique combination of hotel, room category, pricing period, and price.
-      - Each hotel object should contain the room category information directly at the hotel level, not nested.
-      - Use DD-MM-YYYY format for dates.
-      - Only include VAT and surcharge fields if they are explicitly mentioned in the document.
-      - DO NOT return duplicate hotel objects. Each object in the hotels array must be unique.
-      - Return ONLY valid JSON without any markdown formatting.`
-    );
-
-    const responseText = result.response.text();
-
-
-    if (!responseText || responseText.trim() === "") {
-      throw new Error("Empty response from AI model");
-    }
-
-    const jsonResponse = JSON.parse(responseText);
-
-
-    // Clean up: delete the uploaded file from Gemini
-    try {
-      await fileManager.deleteFile(uploadedFile.name);
-
-    } catch (deleteError) {
-
-    }
-
-    return jsonResponse;
-  } catch (error) {
-    console.error("Error in extractHotelDataFromFile:", error);
-
-    // Clean up on error
-    if (uploadedFile) {
-      try {
-        await fileManager.deleteFile(uploadedFile.name);
-
-      } catch (deleteError) {
-        console.warn("Could not delete uploaded file on error:", deleteError);
-      }
-    }
-
-    throw error;
-  } finally {
-    // Clean up temporary file
-    try {
-      if (fs.existsSync(tempPath)) {
-        fs.unlinkSync(tempPath);
-
-      }
-    } catch (cleanupError) {
-      console.warn("Could not delete temporary file:", cleanupError);
-    }
-  }
-};
-
-// Original function to handle file paths (keeping for backward compatibility)
 export const extractHotelData = async (
   filePath: string,
   supplierId: string,
@@ -478,32 +256,20 @@ export const extractHotelData = async (
                 fileUri: uploadedFile.uri,
               },
             },
-            {
-              text: `Extract all hotel information from this document. For each hotel, create SEPARATE hotel objects for EACH room category/pricing combination.
+             {
+              text: `Extract hotel data to JSON with two sections:
 
-IMPORTANT: Each hotel object should contain only ONE room category as a flat structure. If a hotel has multiple room types or pricing options, create multiple hotel objects with the same hotel details but different room category information.
+hotelInfo (once): hotelName, starsCategory (number), vat (1.1=10%, 1.2=20%, default=1), galaDinner (only if mentioned), promotions (array)
 
-For each hotel object, extract these fields directly at the hotel level:
-1. hotelName - exact name as written
-2. starsCategory - as number (e.g., 4, 5)
-3. category - room type name (e.g., "Deluxe Internal Window", "Superior")
-4. fromDate - start date of pricing period in DD-MM-YYYY format
-5. toDate - end date of pricing period in DD-MM-YYYY format
-6. price - base room price
-7. extraBed - object with adult and child extra bed prices
-8. meals - meal type as string (e.g., "Fullboard", "Halfboard", "Breakfast", "Dinner")
-9. vat - VAT multiplier ONLY if explicitly mentioned (1 if not mentioned)
-10. surcharge - array of surcharge objects ONLY if surcharges are mentioned
-11. galaDinner - optional object with adult/child prices, date, and age range
-12. promotions - array of promotional offers
+roomCategories (per room/period): category, fromDate/toDate (DD-MM-YYYY), price, extraBed {adult, child}, meals, surcharge (array, only if mentioned)
 
-VAT and Surcharge Guidelines:
-- Only include surcharge if the document mentions additional charges for specific dates/reasons
-- Surcharge should include percentage, applicable dates array, and description
-- 10% VAT should be represented as 1.10, 20% VAT as 1.20, etc. If not mentioned, vat is 1.
-
-Return ONLY valid JSON, no markdown formatting or additional text.`,
+Rules:
+- One hotelInfo per document
+- Separate roomCategories for each room type/pricing period
+- Include galaDinner/surcharge only if explicitly stated
+- Return valid JSON only`,
             },
+           
           ],
         },
         {
@@ -511,10 +277,14 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
           parts: [
             {
               text: `{
-                "hotels": [
+                "hotelInfo": {
+                  "hotelName": "LA SINFONIA CITADEL HOTEL",
+                  "starsCategory": 4,
+                  "vat": 1,
+                  "promotions": ["Apply additional Early Bird discount of 5%"]
+                },
+                "roomCategories": [
                   {
-                    "hotelName": "LA SINFONIA CITADEL HOTEL",
-                    "starsCategory": 4,
                     "category": "Executive internal window",
                     "fromDate": "01-05-2025",
                     "toDate": "30-07-2025",
@@ -524,16 +294,8 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
                       "child": 500000,
                       "breakfastWithoutExtraBed": 0
                     },
-                    "vat": 1,
                     "meals": "Fullboard",
-                    "surcharge": [],
-                    "galaDinner": {
-                      "adult": 0,
-                      "child": 0,
-                      "date": "",
-                      "childAgeRange": ""
-                    },
-                    "promotions": ["Apply additional Early Bird discount of 5%"]
+                    "surcharge": []
                   }
                 ]
               }`,
@@ -543,23 +305,21 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       ],
     });
 
-    const result = await chatSession.sendMessage(
-      `Extract all hotel data from this document following the specified format.
-      - Create SEPARATE hotel objects for each unique combination of hotel, room category, pricing period, and price.
-      - Each hotel object should contain the room category information directly at the hotel level, not nested.
-      - Use DD-MM-YYYY format for dates.
-      - Only include VAT and surcharge fields if they are explicitly mentioned in the document.
-      - DO NOT return duplicate hotel objects. Each object in the hotels array must be unique.
-      - Return ONLY valid JSON without any markdown formatting.`
+     const result = await chatSession.sendMessage(
+      `Extract hotel data following above format. Return JSON only.`
     );
 
     // Track end time and log duration
     const endTime = Date.now();
     const durationMs = endTime - startTime;
+    console.log(`AI action time taken: ${durationMs} ms`);
 
+    // Log token usage if available
+    if (result.response.usageMetadata) {
+      console.log("AI token usage:", result.response.usageMetadata);
+    }
 
     const responseText = result.response.text();
-
 
     if (!responseText || responseText.trim() === "") {
       throw new Error("Empty response from AI model");
@@ -567,16 +327,29 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
 
     const jsonResponse = JSON.parse(responseText);
 
+    // Combine hotelInfo with each roomCategory to create the desired hotel objects
+    const combinedHotels = jsonResponse.roomCategories.map(roomCategory => ({
+      ...jsonResponse.hotelInfo,
+      ...roomCategory
+    }));
+
     // Add hotel creation logic here
     const createResult = await createHotels({
-      hotels: jsonResponse.hotels,
+      hotels: combinedHotels,
       supplierId: supplierId.trim(),
       country: country.trim(),
       city: city.trim(),
       currency: currency.trim(),
       createdBy: createdBy.trim(),
     });
+    console.log("Hotels created successfully:", createResult);
 
+    // Clean up: delete the uploaded file from Gemini
+    try {
+      await fileManager.deleteFile(uploadedFile.name);
+    } catch (deleteError) {
+      console.warn("Could not delete uploaded file:", deleteError);
+    }
 
     // Clean up the uploaded file from server
     try {
@@ -584,16 +357,26 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
     } catch (cleanupError) {
       console.error("Error cleaning up file:", cleanupError);
     }
-    const  updateStatus = await HotelRequest.findByIdAndUpdate(
+    
+    const updateStatus = await HotelRequest.findByIdAndUpdate(
       requestId,
       { isComplete: true },
       { new: true }
     );
+    console.log("Hotel request status updated:", updateStatus);
 
-
-    return ;
+    return;
   } catch (error) {
     console.error("Error in extractHotelData:", error);
+
+    // Clean up on error
+    if (uploadedFile) {
+      try {
+        await fileManager.deleteFile(uploadedFile.name);
+      } catch (deleteError) {
+        console.warn("Could not delete uploaded file on error:", deleteError);
+      }
+    }
 
     // Clean up the uploaded file on error
     try {

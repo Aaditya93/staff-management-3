@@ -135,18 +135,18 @@ app.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-const startPeriodicEmailProcessing = () => {
-  setInterval(async () => {
-    try {
-      await processAllUserEmails();
-    } catch (error) {
-      console.error("Error in scheduled email processing:", error);
-    }
-  }, 15000);
-};
+// const startPeriodicEmailProcessing = () => {
+//   setInterval(async () => {
+//     try {
+//       await processAllUserEmails();
+//     } catch (error) {
+//       console.error("Error in scheduled email processing:", error);
+//     }
+//   }, 15000);
+// };
 
-// Start periodic email processing
-startPeriodicEmailProcessing();
+// // Start periodic email processing
+// startPeriodicEmailProcessing();
 
 // Production SSL setup
 const isProduction = process.env.NODE_ENV === 'production';
