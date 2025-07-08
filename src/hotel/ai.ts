@@ -556,12 +556,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
     // Track end time and log duration
     const endTime = Date.now();
     const durationMs = endTime - startTime;
-    console.log(`AI action time taken: ${durationMs} ms`);
 
-    // Log token usage if available
-    if (result.response.usage) {
-      console.log("AI token usage:", result.response.usage);
-    }
 
     const responseText = result.response.text();
 
@@ -581,7 +576,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       currency: currency.trim(),
       createdBy: createdBy.trim(),
     });
-    console.log("Hotels created successfully:", createResult);
+
 
     // Clean up the uploaded file from server
     try {
@@ -594,7 +589,7 @@ Return ONLY valid JSON, no markdown formatting or additional text.`,
       { isComplete: true },
       { new: true }
     );
-    console.log("Hotel request status updated:", updateStatus);
+
 
     return ;
   } catch (error) {

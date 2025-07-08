@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // @ts-nocheck
 const express_1 = __importDefault(require("express"));
+const process_email_1 = require("./process-email");
 const multer_1 = __importDefault(require("multer"));
 const ai_1 = require("./hotel/ai");
 const fs_1 = __importDefault(require("fs"));
@@ -75,7 +76,6 @@ app.post("/hotels", upload.single("file"), (req, res) => __awaiter(void 0, void 
                 .status(400)
                 .json({ success: false, message: "Missing required fields or file" });
         }
-        console.log("Processing file:", file.originalname, "Type:", file.mimetype, "Size:", file.size);
         // Pass the required parameters to extractHotelData, but do not await it
         (0, ai_1.extractHotelData)(file.path, supplierId, country, city, currency, requestId, createdBy).catch((error) => {
             console.error("Error in background hotel extraction:", error);
@@ -116,17 +116,18 @@ app.use((err, req, res, next) => {
         timestamp: new Date().toISOString(),
     });
 });
-// const startPeriodicEmailProcessing = () => {
-//   setInterval(async () => {
-//     try {
-//       await processAllUserEmails();
-//     } catch (error) {
-//       console.error("Error in scheduled email processing:", error);
-//     }
-//   }, 15000);
-// };
-// // Start periodic email processing
-// startPeriodicEmailProcessing();
+const startPeriodicEmailProcessing = () => {
+    setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            yield (0, process_email_1.processAllUserEmails)();
+        }
+        catch (error) {
+            console.error("Error in scheduled email processing:", error);
+        }
+    }), 15000);
+};
+// Start periodic email processing
+startPeriodicEmailProcessing();
 // Production SSL setup
 const isProduction = process.env.NODE_ENV === 'production';
 const useSSL = process.env.USE_SSL === 'true' || isProduction;

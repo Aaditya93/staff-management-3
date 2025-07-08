@@ -83,15 +83,7 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
         .json({ success: false, message: "Missing required fields or file" });
     }
 
-    console.log(
-      "Processing file:",
-      file.originalname,
-      "Type:",
-      file.mimetype,
-      "Size:",
-      file.size
-    );
-
+   
     // Pass the required parameters to extractHotelData, but do not await it
     extractHotelData(
       file.path,
@@ -143,18 +135,18 @@ app.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-// const startPeriodicEmailProcessing = () => {
-//   setInterval(async () => {
-//     try {
-//       await processAllUserEmails();
-//     } catch (error) {
-//       console.error("Error in scheduled email processing:", error);
-//     }
-//   }, 15000);
-// };
+const startPeriodicEmailProcessing = () => {
+  setInterval(async () => {
+    try {
+      await processAllUserEmails();
+    } catch (error) {
+      console.error("Error in scheduled email processing:", error);
+    }
+  }, 15000);
+};
 
-// // Start periodic email processing
-// startPeriodicEmailProcessing();
+// Start periodic email processing
+startPeriodicEmailProcessing();
 
 // Production SSL setup
 const isProduction = process.env.NODE_ENV === 'production';

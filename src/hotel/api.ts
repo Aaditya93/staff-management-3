@@ -125,10 +125,7 @@ export const createHotels = async (
 
         // Create new hotel room category record
         const result = await Hotel.create(hotelDocument);
-        console.log(
-          `Processed hotel ${hotelData.hotelName} - ${hotelData.category}:`,
-          result._id
-        );
+ 
 
         newRecords++;
       } catch (error) {
