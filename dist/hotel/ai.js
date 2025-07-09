@@ -46,131 +46,134 @@ const generationConfig = {
     responseMimeType: "application/json",
     responseSchema: {
         type: "object",
-        required: ["hotelInfo", "roomCategories"],
+        required: ["hotels"],
         properties: {
-            hotelInfo: {
-                type: "object",
-                required: ["hotelName", "starsCategory", "vat"],
-                properties: {
-                    hotelName: {
-                        type: "string",
-                        description: "Name of the hotel",
-                    },
-                    starsCategory: {
-                        type: "number",
-                        description: "Star rating of the hotel (e.g., 4, 5, 3)",
-                    },
-                    vat: {
-                        type: "number",
-                        description: "VAT multiplier (e.g., 1.1 for 10% VAT, 1.2 for 20% VAT). If not mentioned, vat is 1",
-                    },
-                    galaDinner: {
-                        type: "object",
-                        properties: {
-                            adult: {
-                                type: "number",
-                                description: "Gala dinner price for adults",
-                            },
-                            child: {
-                                type: "number",
-                                description: "Gala dinner price for children",
-                            },
-                            date: {
-                                type: "string",
-                                description: "Date of gala dinner in DD-MM-YYYY format",
-                            },
-                            childAgeRange: {
-                                type: "string",
-                                description: "Age range for children",
-                            },
-                        },
-                        description: "Gala dinner information - only include if explicitly mentioned in the document"
-                    },
-                    promotions: {
-                        type: "array",
-                        items: {
-                            type: "string",
-                        },
-                        description: "Hotel promotions or special offers (empty array if none)",
-                    },
-                },
-            },
-            roomCategories: {
+            hotels: {
                 type: "array",
                 items: {
                     type: "object",
-                    required: [
-                        "category",
-                        "fromDate",
-                        "toDate",
-                        "price",
-                        "extraBed",
-                        "meals",
-                        "surcharge",
-                    ],
+                    required: ["hotelName", "starsCategory", "vat", "roomCategories"],
                     properties: {
-                        category: {
+                        hotelName: {
                             type: "string",
-                            description: "Room category (e.g., Deluxe Internal Window, Superior, Standard)",
+                            description: "Name of the hotel",
                         },
-                        fromDate: {
-                            type: "string",
-                            description: "Start date of pricing period in DD-MM-YYYY format (e.g., '01-07-2025')",
-                        },
-                        toDate: {
-                            type: "string",
-                            description: "End date of pricing period in DD-MM-YYYY format (e.g., '01-09-2025')",
-                        },
-                        price: {
+                        starsCategory: {
                             type: "number",
-                            description: "Base room price",
+                            description: "Star rating of the hotel (e.g., 4, 5, 3)",
                         },
-                        extraBed: {
+                        vat: {
+                            type: "number",
+                            description: "VAT multiplier (e.g., 1.1 for 10% VAT, 1.2 for 20% VAT). If not mentioned, vat is 1",
+                        },
+                        galaDinner: {
                             type: "object",
-                            required: ["adult", "child"],
                             properties: {
                                 adult: {
                                     type: "number",
-                                    description: "Extra bed price for adults",
+                                    description: "Gala dinner price for adults",
                                 },
                                 child: {
                                     type: "number",
-                                    description: "Extra bed price for children",
+                                    description: "Gala dinner price for children",
                                 },
-                                breakfastWithoutExtraBed: {
-                                    type: "number",
-                                    description: "Breakfast price without extra bed (if specified, otherwise 0)",
+                                date: {
+                                    type: "string",
+                                    description: "Date of gala dinner in DD-MM-YYYY format",
+                                },
+                                childAgeRange: {
+                                    type: "string",
+                                    description: "Age range for children",
                                 },
                             },
+                            description: "Gala dinner information - only include if explicitly mentioned in the document"
                         },
-                        meals: {
-                            type: "string",
-                            description: "Meal plan (e.g., Fullboard, Halfboard, Breakfast, Dinner)",
+                        promotions: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                            },
+                            description: "Hotel promotions or special offers (empty array if none)",
                         },
-                        surcharge: {
+                        roomCategories: {
                             type: "array",
                             items: {
                                 type: "object",
-                                required: ["description"],
+                                required: [
+                                    "category",
+                                    "fromDate",
+                                    "toDate",
+                                    "price",
+                                    "extraBed",
+                                    "meals",
+                                    "surcharge",
+                                ],
                                 properties: {
-                                    percentage: {
-                                        type: "number",
-                                        description: "Surcharge percentage (e.g., 10 for 10%). Leave empty if fixed amount is specified instead of percentage.",
+                                    category: {
+                                        type: "string",
+                                        description: "Room category (e.g., Deluxe Internal Window, Superior, Standard)",
                                     },
-                                    date: {
+                                    fromDate: {
+                                        type: "string",
+                                        description: "Start date of pricing period in DD-MM-YYYY format (e.g., '01-07-2025')",
+                                    },
+                                    toDate: {
+                                        type: "string",
+                                        description: "End date of pricing period in DD-MM-YYYY format (e.g., '01-09-2025')",
+                                    },
+                                    price: {
+                                        type: "number",
+                                        description: "Base room price",
+                                    },
+                                    extraBed: {
+                                        type: "object",
+                                        required: ["adult", "child"],
+                                        properties: {
+                                            adult: {
+                                                type: "number",
+                                                description: "Extra bed price for adults. Always check if extra bed is available for that room category. Look for sections or keywords like 'Extrabed', 'Extra bed', 'Giường phụ'.",
+                                            },
+                                            child: {
+                                                type: "number",
+                                                description: "Extra bed price for children. Always check if extra bed is available for that room category. Look for sections or keywords like 'Extrabed', 'Extra bed', 'Giường phụ'.",
+                                            },
+                                            breakfastWithoutExtraBed: {
+                                                type: "number",
+                                                description: "Breakfast price without extra bed (if specified, otherwise 0). Adiitional breakfast prices should be included here if mentioned in the document.",
+                                            },
+                                        },
+                                    },
+                                    meals: {
+                                        type: "string",
+                                        description: "Meal plan (e.g., Fullboard, Halfboard, Breakfast, Dinner)",
+                                    },
+                                    surcharge: {
                                         type: "array",
                                         items: {
-                                            type: "string",
+                                            type: "object",
+                                            required: ["description"],
+                                            properties: {
+                                                percentage: {
+                                                    type: "number",
+                                                    description: "Surcharge percentage (e.g., 10 for 10%). Leave empty if fixed amount is specified instead of percentage.",
+                                                },
+                                                date: {
+                                                    type: "array",
+                                                    items: {
+                                                        type: "string",
+                                                    },
+                                                    description: "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally or for specific conditions rather than dates.",
+                                                },
+                                                description: {
+                                                    type: "string",
+                                                    description: "Complete description for surcharge including amount, conditions, and age ranges. Examples: 'Holiday surcharge', 'Peak season surcharge', 'VND 235,000/night for child 5-11 years sharing bed with parents including breakfast', 'VND 470,000/night for child until 18 years with extra bed including breakfast', 'VND 770,000 for 3rd adult/child over 11 years halfboard package'. Surcharges should only represent mandatory additional charges on the room rate during holidays or special periods. Do not include optional services or charges that are only applied if requested.",
+                                                },
+                                            },
                                         },
-                                        description: "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally or for specific conditions rather than dates.",
-                                    },
-                                    description: {
-                                        type: "string",
-                                        description: "Complete description for surcharge including amount, conditions, and age ranges. Examples: 'Holiday surcharge', 'Peak season surcharge', 'VND 235,000/night for child 5-11 years sharing bed with parents including breakfast', 'VND 470,000/night for child until 18 years with extra bed including breakfast', 'VND 770,000 for 3rd adult/child over 11 years halfboard package'",
+                                        description: "Array of surcharges including child policies and mandatory additional charges only. Do not include optional services or charges that are only applied if requested. Include all surcharge information in the description field when percentage or specific dates are not applicable. Only include if surcharges or child policies are mentioned in the document.",
                                     },
                                 },
                             },
-                            description: "Array of surcharges including child policies and additional charges. Include all surcharge information in the description field when percentage or specific dates are not applicable. Only include if surcharges or child policies are mentioned in the document.",
                         },
                     },
                 },
@@ -255,21 +258,38 @@ const extractHotelData = (filePath, supplierId, country, city, currency, request
                             },
                         },
                         {
-                            text: `Extract hotel data to JSON with two sections:
+                            text: `Extract hotel data to JSON with hotels array:
 
-hotelInfo (once): hotelName, starsCategory (number), vat (1.1=10%, 1.2=20%, default=1), galaDinner (only if mentioned), promotions (array)
+Each hotel object: hotelName, starsCategory (number), vat (1.1=10%, 1.2=20%, default=1), galaDinner (only if mentioned), promotions (array), roomCategories (array)
 
 roomCategories (per room/period): category, fromDate/toDate (DD-MM-YYYY), price, extraBed {adult, child}, meals, surcharge (array, only if mentioned)
 
+CRITICAL: Always scan the ENTIRE document for multiple hotels. Look for:
+- Different hotel names (even slight variations)
+- Different addresses or contact information
+- Page breaks or section dividers
+- Multiple pricing tables for different properties
+- Headers indicating new hotel sections
+
+IMPORTANT: Even if one big company has multiple hotels (Hotel A and Hotel B) in the same PDF, you MUST create separate hotel objects for each distinct hotel. Do NOT combine them into one object.
+
 Rules:
 - Only use low season and high season prices, ignore walk-in prices
-- One hotelInfo per document
+- MUST create separate hotel objects for EACH distinct hotel found in the PDF
+- If you find "Hotel A" and "Hotel B" in the same PDF, create 2 separate hotel objects
+- Even if hotels are from the same company/group, treat each hotel as a separate entity
+- Carefully read through ALL pages to identify every hotel mentioned
+- Look for different hotel names, addresses, or clear section breaks to identify separate hotels
+- If single hotel, create one hotel object with all room categories
 - Separate roomCategories for each room type/pricing period
 - Include galaDinner/surcharge only if explicitly stated
-- Extract extraBed prices: look for "Extrabed", "Extra bed", "Giường phụ" sections
-- Extract surcharges: look for "Surcharge", "Phụ thu", holiday fees, festival charges, child policies
+- Extract extraBed prices: check if extra bed is available for that room category, and look for "Extrabed", "Extra bed", "Giường phụ" sections
+- Extract surcharges: look for "Surcharge", "Phụ thu", holiday fees, festival charges, child policies. Do not include additional charges for optional services (e.g., extra services that are only charged if requested). Surcharges should only represent mandatory additional charges on the room rate during holidays or special periods.
 - Extract child pricing policies as surcharges with age ranges in description
-- Return valid JSON only`,
+- Additional Breakfast prices: if mentioned, include in breakfastWithoutExtraBed field
+- Return valid JSON only
+
+EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc", create TWO separate hotel objects even though they are both Radisson properties.`,
                         },
                     ],
                 },
@@ -278,43 +298,55 @@ Rules:
                     parts: [
                         {
                             text: `{
-                "hotelInfo": {
-                  "hotelName": "EDEN OCEAN VIEW HOTEL",
-                  "starsCategory": 4,
-                  "vat": 1,
-                  "promotions": ["F.O.C 16-1 Maximum 4 rooms", "Rates inclusive of breakfast, 5% service charge and government tax"]
-                },
-                "roomCategories": [
+                "hotels": [
                   {
-                    "category": "Classic Double",
-                    "fromDate": "01-01-2025",
-                    "toDate": "20-04-2025",
-                    "price": 750000,
-                    "extraBed": {
-                      "adult": 300000,
-                      "child": 150000
-                    },
-                    "meals": "Breakfast",
-                    "surcharge": [
+                    "hotelName": "EDEN OCEAN VIEW HOTEL",
+                    "starsCategory": 4,
+                    "vat": 1,
+                    "promotions": ["F.O.C 16-1 Maximum 4 rooms", "Rates inclusive of breakfast, 5% service charge and government tax"],
+                    "roomCategories": [
                       {
-                        "description": "Children under 6 years old: Free",
-                        "percentage": null,
-                        "date": []
-                      },
+                        "category": "Classic Double",
+                        "fromDate": "01-01-2025",
+                        "toDate": "20-04-2025",
+                        "price": 750000,
+                        "extraBed": {
+                          "adult": 300000,
+                          "child": 150000
+                        },
+                        "meals": "Breakfast",
+                        "surcharge": [
+                          {
+                            "description": "Children under 6 years old: Free",
+                            "percentage": null,
+                            "date": []
+                          },
+                          {
+                            "description": "Holiday surcharge: VND 200,000/room/night",
+                            "percentage": null,
+                            "date": ["01-01-2025", "29-01-2025 to 31-01-2025"]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "hotelName": "EDEN BEACH RESORT",
+                    "starsCategory": 5,
+                    "vat": 1,
+                    "promotions": ["Early booking discount"],
+                    "roomCategories": [
                       {
-                        "description": "Children 6-11 years old: VND 150,000",
-                        "percentage": null,
-                        "date": []
-                      },
-                      {
-                        "description": "12 years and above: VND 300,000",
-                        "percentage": null,
-                        "date": []
-                      },
-                      {
-                        "description": "Holiday surcharge: VND 200,000/room/night",
-                        "percentage": null,
-                        "date": ["01-01-2025", "29-01-2025 to 31-01-2025", "07-04-2025", "30-04-2025", "01-05-2025", "02-09-2025", "03-09-2025"]
+                        "category": "Deluxe Room",
+                        "fromDate": "01-01-2025",
+                        "toDate": "20-04-2025",
+                        "price": 1200000,
+                        "extraBed": {
+                          "adult": 400000,
+                          "child": 200000
+                        },
+                        "meals": "Breakfast",
+                        "surcharge": []
                       }
                     ]
                   }
@@ -325,7 +357,7 @@ Rules:
                 },
             ],
         });
-        const result = yield chatSession.sendMessage(`Extract hotel data following above format. Return JSON only.`);
+        const result = yield chatSession.sendMessage(`Extract hotel data following above format. Scan the ENTIRE document carefully for ALL hotels. If you find multiple hotels (even from same company/group like Hotel A and Hotel B), create separate objects for each distinct hotel. Each hotel name should have its own hotel object. Return JSON only.`);
         // Track end time and log duration
         const endTime = Date.now();
         const durationMs = endTime - startTime;
@@ -339,18 +371,33 @@ Rules:
             throw new Error("Empty response from AI model");
         }
         const jsonResponse = JSON.parse(responseText);
-        // Combine hotelInfo with each roomCategory to create the desired hotel objects
-        const combinedHotels = jsonResponse.roomCategories.map(roomCategory => (Object.assign(Object.assign({}, jsonResponse.hotelInfo), roomCategory)));
-        // Add hotel creation logic here
-        const createResult = yield (0, api_1.createHotels)({
-            hotels: combinedHotels,
-            supplierId: supplierId.trim(),
-            country: country.trim(),
-            city: city.trim(),
-            currency: currency.trim(),
-            createdBy: createdBy.trim(),
-        });
-        console.log("Hotels created successfully:", createResult);
+        console.log("AI response:", jsonResponse);
+        // Keep hotels as separate objects
+        const hotelsToCreate = jsonResponse.hotels.map(hotel => ({
+            hotelInfo: {
+                hotelName: hotel.hotelName,
+                starsCategory: hotel.starsCategory,
+                vat: hotel.vat,
+                galaDinner: hotel.galaDinner,
+                promotions: hotel.promotions
+            },
+            roomCategories: hotel.roomCategories
+        }));
+        // Process each hotel separately
+        for (const hotelData of hotelsToCreate) {
+            const combinedHotels = hotelData.roomCategories.map(roomCategory => (Object.assign({ hotelName: hotelData.hotelInfo.hotelName, starsCategory: hotelData.hotelInfo.starsCategory, vat: hotelData.hotelInfo.vat, galaDinner: hotelData.hotelInfo.galaDinner, promotions: hotelData.hotelInfo.promotions }, roomCategory)));
+            console.log(`Creating hotels for ${hotelData.hotelInfo.hotelName} with data:`, combinedHotels);
+            // Create hotels for this specific hotel
+            const createResult = yield (0, api_1.createHotels)({
+                hotels: combinedHotels,
+                supplierId: supplierId.trim(),
+                country: country.trim(),
+                city: city.trim(),
+                currency: currency.trim(),
+                createdBy: createdBy.trim(),
+            });
+            console.log(`Hotels created for ${hotelData.hotelInfo.hotelName}:`, createResult);
+        }
         // Clean up: delete the uploaded file from Gemini
         try {
             yield fileManager.deleteFile(uploadedFile.name);
