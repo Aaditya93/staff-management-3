@@ -52,8 +52,29 @@ const generationConfig = {
                 type: "array",
                 items: {
                     type: "object",
-                    required: ["hotelName", "starsCategory", "vat", "roomCategories"],
+                    required: ["hotelName", "starsCategory", "vat", "roomCategories", "promotions", "cancellationPolicys", "markets", "childPolicies"],
                     properties: {
+                        childPolicies: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                            },
+                            description: "Child policies for the hotel (empty array if none)",
+                        },
+                        cancellationPolicys: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                            },
+                            description: "Cancellation policies for the hotel (empty array if none)",
+                        },
+                        markets: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                            },
+                            description: "Markets where the hotel operates (e.g., 'Domestic', 'International', 'Indian','Korean', 'Chinese'). If not mentioned, leave it empty.",
+                        },
                         hotelName: {
                             type: "string",
                             description: "Name of the hotel",
@@ -83,7 +104,7 @@ const generationConfig = {
                                 },
                                 childAgeRange: {
                                     type: "string",
-                                    description: "Age range for children",
+                                    description: "Age range for children.  If Age is Under 12 Show it as 0-11",
                                 },
                             },
                             description: "Gala dinner information - only include if explicitly mentioned in the document"
@@ -107,8 +128,75 @@ const generationConfig = {
                                     "extraBed",
                                     "meals",
                                     "surcharge",
+                                    "season",
+                                    "maxOccupancy",
+                                    "breakfast",
+                                    "fullBoard",
+                                    "halfBoard",
                                 ],
                                 properties: {
+                                    breakfast: {
+                                        type: "object",
+                                        properties: {
+                                            child: {
+                                                type: "number",
+                                                description: "Breakfast price for child",
+                                            },
+                                            childAgeRange: {
+                                                type: "string",
+                                                description: "Age range for children breakfast pricing (e.g., '0-12 years')",
+                                            },
+                                            noofChildren: {
+                                                type: "number",
+                                                description: "Number of children included in breakfast pricing",
+                                            },
+                                        },
+                                        description: "Breakfast pricing information - only include if explicitly mentioned in the document",
+                                    },
+                                    fullBoard: {
+                                        type: "object",
+                                        properties: {
+                                            child: {
+                                                type: "number",
+                                                description: "Full board price for child",
+                                            },
+                                            adult: {
+                                                type: "number",
+                                                description: "Full board price for adult",
+                                            },
+                                            childAgeRange: {
+                                                type: "string",
+                                                description: "Age range for children full board pricing (e.g., '0-12 years')",
+                                            },
+                                        },
+                                        description: "Full board pricing information - only include if explicitly mentioned in the document",
+                                    },
+                                    halfBoard: {
+                                        type: "object",
+                                        properties: {
+                                            child: {
+                                                type: "number",
+                                                description: "Half board price for child",
+                                            },
+                                            adult: {
+                                                type: "number",
+                                                description: "Half board price for adult",
+                                            },
+                                            childAgeRange: {
+                                                type: "string",
+                                                description: "Age range for children half board pricing (e.g., '0-12 years')",
+                                            },
+                                        },
+                                        description: "Half board pricing information - only include if explicitly mentioned in the document",
+                                    },
+                                    maxOccupancy: {
+                                        type: "string",
+                                        description: "Maximum occupancy for the room category (e.g., ' 3A/ 2A+2C '). If not mentioned, leave it empty.",
+                                    },
+                                    season: {
+                                        type: "string",
+                                        description: "Season of the room category (e.g., Low Season, High Season , Normal Season). If not mentioned, leave it empty.",
+                                    },
                                     category: {
                                         type: "string",
                                         description: "Room category (e.g., Deluxe Internal Window, Superior, Standard)",
@@ -127,7 +215,7 @@ const generationConfig = {
                                     },
                                     extraBed: {
                                         type: "object",
-                                        required: ["adult", "child"],
+                                        required: ["adult", "child", "breakfastWithoutExtraBed", "childAgeRange"],
                                         properties: {
                                             adult: {
                                                 type: "number",
@@ -141,6 +229,10 @@ const generationConfig = {
                                                 type: "number",
                                                 description: "Breakfast price without extra bed (if specified, otherwise 0). Adiitional breakfast prices should be included here if mentioned in the document.",
                                             },
+                                            childAgeRange: {
+                                                type: "string",
+                                                description: "Age range for children applicable for extra bed pricing (e.g., '0-12 years'). If Age is Under 12 Show it as 0-11 This is optional and should only be included if specified in the document.",
+                                            }
                                         },
                                     },
                                     meals: {
@@ -283,7 +375,7 @@ Rules:
 - If single hotel, create one hotel object with all room categories
 - Separate roomCategories for each room type/pricing period
 - Include galaDinner/surcharge only if explicitly stated
-- Extract extraBed prices: check if extra bed is available for that room category, and look for "Extrabed", "Extra bed", "Giường phụ" sections
+- Extract extraBed prices: check if extra bed is available for that room category, and look for "Extrabed", "Extra bed", "Giường phụ" sections. Extract Child Age range if mentioned (e.g., "0-12 years"). If not mentioned, leave it out.
 - Extract surcharges: look for "Surcharge", "Phụ thu", holiday fees, festival charges, child policies. Do not include additional charges for optional services (e.g., extra services that are only charged if requested). Surcharges should only represent mandatory additional charges on the room rate during holidays or special periods.
 - Extract child pricing policies as surcharges with age ranges in description
 - Additional Breakfast prices: if mentioned, include in breakfastWithoutExtraBed field
@@ -303,16 +395,41 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                     "hotelName": "EDEN OCEAN VIEW HOTEL",
                     "starsCategory": 4,
                     "vat": 1,
+                    "childPolicies": ["Children under 6 years old: Free", "Children 6-12 years old: VND 200,000/room/night"],
                     "promotions": ["F.O.C 16-1 Maximum 4 rooms", "Rates inclusive of breakfast, 5% service charge and government tax"],
+                    markets: ["Domestic", "Indian", "Korean", "Chinese"],
+                    cancellationPolicys: ["Free cancellation 7 days before check-in", "No show or early departure will be charged 100% of the total amount"],
+                    galaDinner: {
                     "roomCategories": [
                       {
                         "category": "Classic Double",
                         "fromDate": "01-01-2025",
                         "toDate": "20-04-2025",
                         "price": 750000,
+                        "season": "Low Season",
                         "extraBed": {
                           "adult": 300000,
-                          "child": 150000
+                          "child": 150000,
+                           "childAgeRange": "0-12 years",
+                          "breakfastWithoutExtraBed": 100000
+
+                        },
+                        maxOccupancy: "2A/ 1A+1C",
+                      
+                        breakfast: {
+                          "child": 100000,    
+                          "childAgeRange": "0-12 years",
+                          "noofChildren": 1
+                        },
+                        fullBoard: {
+                          "child": 200000,      
+                          "adult": 400000,
+                          "childAgeRange": "0-12 years"
+                        },
+                        halfBoard: {
+                          "child": 150000,      
+                          "adult": 300000,
+                          "childAgeRange": "0-12 years"
                         },
                         "meals": "Breakfast",
                         "surcharge": [
@@ -333,17 +450,23 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                   {
                     "hotelName": "EDEN BEACH RESORT",
                     "starsCategory": 5,
-                    "vat": 1,
+                    "vat": 1.05,
+                    "childPolicies": ["Children under 6 years old: Free", "Children 6-12 years old: VND 300,000/room/night"],
                     "promotions": ["Early booking discount"],
+                    markets: ["Domestic", "International"],
+                    cancellationPolicys: ["Free cancellation 14 days before check-in" ],
                     "roomCategories": [
                       {
                         "category": "Deluxe Room",
                         "fromDate": "01-01-2025",
                         "toDate": "20-04-2025",
                         "price": 1200000,
+                        "season": "High Season",
                         "extraBed": {
                           "adult": 400000,
-                          "child": 200000
+                          "child": 200000,
+                          "childAgeRange": "0-12 years",
+                          "breakfastWithoutExtraBed": 100000
                         },
                         "meals": "Breakfast",
                         "surcharge": []
@@ -367,6 +490,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
             console.log("AI token usage:", result.response.usageMetadata);
         }
         const responseText = result.response.text();
+        console.log("Raw AI response:", responseText);
         if (!responseText || responseText.trim() === "") {
             throw new Error("Empty response from AI model");
         }
@@ -379,14 +503,16 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                 starsCategory: hotel.starsCategory,
                 vat: hotel.vat,
                 galaDinner: hotel.galaDinner,
-                promotions: hotel.promotions
+                promotions: hotel.promotions,
+                cancellationPolicys: hotel.cancellationPolicys,
+                markets: hotel.markets,
+                childPolicies: hotel.childPolicies
             },
             roomCategories: hotel.roomCategories
         }));
         // Process each hotel separately
         for (const hotelData of hotelsToCreate) {
-            const combinedHotels = hotelData.roomCategories.map(roomCategory => (Object.assign({ hotelName: hotelData.hotelInfo.hotelName, starsCategory: hotelData.hotelInfo.starsCategory, vat: hotelData.hotelInfo.vat, galaDinner: hotelData.hotelInfo.galaDinner, promotions: hotelData.hotelInfo.promotions }, roomCategory)));
-            console.log(`Creating hotels for ${hotelData.hotelInfo.hotelName} with data:`, combinedHotels);
+            const combinedHotels = hotelData.roomCategories.map(roomCategory => (Object.assign({ hotelName: hotelData.hotelInfo.hotelName, starsCategory: hotelData.hotelInfo.starsCategory, vat: hotelData.hotelInfo.vat, galaDinner: hotelData.hotelInfo.galaDinner, promotions: hotelData.hotelInfo.promotions, cancellationPolicys: hotelData.hotelInfo.cancellationPolicys, markets: hotelData.hotelInfo.markets, childPolicies: hotelData.hotelInfo.childPolicies }, roomCategory)));
             // Create hotels for this specific hotel
             const createResult = yield (0, api_1.createHotels)({
                 hotels: combinedHotels,

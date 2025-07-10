@@ -3,6 +3,7 @@ import mongoose, { Document, Schema, Model } from "mongoose";
 export interface IExtraBed {
   adult: number;
   child: number;
+  childAgeRange?: string; // e.g., "0-12 years"
   breakfastWithoutExtraBed?: number; // Optional, can be added later
 }
 
@@ -21,14 +22,35 @@ export interface ISurcharge {
 
 export interface IHotel extends Document {
   supplierId?: string;
+  _id: string;
   hotelName: string;
-  market: string; // e.g., "Europe", "Asia"
   starsCategory: number;
   country: string;
+  maxOccupancy?: string; 
+  breakfast?: {
+    child?: number; 
+    childAgeRange?: string; 
+    noofChildren?: number; 
+  };
+  fullBoard?: {
+    child?: number; 
+    adult?: number; 
+    childAgeRange?: string; 
+  };
+  halfBoard?: {
+    child?: number;
+    adult?: number;
+    childAgeRange?: string; 
+
+  };
   vat?: number; // Optional, can be added later
   surcharge?: ISurcharge[];
   currency: string; // Optional, can be added later
   city: string;
+  season?: string; // Optional, can be added later
+  markets?: string[]; // Optional, can be added later
+  cancellationPolicys?: string[]; // Optional, can be added later
+  childPolicies?: string[]; // Optional, can be added later
   category: string;
   fromDate: string;
   toDate: string;
@@ -58,6 +80,9 @@ const ExtraBedSchema = new Schema(
       type: Number,
 
       min: 0,
+    },
+    childAgeRange: {
+      type: String,
     },
     breakfastWithoutExtraBed: {
       type: Number,
@@ -117,12 +142,66 @@ const HotelSchema: Schema = new Schema(
     currency: {
       type: String,
     },
-    // market: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    //   index: true,
-    // },
+    season: {
+      type: String,
+      trim: true,
+    },
+    maxOccupancy: {
+      type: String,
+      trim: true,
+    },
+    breakfast: {
+      child:{
+        type: Number,
+        trim: true,
+      },
+      childAgeRange: {
+        type: String,
+        trim: true,   
+      },
+      noofChildren: {
+        type: Number,
+        min: 0, 
+      },
+    },  
+    fullBoard: {
+      child: {
+        type: Number,
+      },
+      adult:{
+        type: Number,
+        trim: true, 
+      },
+      childAgeRange: {
+        type: String,
+        trim: true,
+      },
+    },
+    halfBoard: {
+      child: {
+        type: Number,
+        trim: true,
+      },
+      adult: {
+        type: Number,
+        trim: true,
+      },
+      childAgeRange: {
+        type: String,
+        trim: true,
+      },
+    },
+    markets: {
+      type: [String], 
+
+      trim: true,
+    },
+    childPolicies: {
+      type: [String],
+
+      trim: true,
+    },
+  
     hotelName: {
       type: String,
       required: true,
@@ -158,6 +237,11 @@ const HotelSchema: Schema = new Schema(
       type: String,
 
       trim: true,
+    },
+    cancellationPolicys: {
+      type: [String],
+      trim: true,
+
     },
     fromDate: {
       type: Date,

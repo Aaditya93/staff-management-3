@@ -33,6 +33,9 @@ const ExtraBedSchema = new mongoose_1.Schema({
         type: Number,
         min: 0,
     },
+    childAgeRange: {
+        type: String,
+    },
     breakfastWithoutExtraBed: {
         type: Number,
         default: false,
@@ -81,12 +84,63 @@ const HotelSchema = new mongoose_1.Schema({
     currency: {
         type: String,
     },
-    // market: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    //   index: true,
-    // },
+    season: {
+        type: String,
+        trim: true,
+    },
+    maxOccupancy: {
+        type: String,
+        trim: true,
+    },
+    breakfast: {
+        child: {
+            type: Number,
+            trim: true,
+        },
+        childAgeRange: {
+            type: String,
+            trim: true,
+        },
+        noofChildren: {
+            type: Number,
+            min: 0,
+        },
+    },
+    fullBoard: {
+        child: {
+            type: Number,
+        },
+        adult: {
+            type: Number,
+            trim: true,
+        },
+        childAgeRange: {
+            type: String,
+            trim: true,
+        },
+    },
+    halfBoard: {
+        child: {
+            type: Number,
+            trim: true,
+        },
+        adult: {
+            type: Number,
+            trim: true,
+        },
+        childAgeRange: {
+            type: String,
+            trim: true,
+        },
+    },
+    markets: {
+        type: [String],
+        trim: true,
+    },
+    childPolicies: {
+        type: [String],
+        trim: true,
+    },
     hotelName: {
         type: String,
         required: true,
@@ -120,6 +174,10 @@ const HotelSchema = new mongoose_1.Schema({
     },
     category: {
         type: String,
+        trim: true,
+    },
+    cancellationPolicys: {
+        type: [String],
         trim: true,
     },
     fromDate: {

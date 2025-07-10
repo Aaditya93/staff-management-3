@@ -26,7 +26,7 @@ function parseDDMMYYYY(dateStr) {
     return new Date(Number(year), Number(month) - 1, Number(day));
 }
 const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     try {
         if (!input || !input.hotels || !Array.isArray(input.hotels)) {
             return {
@@ -45,6 +45,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
         let newRecords = 0;
         let updatedRecords = 0;
         const errors = [];
+        console.log(hotels);
         for (const hotelData of hotels) {
             try {
                 // Prepare hotel document - each record represents one room category
@@ -52,8 +53,8 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                     supplierId: supplierId || hotelData.supplierId,
                     hotelName: hotelData.hotelName.trim(),
                     starsCategory: hotelData.starsCategory,
-                    country: country || hotelData.country || "Unknown",
-                    city: city || hotelData.city || "Unknown",
+                    country: country || hotelData.country || "-",
+                    city: city || hotelData.city || "-",
                     category: hotelData.category.trim(),
                     fromDate: parseDDMMYYYY(hotelData.fromDate.trim()),
                     toDate: parseDDMMYYYY(hotelData.toDate.trim()),
@@ -63,7 +64,34 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                         breakfastWithoutExtraBed: ((_a = hotelData.extraBed) === null || _a === void 0 ? void 0 : _a.breakfastWithoutExtraBed) || 0,
                         adult: ((_b = hotelData.extraBed) === null || _b === void 0 ? void 0 : _b.adult) || 0,
                         child: ((_c = hotelData.extraBed) === null || _c === void 0 ? void 0 : _c.child) || 0,
+                        childAgeRange: (_d = hotelData.extraBed) === null || _d === void 0 ? void 0 : _d.childAgeRange,
                     },
+                    fullBoard: hotelData.fullBoard
+                        ? {
+                            child: hotelData.fullBoard.child,
+                            adult: hotelData.fullBoard.adult,
+                            childAgeRange: hotelData.fullBoard.childAgeRange,
+                        }
+                        : undefined,
+                    halfBoard: hotelData.halfBoard
+                        ? {
+                            child: hotelData.halfBoard.child,
+                            adult: hotelData.halfBoard.adult,
+                            childAgeRange: hotelData.halfBoard.childAgeRange,
+                        }
+                        : undefined,
+                    breakfast: hotelData.breakfast
+                        ? {
+                            child: hotelData.breakfast.child,
+                            childAgeRange: hotelData.breakfast.childAgeRange,
+                            noofChildren: hotelData.breakfast.noofChildren,
+                        }
+                        : undefined,
+                    season: hotelData.season,
+                    maxOccupancy: hotelData.maxOccupancy,
+                    childPolicies: hotelData.childPolicies,
+                    markets: hotelData.markets,
+                    cancellationPolicys: hotelData.cancellationPolicys,
                     meals: hotelData.meals,
                     galaDinner: hotelData.galaDinner,
                     promotions: hotelData.promotions || [],
@@ -74,6 +102,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                 };
                 // Create new hotel room category record
                 const result = yield hotel_1.default.create(hotelDocument);
+                console.log("Created hotel record:", result);
                 newRecords++;
             }
             catch (error) {

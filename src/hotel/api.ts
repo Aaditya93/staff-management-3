@@ -7,6 +7,7 @@ export interface ExtraBedData {
   adult: number;
   breakfastWithoutExtraBed?: number; // Optional, can be added later
   child: number;
+  childAgeRange?: string; // Optional, can be added later
 }
 
 export interface GalaDinnerData {
@@ -39,6 +40,27 @@ export interface HotelData {
   toDate: string;
   price: number;
   currency?: string;
+  fullBoard?: {
+    child?: number; // Optional, can be added later
+    adult?: number; // Optional, can be added later
+    childAgeRange?: string; // Optional, can be added later
+  };
+  halfBoard?: {
+    child?: number; // Optional, can be added later
+    adult?: number; // Optional, can be added later     
+
+    childAgeRange?: string; // Optional, can be added later
+  };
+  breakfast?: {
+    child?: number; // Optional, can be added later
+    childAgeRange?: string; // Optional, can be added later   
+    noofChildren?: number; // Optional, can be added later
+  };
+  maxOccupancy?: string; // Optional, can be added later
+  season?: string; // Optional, can be added later
+  markets?: string[]; // Optional, can be added later
+  cancellationPolicys?: string[]; // Optional, can be added later
+  childPolicies?: string[]; // Optional, can be added later
   extraBed: ExtraBedData;
   meals: string;
   galaDinner?: GalaDinnerData;
@@ -90,9 +112,11 @@ export const createHotels = async (
       };
     }
 
+
     let newRecords = 0;
     let updatedRecords = 0;
     const errors: string[] = [];
+    console.log(hotels)
 
     for (const hotelData of hotels) {
       try {
@@ -101,8 +125,8 @@ export const createHotels = async (
           supplierId: supplierId || hotelData.supplierId,
           hotelName: hotelData.hotelName.trim(),
           starsCategory: hotelData.starsCategory,
-          country: country || hotelData.country || "Unknown",
-          city: city || hotelData.city || "Unknown",
+          country: country || hotelData.country || "-",
+          city: city || hotelData.city || "-",
           category: hotelData.category.trim(),
           fromDate: parseDDMMYYYY(hotelData.fromDate.trim()),
           toDate: parseDDMMYYYY(hotelData.toDate.trim()),
@@ -113,7 +137,35 @@ export const createHotels = async (
               hotelData.extraBed?.breakfastWithoutExtraBed || 0,
             adult: hotelData.extraBed?.adult || 0,
             child: hotelData.extraBed?.child || 0,
+            childAgeRange: hotelData.extraBed?.childAgeRange ,
           },
+          fullBoard: hotelData.fullBoard
+            ? {
+                child: hotelData.fullBoard.child ,
+                adult: hotelData.fullBoard.adult ,
+                childAgeRange: hotelData.fullBoard.childAgeRange ,
+              }
+            : undefined,
+          halfBoard: hotelData.halfBoard
+            ? {
+                child: hotelData.halfBoard.child ,      
+                adult: hotelData.halfBoard.adult ,
+                childAgeRange: hotelData.halfBoard.childAgeRange ,
+              }
+            : undefined,
+          breakfast: hotelData.breakfast
+            ? {
+                child: hotelData.breakfast.child ,
+                childAgeRange: hotelData.breakfast.childAgeRange ,
+                noofChildren: hotelData.breakfast.noofChildren ,
+              }
+            : undefined,
+          season : hotelData.season ,
+
+          maxOccupancy: hotelData.maxOccupancy ,
+          childPolicies: hotelData.childPolicies ,
+          markets: hotelData.markets ,
+          cancellationPolicys: hotelData.cancellationPolicys ,
           meals: hotelData.meals,
           galaDinner: hotelData.galaDinner,
           promotions: hotelData.promotions || [],
@@ -125,6 +177,7 @@ export const createHotels = async (
 
         // Create new hotel room category record
         const result = await Hotel.create(hotelDocument);
+console.log("Created hotel record:", result);
  
 
         newRecords++;
