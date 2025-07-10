@@ -73,7 +73,7 @@ const generationConfig = {
                             items: {
                                 type: "string",
                             },
-                            description: "Markets where the hotel operates (e.g., 'Domestic', 'International', 'Indian','Korean', 'Chinese'). If not mentioned, leave it empty.",
+                            description: "Markets where the hotel operates (e.g. 'Indian','Korean', 'Chinese'). If not mentioned, leave it empty. Only Include Countries or regions where the hotel is actively marketed or operates.",
                         },
                         hotelName: {
                             type: "string",
@@ -124,7 +124,8 @@ const generationConfig = {
                                     "category",
                                     "fromDate",
                                     "toDate",
-                                    "price",
+                                    "inboundPrice",
+                                    "domesticPrice",
                                     "extraBed",
                                     "meals",
                                     "surcharge",
@@ -209,9 +210,13 @@ const generationConfig = {
                                         type: "string",
                                         description: "End date of pricing period in DD-MM-YYYY format (e.g., '01-09-2025')",
                                     },
-                                    price: {
+                                    inboundPrice: {
                                         type: "number",
-                                        description: "Base room price",
+                                        description: "Base room price for International Guest. If not mentioned Use Domestic Price or the price mentioned in the document",
+                                    },
+                                    domesticPrice: {
+                                        type: "number",
+                                        description: "Base room price for Domestic Guest. If not mentioned Use Inbound Price or the price mentioned in the document",
                                     },
                                     extraBed: {
                                         type: "object",
@@ -369,6 +374,7 @@ Rules:
 - Only use low season and high season prices, ignore walk-in prices
 - MUST create separate hotel objects for EACH distinct hotel found in the PDF
 - If you find "Hotel A" and "Hotel B" in the same PDF, create 2 separate hotel objects
+- If Domestic and Inbound prices are mentioned, use them as separate fields (inboundPrice and domesticPrice)
 - Even if hotels are from the same company/group, treat each hotel as a separate entity
 - Carefully read through ALL pages to identify every hotel mentioned
 - Look for different hotel names, addresses, or clear section breaks to identify separate hotels
@@ -405,7 +411,8 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                         "category": "Classic Double",
                         "fromDate": "01-01-2025",
                         "toDate": "20-04-2025",
-                        "price": 750000,
+                        "inboundPrice": 750000,
+                        "domesticPrice": 700000,
                         "season": "Low Season",
                         "extraBed": {
                           "adult": 300000,
@@ -460,7 +467,8 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                         "category": "Deluxe Room",
                         "fromDate": "01-01-2025",
                         "toDate": "20-04-2025",
-                        "price": 1200000,
+                        "inboundPrice": 1200000,
+                        "domesticPrice": 1150000,
                         "season": "High Season",
                         "extraBed": {
                           "adult": 400000,

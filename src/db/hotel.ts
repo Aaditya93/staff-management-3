@@ -54,7 +54,8 @@ export interface IHotel extends Document {
   category: string;
   fromDate: string;
   toDate: string;
-  price: number;
+  inboundPrice: number;
+  domesticPrice: number;
   extraBed: IExtraBed;
   meals: string;
   galaDinner?: IGalaDinner;
@@ -249,8 +250,13 @@ const HotelSchema: Schema = new Schema(
     toDate: {
       type: Date,
     },
-    price: {
+    inboundPrice: {
       type: Number,
+
+      min: 0,
+    },
+    domesticPrice: {
+      type: Number,   
 
       min: 0,
     },

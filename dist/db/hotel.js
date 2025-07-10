@@ -186,7 +186,11 @@ const HotelSchema = new mongoose_1.Schema({
     toDate: {
         type: Date,
     },
-    price: {
+    inboundPrice: {
+        type: Number,
+        min: 0,
+    },
+    domesticPrice: {
         type: Number,
         min: 0,
     },

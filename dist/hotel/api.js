@@ -58,7 +58,8 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                     category: hotelData.category.trim(),
                     fromDate: parseDDMMYYYY(hotelData.fromDate.trim()),
                     toDate: parseDDMMYYYY(hotelData.toDate.trim()),
-                    price: hotelData.price,
+                    inboundPrice: hotelData.inboundPrice,
+                    domesticPrice: hotelData.domesticPrice,
                     currency: currency || hotelData.currency,
                     extraBed: {
                         breakfastWithoutExtraBed: ((_a = hotelData.extraBed) === null || _a === void 0 ? void 0 : _a.breakfastWithoutExtraBed) || 0,
