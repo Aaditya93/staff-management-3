@@ -6,9 +6,9 @@ import {
 } from "./sqs/sqs";
 import { deleteMessageFromQueue } from "./sqs/sqs";
 import { processIncomingEmail } from "./receive-email";
-// Initialize Express app
+
 const app = express();
-const PORT = process.env.CONSUMER_PORT || 3002;
+const PORT = process.env.CONSUMER_PORT || 3003;
 
 // Middleware for parsing JSON
 app.use(express.json());
