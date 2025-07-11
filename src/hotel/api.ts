@@ -38,6 +38,7 @@ export interface HotelData {
   category: string;
   fromDate: string;
   toDate: string;
+  noofChildren?: number; // Optional, can be added later
   fitPrice?: number; // Optional, can be added later
   gitPrice?: number; // Optional, can be added later
   fitGitCondition?: string; // Optional, can be added later
@@ -190,6 +191,7 @@ export const createHotels = async (
           markets: hotelData.markets ,
           cancellationPolicys: hotelData.cancellationPolicys ,
           meals: hotelData.meals,
+          noofChildren: hotelData.noofChildren ,
           galaDinner: hotelData.galaDinner,
           promotions: hotelData.promotions || [],
           vat: hotelData.vat || undefined,
@@ -200,7 +202,7 @@ export const createHotels = async (
 
         // Create new hotel room category record
         const result = await Hotel.create(hotelDocument);
-console.log("Created hotel record:", result);
+// console.log("Created hotel record:", result);
  
 
         newRecords++;

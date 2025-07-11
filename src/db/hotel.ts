@@ -11,6 +11,8 @@ export interface IGalaDinner {
   adult?: number;
   child?: number;
   date?: string;
+  description?: string; // e.g., "Christmas gala dinner"
+
   childAgeRange?: string; // e.g., "0-12 years"
 }
 
@@ -27,7 +29,7 @@ export interface IHotel extends Document {
   starsCategory: number;
   country: string;
   maxOccupancy?: string; 
-  reservationEmail?: string; // Optional, can be added later
+  reservationEmail?: string; 
   allInclusive?: {
     child?: number; 
     adult?: number; 
@@ -35,8 +37,10 @@ export interface IHotel extends Document {
   };
   breakfast?: {
     child?: number; 
+    adult?: number;
+
     childAgeRange?: string; 
-    noofChildren?: number; 
+
   };
   fullBoard?: {
     child?: number; 
@@ -53,12 +57,12 @@ export interface IHotel extends Document {
   surcharge?: ISurcharge[];
   fitPrice?: number; // Optional, can be added later
   gitPrice?: number; // Optional, can be added later
-  currency: string; // Optional, can be added later
+  currency: string; 
   city: string;
-  season?: string; // Optional, can be added later
-  markets?: string[]; // Optional, can be added later
-  cancellationPolicys?: string[]; // Optional, can be added later
-  childPolicies?: string[]; // Optional, can be added later
+  season?: string;
+  markets?: string[]; 
+  cancellationPolicys?: string[]; 
+  childPolicies?: string[];
   category: string;
   fromDate: string;
   toDate: string;
@@ -66,7 +70,8 @@ export interface IHotel extends Document {
   domesticPrice: number;
   extraBed: IExtraBed;
   meals: string;
-  galaDinner?: IGalaDinner;
+   noofChildren: number; // Optional, can be added later
+  galaDinner?: IGalaDinner[];
   promotions: string[];
   isActive?: boolean;
   fitGitCondition?: string; // Optional, can be added later
@@ -171,10 +176,7 @@ const HotelSchema: Schema = new Schema(
         type: String,
         trim: true,   
       },
-      noofChildren: {
-        type: Number,
-        min: 0, 
-      },
+     
     },  
     fullBoard: {
       child: {
@@ -310,8 +312,14 @@ const HotelSchema: Schema = new Schema(
       type: String,
       trim: true,
     },
+     noofChildren: {
+        type: Number,
+        min: 0, 
+      },
     galaDinner: {
-      type: GalaDinnerSchema,
+      type: [GalaDinnerSchema],
+      default: [],
+      trim: true,
     },
     promotions: {
       type: [String],

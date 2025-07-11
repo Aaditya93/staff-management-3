@@ -101,10 +101,6 @@ const HotelSchema = new mongoose_1.Schema({
             type: String,
             trim: true,
         },
-        noofChildren: {
-            type: Number,
-            min: 0,
-        },
     },
     fullBoard: {
         child: {
@@ -231,8 +227,14 @@ const HotelSchema = new mongoose_1.Schema({
         type: String,
         trim: true,
     },
+    noofChildren: {
+        type: Number,
+        min: 0,
+    },
     galaDinner: {
-        type: GalaDinnerSchema,
+        type: [GalaDinnerSchema],
+        default: [],
+        trim: true,
     },
     promotions: {
         type: [String],

@@ -105,6 +105,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                     markets: hotelData.markets,
                     cancellationPolicys: hotelData.cancellationPolicys,
                     meals: hotelData.meals,
+                    noofChildren: hotelData.noofChildren,
                     galaDinner: hotelData.galaDinner,
                     promotions: hotelData.promotions || [],
                     vat: hotelData.vat || undefined,
@@ -114,7 +115,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                 };
                 // Create new hotel room category record
                 const result = yield hotel_1.default.create(hotelDocument);
-                console.log("Created hotel record:", result);
+                // console.log("Created hotel record:", result);
                 newRecords++;
             }
             catch (error) {
