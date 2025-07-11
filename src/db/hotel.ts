@@ -45,6 +45,8 @@ export interface IHotel extends Document {
   };
   vat?: number; // Optional, can be added later
   surcharge?: ISurcharge[];
+  fitPrice?: number; // Optional, can be added later
+  gitPrice?: number; // Optional, can be added later
   currency: string; // Optional, can be added later
   city: string;
   season?: string; // Optional, can be added later
@@ -61,6 +63,7 @@ export interface IHotel extends Document {
   galaDinner?: IGalaDinner;
   promotions: string[];
   isActive?: boolean;
+  fitGitCondition?: string; // Optional, can be added later
 
   ratings?: Array<{
     userId: string;
@@ -252,13 +255,31 @@ const HotelSchema: Schema = new Schema(
     },
     inboundPrice: {
       type: Number,
+      index: true,
 
       min: 0,
     },
     domesticPrice: {
-      type: Number,   
+      type: Number, 
+      index: true,  
 
       min: 0,
+    },
+    fitPrice:{
+      type: Number,
+      index: true,
+      min: 0,
+
+
+    },
+    gitPrice:{
+      type: Number,
+      index: true,
+      min: 0,
+    },
+    fitGitCondition: {
+      type: String,
+      trim: true,   
     },
     extraBed: {
       type: ExtraBedSchema,

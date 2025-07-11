@@ -188,11 +188,27 @@ const HotelSchema = new mongoose_1.Schema({
     },
     inboundPrice: {
         type: Number,
+        index: true,
         min: 0,
     },
     domesticPrice: {
         type: Number,
+        index: true,
         min: 0,
+    },
+    fitPrice: {
+        type: Number,
+        index: true,
+        min: 0,
+    },
+    gitPrice: {
+        type: Number,
+        index: true,
+        min: 0,
+    },
+    fitGitCondition: {
+        type: String,
+        trim: true,
     },
     extraBed: {
         type: ExtraBedSchema,

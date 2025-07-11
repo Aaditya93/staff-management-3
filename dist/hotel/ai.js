@@ -126,6 +126,9 @@ const generationConfig = {
                                     "toDate",
                                     "inboundPrice",
                                     "domesticPrice",
+                                    "fitPrice",
+                                    "gitPrice",
+                                    "fitGitCondition",
                                     "extraBed",
                                     "meals",
                                     "surcharge",
@@ -212,11 +215,23 @@ const generationConfig = {
                                     },
                                     inboundPrice: {
                                         type: "number",
-                                        description: "Base room price for International Guest. If not mentioned Use Domestic Price or the price mentioned in the document",
+                                        description: "Base room price for International Guest. If not mentioned keep it empty.",
                                     },
                                     domesticPrice: {
                                         type: "number",
-                                        description: "Base room price for Domestic Guest. If not mentioned Use Inbound Price or the price mentioned in the document",
+                                        description: "Base room price for Domestic Guest. If not mentioned keep it empty.",
+                                    },
+                                    fitPrice: {
+                                        type: "number",
+                                        description: "Base room price for FIT Guest. FIT means price for small group. If not mentioned keep it empty.",
+                                    },
+                                    gitPrice: {
+                                        type: "number",
+                                        description: "Base room price for GIT Guest. GIT means price for large group. If not mentioned keep it empty.",
+                                    },
+                                    fitGitCondition: {
+                                        type: "string",
+                                        description: "Conditions for FIT/GIT pricing (e.g., 'Minimum 10 rooms for GIT pricing'). It should write it like this FIT: < 6 rooms. GIT: >= 6 rooms  If not mentioned, leave it empty.",
                                     },
                                     extraBed: {
                                         type: "object",
@@ -374,7 +389,7 @@ Rules:
 - Only use low season and high season prices, ignore walk-in prices
 - MUST create separate hotel objects for EACH distinct hotel found in the PDF
 - If you find "Hotel A" and "Hotel B" in the same PDF, create 2 separate hotel objects
-- If Domestic and Inbound prices are mentioned, use them as separate fields (inboundPrice and domesticPrice)
+- If Domestic , Inbound prices , FIT Prices , GIT Prices are not mentioned, keep them empty
 - Even if hotels are from the same company/group, treat each hotel as a separate entity
 - Carefully read through ALL pages to identify every hotel mentioned
 - Look for different hotel names, addresses, or clear section breaks to identify separate hotels
@@ -413,6 +428,9 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                         "toDate": "20-04-2025",
                         "inboundPrice": 750000,
                         "domesticPrice": 700000,
+                        "fitPrice": 700000,
+                        "gitPrice": 700000,
+                        "fitGitCondition": "Minimum 10 rooms for GIT pricing",
                         "season": "Low Season",
                         "extraBed": {
                           "adult": 300000,

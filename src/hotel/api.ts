@@ -38,6 +38,9 @@ export interface HotelData {
   category: string;
   fromDate: string;
   toDate: string;
+  fitPrice?: number; // Optional, can be added later
+  gitPrice?: number; // Optional, can be added later
+  fitGitCondition?: string; // Optional, can be added later
   inboundPrice: number; // Optional, can be added later
   domesticPrice: number; // Optional, can be added later
   currency?: string;
@@ -133,6 +136,9 @@ export const createHotels = async (
           toDate: parseDDMMYYYY(hotelData.toDate.trim()),
           inboundPrice: hotelData.inboundPrice ,
           domesticPrice: hotelData.domesticPrice ,
+          fitPrice: hotelData.fitPrice ,
+          gitPrice: hotelData.gitPrice ,
+          fitGitCondition: hotelData.fitGitCondition,
           currency: currency || hotelData.currency,
           extraBed: {
             breakfastWithoutExtraBed:

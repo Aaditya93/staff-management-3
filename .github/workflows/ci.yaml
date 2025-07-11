@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: SSH and deploy
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" > keyfile
+        chmod 600 keyfile
+        mkdir -p ~/.ssh
+        cp known_hosts ~/.ssh/known_hosts
+        ssh -t -i keyfile ubuntu@ec2-13-211-144-149.ap-southeast-2.compute.amazonaws.com "sudo bash ~/deploy.sh"
+
+    - name: update systemd service
+      run: |
+        cd staff-management-3
+        sudo pm2 delete all
+        git pull origin main
+        pm2 start dist/server.js --name “email-scanner-server”
+
+    - name: Cleanup
+      run: |
+        rm keyfile
+        echo "Deployment completed successfully."
+        echo "Systemd service updated successfully."
+        echo "PM2 processes restarted successfully."
+        echo "Code pulled from main branch successfully."
+        echo "Cleanup completed."
