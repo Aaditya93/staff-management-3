@@ -45,7 +45,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
         let newRecords = 0;
         let updatedRecords = 0;
         const errors = [];
-        console.log(hotels);
+        // console.log(hotels)
         for (const hotelData of hotels) {
             try {
                 // Prepare hotel document - each record represents one room category
@@ -115,7 +115,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                 };
                 // Create new hotel room category record
                 const result = yield hotel_1.default.create(hotelDocument);
-                // console.log("Created hotel record:", result);
+                console.log("Created hotel record:", result);
                 newRecords++;
             }
             catch (error) {

@@ -15,6 +15,7 @@ export interface GalaDinnerData {
   child?: number;
   date?: string;
   childAgeRange?: string;
+  description?: string; // e.g., "Christmas gala dinner"
 }
 function parseDDMMYYYY(dateStr: string): Date | undefined {
   if (!dateStr) return undefined;
@@ -75,7 +76,7 @@ export interface HotelData {
   childPolicies?: string[]; // Optional, can be added later
   extraBed: ExtraBedData;
   meals: string;
-  galaDinner?: GalaDinnerData;
+  galaDinner?: GalaDinnerData[];
   promotions?: string[];
   vat?: number; // Optional VAT percentage
   surcharge?: SurchargeData[]; // Optional surcharge array
@@ -128,7 +129,7 @@ export const createHotels = async (
     let newRecords = 0;
     let updatedRecords = 0;
     const errors: string[] = [];
-    console.log(hotels)
+    // console.log(hotels)
 
     for (const hotelData of hotels) {
       try {
@@ -202,7 +203,7 @@ export const createHotels = async (
 
         // Create new hotel room category record
         const result = await Hotel.create(hotelDocument);
-// console.log("Created hotel record:", result);
+console.log("Created hotel record:", result);
  
 
         newRecords++;

@@ -21,7 +21,7 @@ jobs:
         chmod 600 keyfile.pem
         ssh -T -o StrictHostKeyChecking=no -i keyfile.pem ubuntu@ec2-13-213-46-96.ap-southeast-1.compute.amazonaws.com << 'EOF'
           cd staff-management-3
-          sudo pm2 delete all || true
+          sudo pm2 delete all 
           git pull origin main
           pm2 start dist/server.js --name email-scanner-server
         EOF

@@ -19,7 +19,7 @@ export interface IGalaDinner {
 export interface ISurcharge {
   percentage: number; // e.g., 10 for 10%
   date: string[]; // e.g., ["2023-12-25", "2023-12-31"]
-  descirption: string; // e.g., "Holiday surcharge"
+  description: string; // e.g., "Holiday surcharge"
 }
 
 export interface IHotel extends Document {
@@ -134,6 +134,10 @@ const GalaDinnerSchema = new Schema(
     date: {
       type: String,
 
+      trim: true,
+    },
+    description: {
+      type: String,
       trim: true,
     },
     childAgeRange: {

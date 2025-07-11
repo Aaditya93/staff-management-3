@@ -470,14 +470,14 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                           "adult": 300000,
                           "childAgeRange": "0-12 years"
                         },
-                   "galaDinner": [
-              {
-                "adult": 500000,
-                "child": 250000,
-                "date": "01-01-2025",
-                "description": "New Year gala dinner"
-              }
-            ],
+                       "galaDinner": [
+                      {
+                        "adult": 500000,
+                        "child": 250000,
+                        "date": "01-01-2025",
+                        "description": "New Year gala dinner"
+                      }
+                    ],
                     "roomCategories": [
                       {
                         "category": "Classic Double",
@@ -565,7 +565,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
             throw new Error("Empty response from AI model");
         }
         const jsonResponse = JSON.parse(responseText);
-        console.log("AI response:", jsonResponse);
+        // console.log("AI response:", jsonResponse);
         // Keep hotels as separate objects
         const hotelsToCreate = jsonResponse.hotels.map(hotel => ({
             hotelInfo: {
@@ -597,7 +597,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                 currency: currency.trim(),
                 createdBy: createdBy.trim(),
             });
-            console.log(`Hotels created for ${hotelData.hotelInfo.hotelName}:`, createResult);
+            // console.log(`Hotels created for ${hotelData.hotelInfo.hotelName}:`, createResult);
         }
         // Clean up: delete the uploaded file from Gemini
         try {
@@ -614,7 +614,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
             console.error("Error cleaning up file:", cleanupError);
         }
         const updateStatus = yield HotelRequest_1.default.findByIdAndUpdate(requestId, { isComplete: true }, { new: true });
-        console.log("Hotel request status updated:", updateStatus);
+        // console.log("Hotel request status updated:", updateStatus);
         return;
     }
     catch (error) {
