@@ -26,7 +26,7 @@ function parseDDMMYYYY(dateStr) {
     return new Date(Number(year), Number(month) - 1, Number(day));
 }
 const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d;
+    var _a, _b, _c;
     try {
         if (!input || !input.hotels || !Array.isArray(input.hotels)) {
             return {
@@ -64,12 +64,19 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                     gitPrice: hotelData.gitPrice,
                     fitGitCondition: hotelData.fitGitCondition,
                     currency: currency || hotelData.currency,
+                    reservationEmail: hotelData.reservationEmail,
                     extraBed: {
-                        breakfastWithoutExtraBed: ((_a = hotelData.extraBed) === null || _a === void 0 ? void 0 : _a.breakfastWithoutExtraBed) || 0,
-                        adult: ((_b = hotelData.extraBed) === null || _b === void 0 ? void 0 : _b.adult) || 0,
-                        child: ((_c = hotelData.extraBed) === null || _c === void 0 ? void 0 : _c.child) || 0,
-                        childAgeRange: (_d = hotelData.extraBed) === null || _d === void 0 ? void 0 : _d.childAgeRange,
+                        adult: (_a = hotelData.extraBed) === null || _a === void 0 ? void 0 : _a.adult,
+                        child: (_b = hotelData.extraBed) === null || _b === void 0 ? void 0 : _b.child,
+                        childAgeRange: (_c = hotelData.extraBed) === null || _c === void 0 ? void 0 : _c.childAgeRange,
                     },
+                    allInclusive: hotelData.allInclusive
+                        ? {
+                            child: hotelData.allInclusive.child,
+                            adult: hotelData.allInclusive.adult,
+                            childAgeRange: hotelData.allInclusive.childAgeRange,
+                        }
+                        : undefined,
                     fullBoard: hotelData.fullBoard
                         ? {
                             child: hotelData.fullBoard.child,
@@ -87,6 +94,7 @@ const createHotels = (input) => __awaiter(void 0, void 0, void 0, function* () {
                     breakfast: hotelData.breakfast
                         ? {
                             child: hotelData.breakfast.child,
+                            adult: hotelData.breakfast.adult,
                             childAgeRange: hotelData.breakfast.childAgeRange,
                             noofChildren: hotelData.breakfast.noofChildren,
                         }

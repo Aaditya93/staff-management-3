@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { createHotels } from "./api";
 import HotelRequest from "../db/HotelRequest";
+import { all } from "axios";
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 if (!apiKey) {
@@ -41,7 +42,7 @@ const generationConfig = {
         type: "array",
         items: {
           type: "object",
-          required: ["hotelName", "starsCategory", "vat", "roomCategories","promotions", "cancellationPolicys", "markets","childPolicies"],
+          required: ["hotelName", "vat", "roomCategories","promotions", "cancellationPolicys", "markets","childPolicies", "reservationEmail"],
           properties: {
             childPolicies: {
               type: "array",
@@ -57,6 +58,10 @@ const generationConfig = {
               },
               description: "Cancellation policies for the hotel (empty array if none)",
             },
+            reservationEmail: { 
+              type: "string",
+              description: "Reservation email for the hotel. If not mentioned, leave it empty.",
+            },
             markets:{
               type: "array",
               items: {
@@ -67,10 +72,6 @@ const generationConfig = {
             hotelName: {
               type: "string",
               description: "Name of the hotel",
-            },
-            starsCategory: {
-              type: "number",
-              description: "Star rating of the hotel (e.g., 4, 5, 3)",
             },
             vat: {
               type: "number",
@@ -135,6 +136,10 @@ const generationConfig = {
                         type: "number",
                         description: "Breakfast price for child",
                       },
+                      adult:{
+                        type: "number",
+                        description: "Breakfast price for adult",
+                      },
                       childAgeRange: {
                         type: "string",
                         description: "Age range for children breakfast pricing (e.g., '0-12 years')",
@@ -182,6 +187,24 @@ const generationConfig = {
                     },
                     description: "Half board pricing information - only include if explicitly mentioned in the document",
                   },
+                  allInclusive: {
+                    type: "object",
+                    properties: {
+                      child: {
+                        type: "number",
+                        description: "All-inclusive price for child",
+                      },    
+                      adult: {
+                        type: "number",
+                        description: "All-inclusive price for adult",
+                      },
+                      childAgeRange: {
+                        type: "string",
+                        description: "Age range for children all-inclusive pricing (e.g., '0-12 years')",
+                      },
+                    },  
+                    description: "All-inclusive pricing information - only include if explicitly mentioned in the document",  
+                  },
                   maxOccupancy: {
                     type: "string",
                     description: "Maximum occupancy for the room category (e.g., ' 3A/ 2A+2C '). If not mentioned, leave it empty.",
@@ -224,7 +247,7 @@ const generationConfig = {
                   },
                   extraBed: {
                     type: "object",
-                    required: ["adult", "child" , "breakfastWithoutExtraBed", "childAgeRange"],
+                    required: ["adult", "child" , "childAgeRange"],
                     properties: {
                       adult: {
                         type: "number",
@@ -232,12 +255,9 @@ const generationConfig = {
                       },
                       child: {
                         type: "number",
-                        description: "Extra bed price for children. Always check if extra bed is available for that room category. Look for sections or keywords like 'Extrabed', 'Extra bed', 'Giường phụ'.",
+                        description: "Extra bed price for children. Always check if extra bed is available for that room category. If not mentioned , use adult price for child. ",
                       },
-                      breakfastWithoutExtraBed: {
-                        type: "number",
-                        description: "Breakfast price without extra bed (if specified, otherwise 0). Adiitional breakfast prices should be included here if mentioned in the document.",
-                      },
+                     
                       childAgeRange:{
                         type: "string",
                         description: "Age range for children applicable for extra bed pricing (e.g., '0-12 years'). If Age is Under 12 Show it as 0-11 This is optional and should only be included if specified in the document.",
@@ -295,6 +315,7 @@ export const extractHotelData = async (
   currency: string,
   requestId: string,
   createdBy: string,
+  stars: number
 ) => {
   if (!filePath) {
     throw new Error("No file path provided");
@@ -378,7 +399,7 @@ export const extractHotelData = async (
                                  {
               text: `Extract hotel data to JSON with hotels array:
 
-Each hotel object: hotelName, starsCategory (number), vat (1.1=10%, 1.2=20%, default=1), galaDinner (only if mentioned), promotions (array), roomCategories (array)
+Each hotel object: hotelName, vat (1.1=10%, 1.2=20%, default=1), galaDinner (only if mentioned), promotions (array), roomCategories (array)
 
 roomCategories (per room/period): category, fromDate/toDate (DD-MM-YYYY), price, extraBed {adult, child}, meals, surcharge (array, only if mentioned)
 
@@ -421,8 +442,9 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                 "hotels": [
                   {
                     "hotelName": "EDEN OCEAN VIEW HOTEL",
-                    "starsCategory": 4,
+
                     "vat": 1,
+                    "reservationEmail": "reservation@edenooceanhotel.com
                     "childPolicies": ["Children under 6 years old: Free", "Children 6-12 years old: VND 200,000/room/night"],
                     "promotions": ["F.O.C 16-1 Maximum 4 rooms", "Rates inclusive of breakfast, 5% service charge and government tax"],
                     markets: ["Domestic", "Indian", "Korean", "Chinese"],
@@ -443,13 +465,18 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                           "adult": 300000,
                           "child": 150000,
                            "childAgeRange": "0-12 years",
-                          "breakfastWithoutExtraBed": 100000
 
                         },
                         maxOccupancy: "2A/ 1A+1C",
+                        allInclusive: {
+                          "child": 150000,
+                          "adult": 300000,
+                          "childAgeRange": "0-12 years"
+                        },
                       
                         breakfast: {
-                          "child": 100000,    
+                          "child": 100000,   
+                          "adult": 200000, 
                           "childAgeRange": "0-12 years",
                           "noofChildren": 1
                         },
@@ -481,7 +508,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                   },
                   {
                     "hotelName": "EDEN BEACH RESORT",
-                    "starsCategory": 5,
+
                     "vat": 1.05,
                     "childPolicies": ["Children under 6 years old: Free", "Children 6-12 years old: VND 300,000/room/night"],
                     "promotions": ["Early booking discount"],
@@ -499,7 +526,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                           "adult": 400000,
                           "child": 200000,
                           "childAgeRange": "0-12 years",
-                          "breakfastWithoutExtraBed": 100000
+
                         },
                         "meals": "Breakfast",
                         "surcharge": []
@@ -543,13 +570,14 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
     const hotelsToCreate = jsonResponse.hotels.map(hotel => ({
       hotelInfo: {
         hotelName: hotel.hotelName,
-        starsCategory: hotel.starsCategory,
+        starsCategory: stars,
         vat: hotel.vat,
         galaDinner: hotel.galaDinner,
         promotions: hotel.promotions,
         cancellationPolicys: hotel.cancellationPolicys ,
         markets: hotel.markets ,
-        childPolicies: hotel.childPolicies 
+        childPolicies: hotel.childPolicies ,
+        reservationEmail: hotel.reservationEmail
       },
       roomCategories: hotel.roomCategories
     }));
@@ -558,13 +586,14 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
     for (const hotelData of hotelsToCreate) {
       const combinedHotels = hotelData.roomCategories.map(roomCategory => ({
         hotelName: hotelData.hotelInfo.hotelName,
-        starsCategory: hotelData.hotelInfo.starsCategory,
+        starsCategory: stars,
         vat: hotelData.hotelInfo.vat,
         galaDinner: hotelData.hotelInfo.galaDinner,
         promotions: hotelData.hotelInfo.promotions,
         cancellationPolicys: hotelData.hotelInfo.cancellationPolicys,
         markets: hotelData.hotelInfo.markets,
         childPolicies: hotelData.hotelInfo.childPolicies,
+        reservationEmail: hotelData.hotelInfo.reservationEmail,
         ...roomCategory
       }));
 

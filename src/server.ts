@@ -74,10 +74,10 @@ app.get("/", (req, res) => {
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), async (req, res) => {
   try {
-    const { supplierId, country, city, currency,createdBy,requestId } = req.body;
+    const { supplierId, country, city, currency,createdBy,stars,requestId } = req.body;
     const file = req.file;
 
-    if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId) {
+    if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId || !stars) {
       return res
         .status(400)
         .json({ success: false, message: "Missing required fields or file" });
@@ -92,7 +92,8 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
       city,
       currency,
       requestId,
-      createdBy
+      createdBy,
+      stars
     ).catch((error) => {
       console.error("Error in background hotel extraction:", error);
     });

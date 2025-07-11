@@ -1,11 +1,11 @@
 "use server";
 
+import { all } from "axios";
 import dbConnect from "../db/db";
 import Hotel from "../db/hotel";
 
 export interface ExtraBedData {
   adult: number;
-  breakfastWithoutExtraBed?: number; // Optional, can be added later
   child: number;
   childAgeRange?: string; // Optional, can be added later
 }
@@ -44,6 +44,7 @@ export interface HotelData {
   inboundPrice: number; // Optional, can be added later
   domesticPrice: number; // Optional, can be added later
   currency?: string;
+  reservationEmail?: string; // Optional, can be added later
   fullBoard?: {
     child?: number; // Optional, can be added later
     adult?: number; // Optional, can be added later
@@ -55,8 +56,14 @@ export interface HotelData {
 
     childAgeRange?: string; // Optional, can be added later
   };
+  allInclusive?: {
+    child?: number; // Optional, can be added later
+    adult?: number; // Optional, can be added later
+    childAgeRange?: string; // Optional, can be added later
+  };
   breakfast?: {
     child?: number; // Optional, can be added later
+    adult?: number; // Optional, can be added later
     childAgeRange?: string; // Optional, can be added later   
     noofChildren?: number; // Optional, can be added later
   };
@@ -140,13 +147,20 @@ export const createHotels = async (
           gitPrice: hotelData.gitPrice ,
           fitGitCondition: hotelData.fitGitCondition,
           currency: currency || hotelData.currency,
+          reservationEmail: hotelData.reservationEmail ,
           extraBed: {
-            breakfastWithoutExtraBed:
-              hotelData.extraBed?.breakfastWithoutExtraBed || 0,
-            adult: hotelData.extraBed?.adult || 0,
-            child: hotelData.extraBed?.child || 0,
+
+            adult: hotelData.extraBed?.adult ,
+            child: hotelData.extraBed?.child ,
             childAgeRange: hotelData.extraBed?.childAgeRange ,
           },
+          allInclusive: hotelData.allInclusive
+            ? {
+                child: hotelData.allInclusive.child ,
+                adult: hotelData.allInclusive.adult ,
+                childAgeRange: hotelData.allInclusive.childAgeRange ,   
+              } 
+            : undefined,
           fullBoard: hotelData.fullBoard
             ? {
                 child: hotelData.fullBoard.child ,
@@ -164,6 +178,7 @@ export const createHotels = async (
           breakfast: hotelData.breakfast
             ? {
                 child: hotelData.breakfast.child ,
+                adult: hotelData.breakfast.adult ,
                 childAgeRange: hotelData.breakfast.childAgeRange ,
                 noofChildren: hotelData.breakfast.noofChildren ,
               }

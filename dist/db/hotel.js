@@ -36,10 +36,6 @@ const ExtraBedSchema = new mongoose_1.Schema({
     childAgeRange: {
         type: String,
     },
-    breakfastWithoutExtraBed: {
-        type: Number,
-        default: false,
-    },
 }, { _id: false });
 const SurchargeSchema = new mongoose_1.Schema({
     percentage: {
@@ -97,6 +93,10 @@ const HotelSchema = new mongoose_1.Schema({
             type: Number,
             trim: true,
         },
+        adult: {
+            type: Number,
+            trim: true,
+        },
         childAgeRange: {
             type: String,
             trim: true,
@@ -120,6 +120,20 @@ const HotelSchema = new mongoose_1.Schema({
         },
     },
     halfBoard: {
+        child: {
+            type: Number,
+            trim: true,
+        },
+        adult: {
+            type: Number,
+            trim: true,
+        },
+        childAgeRange: {
+            type: String,
+            trim: true,
+        },
+    },
+    allInclusive: {
         child: {
             type: Number,
             trim: true,
@@ -229,6 +243,10 @@ const HotelSchema = new mongoose_1.Schema({
         type: Boolean,
         default: true,
         index: true,
+    },
+    reservationEmail: {
+        type: String,
+        trim: true,
     },
     ratings: [
         {

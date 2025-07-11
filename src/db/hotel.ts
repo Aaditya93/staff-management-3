@@ -4,7 +4,7 @@ export interface IExtraBed {
   adult: number;
   child: number;
   childAgeRange?: string; // e.g., "0-12 years"
-  breakfastWithoutExtraBed?: number; // Optional, can be added later
+
 }
 
 export interface IGalaDinner {
@@ -27,6 +27,12 @@ export interface IHotel extends Document {
   starsCategory: number;
   country: string;
   maxOccupancy?: string; 
+  reservationEmail?: string; // Optional, can be added later
+  allInclusive?: {
+    child?: number; 
+    adult?: number; 
+    childAgeRange?: string; 
+  };
   breakfast?: {
     child?: number; 
     childAgeRange?: string; 
@@ -88,10 +94,7 @@ const ExtraBedSchema = new Schema(
     childAgeRange: {
       type: String,
     },
-    breakfastWithoutExtraBed: {
-      type: Number,
-      default: false,
-    },
+    
   },
   { _id: false }
 );
@@ -159,6 +162,11 @@ const HotelSchema: Schema = new Schema(
         type: Number,
         trim: true,
       },
+      adult: {
+        type: Number,
+        trim: true,
+      },
+
       childAgeRange: {
         type: String,
         trim: true,   
@@ -182,6 +190,20 @@ const HotelSchema: Schema = new Schema(
       },
     },
     halfBoard: {
+      child: {
+        type: Number,
+        trim: true,
+      },
+      adult: {
+        type: Number,
+        trim: true,
+      },
+      childAgeRange: {
+        type: String,
+        trim: true,
+      },
+    },
+    allInclusive: {
       child: {
         type: Number,
         trim: true,
@@ -300,6 +322,11 @@ const HotelSchema: Schema = new Schema(
       type: Boolean,
       default: true,
       index: true,
+    },
+    reservationEmail: {
+      type: String,
+      trim: true,
+
     },
 
     ratings: [

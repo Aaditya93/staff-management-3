@@ -17,12 +17,12 @@ jobs:
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        echo "$SSH_PRIVATE_KEY" > keyfile
-        chmod 600 keyfile
-        ssh -o StrictHostKeyChecking=no -i keyfile ubuntu@ec2-13-213-46-96.ap-southeast-1.compute.amazonaws.com "
+        echo "$SSH_PRIVATE_KEY" > keyfile.pem
+        chmod 700 keyfile.pem
+        ssh -o StrictHostKeyChecking=no -i keyfile.pem ubuntu@ec2-13-213-46-96.ap-southeast-1.compute.amazonaws.com'
           cd staff-management-3 &&
           sudo pm2 delete all || true &&
           git pull origin main &&
           pm2 start dist/server.js --name email-scanner-server
-        "
-        rm keyfile
+        '
+        rm keyfile.pem

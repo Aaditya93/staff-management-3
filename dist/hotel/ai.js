@@ -52,7 +52,7 @@ const generationConfig = {
                 type: "array",
                 items: {
                     type: "object",
-                    required: ["hotelName", "starsCategory", "vat", "roomCategories", "promotions", "cancellationPolicys", "markets", "childPolicies"],
+                    required: ["hotelName", "vat", "roomCategories", "promotions", "cancellationPolicys", "markets", "childPolicies", "reservationEmail"],
                     properties: {
                         childPolicies: {
                             type: "array",
@@ -68,6 +68,10 @@ const generationConfig = {
                             },
                             description: "Cancellation policies for the hotel (empty array if none)",
                         },
+                        reservationEmail: {
+                            type: "string",
+                            description: "Reservation email for the hotel. If not mentioned, leave it empty.",
+                        },
                         markets: {
                             type: "array",
                             items: {
@@ -78,10 +82,6 @@ const generationConfig = {
                         hotelName: {
                             type: "string",
                             description: "Name of the hotel",
-                        },
-                        starsCategory: {
-                            type: "number",
-                            description: "Star rating of the hotel (e.g., 4, 5, 3)",
                         },
                         vat: {
                             type: "number",
@@ -146,6 +146,10 @@ const generationConfig = {
                                                 type: "number",
                                                 description: "Breakfast price for child",
                                             },
+                                            adult: {
+                                                type: "number",
+                                                description: "Breakfast price for adult",
+                                            },
                                             childAgeRange: {
                                                 type: "string",
                                                 description: "Age range for children breakfast pricing (e.g., '0-12 years')",
@@ -193,6 +197,24 @@ const generationConfig = {
                                         },
                                         description: "Half board pricing information - only include if explicitly mentioned in the document",
                                     },
+                                    allInclusive: {
+                                        type: "object",
+                                        properties: {
+                                            child: {
+                                                type: "number",
+                                                description: "All-inclusive price for child",
+                                            },
+                                            adult: {
+                                                type: "number",
+                                                description: "All-inclusive price for adult",
+                                            },
+                                            childAgeRange: {
+                                                type: "string",
+                                                description: "Age range for children all-inclusive pricing (e.g., '0-12 years')",
+                                            },
+                                        },
+                                        description: "All-inclusive pricing information - only include if explicitly mentioned in the document",
+                                    },
                                     maxOccupancy: {
                                         type: "string",
                                         description: "Maximum occupancy for the room category (e.g., ' 3A/ 2A+2C '). If not mentioned, leave it empty.",
@@ -235,7 +257,7 @@ const generationConfig = {
                                     },
                                     extraBed: {
                                         type: "object",
-                                        required: ["adult", "child", "breakfastWithoutExtraBed", "childAgeRange"],
+                                        required: ["adult", "child", "childAgeRange"],
                                         properties: {
                                             adult: {
                                                 type: "number",
@@ -243,11 +265,7 @@ const generationConfig = {
                                             },
                                             child: {
                                                 type: "number",
-                                                description: "Extra bed price for children. Always check if extra bed is available for that room category. Look for sections or keywords like 'Extrabed', 'Extra bed', 'Giường phụ'.",
-                                            },
-                                            breakfastWithoutExtraBed: {
-                                                type: "number",
-                                                description: "Breakfast price without extra bed (if specified, otherwise 0). Adiitional breakfast prices should be included here if mentioned in the document.",
+                                                description: "Extra bed price for children. Always check if extra bed is available for that room category. If not mentioned , use adult price for child. ",
                                             },
                                             childAgeRange: {
                                                 type: "string",
@@ -293,7 +311,7 @@ const generationConfig = {
         },
     },
 };
-const extractHotelData = (filePath, supplierId, country, city, currency, requestId, createdBy) => __awaiter(void 0, void 0, void 0, function* () {
+const extractHotelData = (filePath, supplierId, country, city, currency, requestId, createdBy, stars) => __awaiter(void 0, void 0, void 0, function* () {
     if (!filePath) {
         throw new Error("No file path provided");
     }
@@ -414,8 +432,9 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                 "hotels": [
                   {
                     "hotelName": "EDEN OCEAN VIEW HOTEL",
-                    "starsCategory": 4,
+
                     "vat": 1,
+                    "reservationEmail": "reservation@edenooceanhotel.com
                     "childPolicies": ["Children under 6 years old: Free", "Children 6-12 years old: VND 200,000/room/night"],
                     "promotions": ["F.O.C 16-1 Maximum 4 rooms", "Rates inclusive of breakfast, 5% service charge and government tax"],
                     markets: ["Domestic", "Indian", "Korean", "Chinese"],
@@ -436,13 +455,18 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                           "adult": 300000,
                           "child": 150000,
                            "childAgeRange": "0-12 years",
-                          "breakfastWithoutExtraBed": 100000
 
                         },
                         maxOccupancy: "2A/ 1A+1C",
+                        allInclusive: {
+                          "child": 150000,
+                          "adult": 300000,
+                          "childAgeRange": "0-12 years"
+                        },
                       
                         breakfast: {
-                          "child": 100000,    
+                          "child": 100000,   
+                          "adult": 200000, 
                           "childAgeRange": "0-12 years",
                           "noofChildren": 1
                         },
@@ -474,7 +498,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                   },
                   {
                     "hotelName": "EDEN BEACH RESORT",
-                    "starsCategory": 5,
+
                     "vat": 1.05,
                     "childPolicies": ["Children under 6 years old: Free", "Children 6-12 years old: VND 300,000/room/night"],
                     "promotions": ["Early booking discount"],
@@ -492,7 +516,7 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                           "adult": 400000,
                           "child": 200000,
                           "childAgeRange": "0-12 years",
-                          "breakfastWithoutExtraBed": 100000
+
                         },
                         "meals": "Breakfast",
                         "surcharge": []
@@ -526,19 +550,20 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
         const hotelsToCreate = jsonResponse.hotels.map(hotel => ({
             hotelInfo: {
                 hotelName: hotel.hotelName,
-                starsCategory: hotel.starsCategory,
+                starsCategory: stars,
                 vat: hotel.vat,
                 galaDinner: hotel.galaDinner,
                 promotions: hotel.promotions,
                 cancellationPolicys: hotel.cancellationPolicys,
                 markets: hotel.markets,
-                childPolicies: hotel.childPolicies
+                childPolicies: hotel.childPolicies,
+                reservationEmail: hotel.reservationEmail
             },
             roomCategories: hotel.roomCategories
         }));
         // Process each hotel separately
         for (const hotelData of hotelsToCreate) {
-            const combinedHotels = hotelData.roomCategories.map(roomCategory => (Object.assign({ hotelName: hotelData.hotelInfo.hotelName, starsCategory: hotelData.hotelInfo.starsCategory, vat: hotelData.hotelInfo.vat, galaDinner: hotelData.hotelInfo.galaDinner, promotions: hotelData.hotelInfo.promotions, cancellationPolicys: hotelData.hotelInfo.cancellationPolicys, markets: hotelData.hotelInfo.markets, childPolicies: hotelData.hotelInfo.childPolicies }, roomCategory)));
+            const combinedHotels = hotelData.roomCategories.map(roomCategory => (Object.assign({ hotelName: hotelData.hotelInfo.hotelName, starsCategory: stars, vat: hotelData.hotelInfo.vat, galaDinner: hotelData.hotelInfo.galaDinner, promotions: hotelData.hotelInfo.promotions, cancellationPolicys: hotelData.hotelInfo.cancellationPolicys, markets: hotelData.hotelInfo.markets, childPolicies: hotelData.hotelInfo.childPolicies, reservationEmail: hotelData.hotelInfo.reservationEmail }, roomCategory)));
             // Create hotels for this specific hotel
             const createResult = yield (0, api_1.createHotels)({
                 hotels: combinedHotels,
