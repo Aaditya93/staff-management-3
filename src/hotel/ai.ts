@@ -416,6 +416,7 @@ Rules:
 - Only use low season and high season prices, ignore walk-in prices
 - MUST create separate hotel objects for EACH distinct hotel found in the PDF
 - If you find "Hotel A" and "Hotel B" in the same PDF, create 2 separate hotel objects
+- Extra bed prices may vary between different room categories and hotels, so carefully check each room category and hotel for their specific extra bed pricing.
 - If Domestic , Inbound prices , FIT Prices , GIT Prices are not mentioned, keep them empty
 - Even if hotels are from the same company/group, treat each hotel as a separate entity
 - Carefully read through ALL pages to identify every hotel mentioned

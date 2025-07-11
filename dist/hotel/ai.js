@@ -390,7 +390,7 @@ const extractHotelData = (filePath, supplierId, country, city, currency, request
                         {
                             text: `Extract hotel data to JSON with hotels array:
 
-Each hotel object: hotelName, starsCategory (number), vat (1.1=10%, 1.2=20%, default=1), galaDinner (only if mentioned), promotions (array), roomCategories (array)
+Each hotel object: hotelName, vat (1.1=10%, 1.2=20%, default=1), galaDinner (only if mentioned), promotions (array), roomCategories (array)
 
 roomCategories (per room/period): category, fromDate/toDate (DD-MM-YYYY), price, extraBed {adult, child}, meals, surcharge (array, only if mentioned)
 
@@ -407,6 +407,7 @@ Rules:
 - Only use low season and high season prices, ignore walk-in prices
 - MUST create separate hotel objects for EACH distinct hotel found in the PDF
 - If you find "Hotel A" and "Hotel B" in the same PDF, create 2 separate hotel objects
+- Extra bed prices may vary between different room categories and hotels, so carefully check each room category and hotel for their specific extra bed pricing.
 - If Domestic , Inbound prices , FIT Prices , GIT Prices are not mentioned, keep them empty
 - Even if hotels are from the same company/group, treat each hotel as a separate entity
 - Carefully read through ALL pages to identify every hotel mentioned
