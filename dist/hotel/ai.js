@@ -52,7 +52,7 @@ const generationConfig = {
                 type: "array",
                 items: {
                     type: "object",
-                    required: ["hotelName", "vat", "roomCategories", "promotions", "cancellationPolicys", "markets", "childPolicies", "reservationEmail", "galaDinner", "breakfast", "fullBoard", "halfBoard", "allInclusive", "childPolicies"],
+                    required: ["hotelName", "vat", "roomCategories", "promotions", "cancellationPolicys", "markets", "childPolicies", "reservationEmail", "galaDinner", "surcharge", "extraBed", "breakfast", "fullBoard", "halfBoard", "allInclusive"],
                     properties: {
                         childPolicies: {
                             type: "array",
@@ -194,7 +194,49 @@ const generationConfig = {
                             items: {
                                 type: "string",
                             },
-                            description: "Hotel promotions or special offers (empty array if none)",
+                            description: "Hotel promotions or special price-related offers (e.g., discounts, booking deals, percentage off, free nights). Only include offers that directly affect the price. Leave empty array if none.",
+                        },
+                        extraBed: {
+                            type: "object",
+                            properties: {
+                                adult: {
+                                    type: "number",
+                                    description: "only include if explicitly mentioned in the document. Extra bed price for adults. Always check if extra bed is available for that room category.",
+                                },
+                                child: {
+                                    type: "number",
+                                    description: "only include if explicitly mentioned in the document. Extra bed price for children. Always check if extra bed is available for that room category. If not mentioned , use adult price for child. ",
+                                },
+                                childAgeRange: {
+                                    type: "string",
+                                    description: "only include if explicitly mentioned in the document .Age range for children applicable for extra bed pricing (e.g., '0-12 years'). If Age is Under 12 Show it as 0-11 This is optional and should only be included if specified in the document.",
+                                }
+                            },
+                        },
+                        surcharge: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                required: ["description"],
+                                properties: {
+                                    percentage: {
+                                        type: "number",
+                                        description: "Surcharge percentage (e.g., 10 for 10%). Leave empty if fixed amount is specified instead of percentage.",
+                                    },
+                                    date: {
+                                        type: "array",
+                                        items: {
+                                            type: "string",
+                                        },
+                                        description: "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally or for specific conditions rather than dates.",
+                                    },
+                                    description: {
+                                        type: "string",
+                                        description: "Complete description for surcharge including amount, conditions, and age ranges. Examples: 'Holiday surcharge', 'Peak season surcharge', 'VND 235,000/night for child 5-11 years sharing bed with parents including breakfast', 'VND 470,000/night for child until 18 years with extra bed including breakfast', 'VND 770,000 for 3rd adult/child over 11 years halfboard package'. Surcharges should only represent mandatory additional charges on the room rate during holidays or special periods. Do not include optional services or charges that are only applied if requested.",
+                                    },
+                                },
+                            },
+                            description: "Array of surcharges including child policies and mandatory additional charges only. Do not include optional services or charges that are only applied if requested. Include all surcharge information in the description field when percentage or specific dates are not applicable. Only include if surcharges or child policies are mentioned in the document.",
                         },
                         roomCategories: {
                             type: "array",
@@ -204,17 +246,10 @@ const generationConfig = {
                                     "category",
                                     "fromDate",
                                     "toDate",
-                                    "inboundPrice",
-                                    "domesticPrice",
-                                    "fitPrice",
-                                    "gitPrice",
                                     "fitGitCondition",
-                                    "extraBed",
                                     "meals",
                                     "noofChildren",
-                                    "surcharge",
                                     "season",
-                                    "maxOccupancy",
                                 ],
                                 properties: {
                                     maxOccupancy: {
@@ -239,41 +274,23 @@ const generationConfig = {
                                     },
                                     inboundPrice: {
                                         type: "number",
-                                        description: "Base room price for International Guest. If not mentioned keep it empty.",
+                                        description: " If not mentioned keep it empty. Base room price for International Guest.",
                                     },
                                     domesticPrice: {
                                         type: "number",
-                                        description: "Base room price for Domestic Guest. If not mentioned keep it empty.",
+                                        description: " If not mentioned keep it empty. Base room price for Domestic Guest.",
                                     },
                                     fitPrice: {
                                         type: "number",
-                                        description: "Base room price for FIT Guest. FIT means price for small group. If not mentioned keep it empty.",
+                                        description: " If not mentioned keep it empty.Base room price for FIT Guest. FIT means price for small group.",
                                     },
                                     gitPrice: {
                                         type: "number",
-                                        description: "Base room price for GIT Guest. GIT means price for large group. If not mentioned keep it empty.",
+                                        description: " If not mentioned keep it empty. Base room price for GIT Guest. GIT means price for large group.",
                                     },
                                     fitGitCondition: {
                                         type: "string",
                                         description: "Conditions for FIT/GIT pricing (e.g., 'Minimum 10 rooms for GIT pricing'). It should write it like this FIT: < 6 rooms. GIT: >= 6 rooms  If not mentioned, leave it empty.",
-                                    },
-                                    extraBed: {
-                                        type: "object",
-                                        required: ["adult", "child", "childAgeRange"],
-                                        properties: {
-                                            adult: {
-                                                type: "number",
-                                                description: "Extra bed price for adults. Always check if extra bed is available for that room category. Look for sections or keywords like 'Extrabed', 'Extra bed', 'Giường phụ'.",
-                                            },
-                                            child: {
-                                                type: "number",
-                                                description: "Extra bed price for children. Always check if extra bed is available for that room category. If not mentioned , use adult price for child. ",
-                                            },
-                                            childAgeRange: {
-                                                type: "string",
-                                                description: "Age range for children applicable for extra bed pricing (e.g., '0-12 years'). If Age is Under 12 Show it as 0-11 This is optional and should only be included if specified in the document.",
-                                            }
-                                        },
                                     },
                                     meals: {
                                         type: "string",
@@ -282,31 +299,6 @@ const generationConfig = {
                                     noofChildren: {
                                         type: "number",
                                         description: "Number of children included in meals for free or discounted meals. If not mentioned, leave it empty.",
-                                    },
-                                    surcharge: {
-                                        type: "array",
-                                        items: {
-                                            type: "object",
-                                            required: ["description"],
-                                            properties: {
-                                                percentage: {
-                                                    type: "number",
-                                                    description: "Surcharge percentage (e.g., 10 for 10%). Leave empty if fixed amount is specified instead of percentage.",
-                                                },
-                                                date: {
-                                                    type: "array",
-                                                    items: {
-                                                        type: "string",
-                                                    },
-                                                    description: "Array of dates when surcharge applies (e.g., ['2023-12-25 - 2023-12-31']). Leave empty if surcharge applies generally or for specific conditions rather than dates.",
-                                                },
-                                                description: {
-                                                    type: "string",
-                                                    description: "Complete description for surcharge including amount, conditions, and age ranges. Examples: 'Holiday surcharge', 'Peak season surcharge', 'VND 235,000/night for child 5-11 years sharing bed with parents including breakfast', 'VND 470,000/night for child until 18 years with extra bed including breakfast', 'VND 770,000 for 3rd adult/child over 11 years halfboard package'. Surcharges should only represent mandatory additional charges on the room rate during holidays or special periods. Do not include optional services or charges that are only applied if requested.",
-                                                },
-                                            },
-                                        },
-                                        description: "Array of surcharges including child policies and mandatory additional charges only. Do not include optional services or charges that are only applied if requested. Include all surcharge information in the description field when percentage or specific dates are not applicable. Only include if surcharges or child policies are mentioned in the document.",
                                     },
                                 },
                             },
@@ -402,7 +394,6 @@ roomCategories (per room/period): category, fromDate/toDate (DD-MM-YYYY), price,
 
 CRITICAL: Always scan the ENTIRE document for multiple hotels. Look for:
 - Different hotel names (even slight variations)
-- Different addresses or contact information
 - Page breaks or section dividers
 - Multiple pricing tables for different properties
 - Headers indicating new hotel sections
@@ -410,25 +401,24 @@ CRITICAL: Always scan the ENTIRE document for multiple hotels. Look for:
 IMPORTANT: Even if one big company has multiple hotels (Hotel A and Hotel B) in the same PDF, you MUST create separate hotel objects for each distinct hotel. Do NOT combine them into one object.
 
 Rules:
-- Only use low season and high season prices, ignore walk-in prices
-- MUST create separate hotel objects for EACH distinct hotel found in the PDF
-- All event and gala dinner information should be included in the galaDinner field
-- If you find "Hotel A" and "Hotel B" in the same PDF, create 2 separate hotel objects
-- Carefully review all child policies, child-related promotions, and freebies, and include them in the childPolicies field.
-- Carefully check for food and beverage menu  and pricing to allinclive , br3akfast, fullBoard, halfBoard
-- Extra bed prices may vary between different room categories and hotels, so carefully check each room category and hotel for their specific extra bed pricing.
-- If Domestic , Inbound prices , FIT Prices , GIT Prices are not mentioned, keep them empty
 - Even if hotels are from the same company/group, treat each hotel as a separate entity
 - Carefully read through ALL pages to identify every hotel mentioned
 - Look for different hotel names, addresses, or clear section breaks to identify separate hotels
 - If single hotel, create one hotel object with all room categories
+- If you find "Hotel A" and "Hotel B" in the same PDF, create 2 separate hotel objects
+- Only use low season and high season prices, ignore walk-in prices
+- MUST create separate hotel objects for EACH distinct hotel found in the PDF
+- Do NOT include complimentary items or services in promotions. Examples: Welcome drink, fruit on arrival, free mineral water, free tea/coffee, free Wi-Fi, free use of facilities, etc. Only include price-related offers.
+- If Domestic , Inbound prices , FIT Prices , GIT Prices are not mentioned, keep them empty. dont assume any values. It is optional.
+- Carefully find chiuld policies, child-related promotions, and freebies, and include them in the childPolicies field.
+- All event and gala dinner information should be included in the galaDinner field
+- Carefully check for food and beverage menu  and pricing to allinclive , breakfast, fullBoard, halfBoard
+- Extra bed prices may vary between different room categories and hotels, so carefully check each room category and hotel for their specific extra bed pricing.
 - Separate roomCategories for each room type/pricing period
-- Include galaDinner/surcharge only if explicitly stated
-- Extract extraBed prices: check if extra bed is available for that room category, and look for "Extrabed", "Extra bed", "Giường phụ" sections. Extract Child Age range if mentioned (e.g., "0-12 years"). If not mentioned, leave it out.
+- If not mentioned, leave it out. Extract extraBed prices: check if extra bed is available for that room category, and look for "Extrabed", "Extra bed".
 - Extract surcharges: look for "Surcharge", "Phụ thu", holiday fees, festival charges, child policies. Do not include additional charges for optional services (e.g., extra services that are only charged if requested). Surcharges should only represent mandatory additional charges on the room rate during holidays or special periods.
-- Extract child pricing policies as surcharges with age ranges in description
-- Additional Breakfast prices: if mentioned, include in breakfastWithoutExtraBed field
 - Return valid JSON only
+- Return in English language
 
 EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc", create TWO separate hotel objects even though they are both Radisson properties.`,
                         },
@@ -476,30 +466,15 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                         "child": 250000,
                         "date": "01-01-2025",
                         "description": "New Year gala dinner"
-                      }
-                    ],
-                    "roomCategories": [
-                      {
-                        "category": "Classic Double",
-                        "fromDate": "01-01-2025",
-                        "toDate": "20-04-2025",
-                        "inboundPrice": 750000,
-                        "domesticPrice": 700000,
-                        "fitPrice": 700000,
-                        "gitPrice": 700000,
-                        "fitGitCondition": "Minimum 10 rooms for GIT pricing",
-                        "season": "Low Season",
-                        "extraBed": {
+                      },
+                       "extraBed": {
                           "adult": 300000,
                           "child": 150000,
                           "childAgeRange": "0-12 years"
 
                         },
-                        maxOccupancy: "2A/ 1A+1C",
-                     
-                        "meals": "Breakfast",
-                        "noofChildren": 1,
-                        "surcharge": [
+
+                         "surcharge": [
                           {
                             "description": "Children under 6 years old: Free",
                             "percentage": null,
@@ -511,38 +486,27 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                             "date": ["01-01-2025", "29-01-2025 to 31-01-2025"]
                           }
                         ]
-                      }
-                    ]
-                  },
-                  {
-                    "hotelName": "EDEN BEACH RESORT",
-
-                    "vat": 1.05,
-                    "childPolicies": ["Children under 6 years old: Free", "Children 6-12 years old: VND 300,000/room/night"],
-                    "promotions": ["Early booking discount"],
-                    "markets": ["Domestic", "International"],
-                    "cancellationPolicys": ["Free cancellation 14 days before check-in" ],
+                    ],
                     "roomCategories": [
                       {
-                        "category": "Deluxe Room",
+                        "category": "Classic Double",
                         "fromDate": "01-01-2025",
                         "toDate": "20-04-2025",
-                        "inboundPrice": 1200000,
-                        "domesticPrice": 1150000,
-                        "season": "High Season",
-                        "extraBed": {
-                          "adult": 400000,
-                          "child": 200000,
-                          "childAgeRange": "0-12 years",
+                        "inboundPrice": 750000,
+                        "domesticPrice": 650000,
 
-                        },
-                      
+                        "gitPrice": 600000,
+                        "fitGitCondition": "Minimum 10 rooms for GIT pricing",
+                        "season": "Low Season",
+                       
+                        maxOccupancy: "2A/ 1A+1C",
+                     
                         "meals": "Breakfast",
-                        "noofChildren": 2,
-                        "surcharge": []
+                        "noofChildren": 1
                       }
                     ]
                   }
+                
                 ]
               }`,
                         },
@@ -581,13 +545,15 @@ EXAMPLE: If PDF contains "Radisson Hotel Danang" and "Radisson Resort Phu Quoc",
                 fullBoard: hotel.fullBoard,
                 halfBoard: hotel.halfBoard,
                 allInclusive: hotel.allInclusive,
+                surcharge: hotel.surcharge,
+                extraBed: hotel.extraBed,
                 reservationEmail: hotel.reservationEmail
             },
             roomCategories: hotel.roomCategories
         }));
         // Process each hotel separately
         for (const hotelData of hotelsToCreate) {
-            const combinedHotels = hotelData.roomCategories.map(roomCategory => (Object.assign({ hotelName: hotelData.hotelInfo.hotelName, starsCategory: stars, vat: hotelData.hotelInfo.vat, galaDinner: hotelData.hotelInfo.galaDinner, promotions: hotelData.hotelInfo.promotions, cancellationPolicys: hotelData.hotelInfo.cancellationPolicys, markets: hotelData.hotelInfo.markets, childPolicies: hotelData.hotelInfo.childPolicies, reservationEmail: hotelData.hotelInfo.reservationEmail, breakfast: hotelData.hotelInfo.breakfast, fullBoard: hotelData.hotelInfo.fullBoard, halfBoard: hotelData.hotelInfo.halfBoard, allInclusive: hotelData.hotelInfo.allInclusive }, roomCategory)));
+            const combinedHotels = hotelData.roomCategories.map(roomCategory => (Object.assign({ hotelName: hotelData.hotelInfo.hotelName, starsCategory: stars, vat: hotelData.hotelInfo.vat, galaDinner: hotelData.hotelInfo.galaDinner, promotions: hotelData.hotelInfo.promotions, cancellationPolicys: hotelData.hotelInfo.cancellationPolicys, markets: hotelData.hotelInfo.markets, childPolicies: hotelData.hotelInfo.childPolicies, reservationEmail: hotelData.hotelInfo.reservationEmail, breakfast: hotelData.hotelInfo.breakfast, fullBoard: hotelData.hotelInfo.fullBoard, halfBoard: hotelData.hotelInfo.halfBoard, allInclusive: hotelData.hotelInfo.allInclusive, surcharge: hotelData.hotelInfo.surcharge, extraBed: hotelData.hotelInfo.extraBed }, roomCategory)));
             // Create hotels for this specific hotel
             const createResult = yield (0, api_1.createHotels)({
                 hotels: combinedHotels,
