@@ -68,15 +68,15 @@ app.get("/", (req, res) => {
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { supplierId, country, city, currency, createdBy, stars, requestId } = req.body;
+        const { supplierId, country, city, currency, createdBy, stars, requestId, fileUrl } = req.body;
         const file = req.file;
-        if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId || !stars) {
+        if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId || !stars || !fileUrl) {
             return res
                 .status(400)
                 .json({ success: false, message: "Missing required fields or file" });
         }
         // Pass the required parameters to extractHotelData, but do not await it
-        (0, ai_1.extractHotelData)(file.path, supplierId, country, city, currency, requestId, createdBy, stars).catch((error) => {
+        (0, ai_1.extractHotelData)(file.path, supplierId, country, city, currency, requestId, createdBy, stars, fileUrl).catch((error) => {
             console.error("Error in background hotel extraction:", error);
         });
         // Immediately respond to the client that processing has started

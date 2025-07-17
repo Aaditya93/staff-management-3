@@ -30,6 +30,7 @@ export interface IHotel extends Document {
   country: string;
   maxOccupancy?: string; 
   reservationEmail?: string; 
+  minNights?: number; // Optional, can be added later
   allInclusive?: {
     child?: number; 
     adult?: number; 
@@ -75,7 +76,7 @@ export interface IHotel extends Document {
   promotions: string[];
   isActive?: boolean;
   fitGitCondition?: string; // Optional, can be added later
-
+  link: string; // Optional, can be added later
   ratings?: Array<{
     userId: string;
     score: number;
@@ -305,9 +306,17 @@ const HotelSchema: Schema = new Schema(
       index: true,
       min: 0,
     },
+    minNights: {
+      type: Number,
+ 
+    },
     fitGitCondition: {
       type: String,
       trim: true,   
+    },
+    link: {
+      type: String,
+      trim: true,
     },
     extraBed: {
       type: ExtraBedSchema,

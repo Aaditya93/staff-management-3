@@ -8,7 +8,7 @@ import { deleteMessageFromQueue } from "./sqs/sqs";
 import { processIncomingEmail } from "./receive-email";
 
 const app = express();
-const PORT = process.env.CONSUMER_PORT || 3003;
+const PORT = process.env.CONSUMER_PORT || 3002;
 
 // Middleware for parsing JSON
 app.use(express.json());

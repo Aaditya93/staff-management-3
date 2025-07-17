@@ -220,7 +220,14 @@ const HotelSchema = new mongoose_1.Schema({
         index: true,
         min: 0,
     },
+    minNights: {
+        type: Number,
+    },
     fitGitCondition: {
+        type: String,
+        trim: true,
+    },
+    link: {
         type: String,
         trim: true,
     },

@@ -17,7 +17,7 @@ const sqs_1 = require("./sqs/sqs");
 const sqs_2 = require("./sqs/sqs");
 const receive_email_1 = require("./receive-email");
 const app = (0, express_1.default)();
-const PORT = process.env.CONSUMER_PORT || 3003;
+const PORT = process.env.CONSUMER_PORT || 3002;
 // Middleware for parsing JSON
 app.use(express_1.default.json());
 // Function to process received SQS messages

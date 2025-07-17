@@ -74,10 +74,10 @@ app.get("/", (req, res) => {
 // API route for creating hotels
 app.post("/hotels", upload.single("file"), async (req, res) => {
   try {
-    const { supplierId, country, city, currency,createdBy,stars,requestId } = req.body;
+    const { supplierId, country, city, currency,createdBy,stars,requestId , fileUrl} = req.body;
     const file = req.file;
 
-    if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId || !stars) {
+    if (!file || !supplierId || !country || !city || !currency || !createdBy || !requestId || !stars  || !fileUrl)  {
       return res
         .status(400)
         .json({ success: false, message: "Missing required fields or file" });
@@ -93,7 +93,8 @@ app.post("/hotels", upload.single("file"), async (req, res) => {
       currency,
       requestId,
       createdBy,
-      stars
+      stars,
+      fileUrl
     ).catch((error) => {
       console.error("Error in background hotel extraction:", error);
     });
@@ -136,18 +137,18 @@ app.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-const startPeriodicEmailProcessing = () => {
-  setInterval(async () => {
-    try {
-      await processAllUserEmails();
-    } catch (error) {
-      console.error("Error in scheduled email processing:", error);
-    }
-  }, 15000);
-};
+// const startPeriodicEmailProcessing = () => {
+//   setInterval(async () => {
+//     try {
+//       await processAllUserEmails();
+//     } catch (error) {
+//       console.error("Error in scheduled email processing:", error);
+//     }
+//   }, 15000);
+// };
 
-// Start periodic email processing
-startPeriodicEmailProcessing();
+// // Start periodic email processing
+// startPeriodicEmailProcessing();
 
 // Production SSL setup
 const isProduction = process.env.NODE_ENV === 'production';

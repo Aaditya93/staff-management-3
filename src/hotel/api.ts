@@ -3,6 +3,7 @@
 import { all } from "axios";
 import dbConnect from "../db/db";
 import Hotel from "../db/hotel";
+import { link } from "fs";
 
 export interface ExtraBedData {
   adult: number;
@@ -45,6 +46,7 @@ export interface HotelData {
   fitGitCondition?: string; // Optional, can be added later
   inboundPrice: number; // Optional, can be added later
   domesticPrice: number; // Optional, can be added later
+  minNights?: number; // Optional, can be added later
   currency?: string;
   reservationEmail?: string; // Optional, can be added later
   fullBoard?: {
@@ -90,6 +92,7 @@ export interface CreateHotelsInput {
   city?: string;
   currency?: string;
   createdBy?: string; // Optional, can be used for tracking
+  fileUrl?: string; // Optional, can be used for tracking
 }
 
 export interface CreateHotelsResult {
@@ -115,7 +118,7 @@ export const createHotels = async (
 
     await dbConnect();
 
-    const { hotels, supplierId, country, city, currency, createdBy } = input;
+    const { hotels, supplierId, country, city, currency, createdBy,  fileUrl} = input;
 
     if (!hotels || !Array.isArray(hotels) || hotels.length === 0) {
       return {
@@ -147,6 +150,7 @@ export const createHotels = async (
           domesticPrice: hotelData.domesticPrice ,
           fitPrice: hotelData.fitPrice ,
           gitPrice: hotelData.gitPrice ,
+          minNights: hotelData.minNights , // Default to 0 if not provided
           fitGitCondition: hotelData.fitGitCondition,
           currency: currency || hotelData.currency,
           reservationEmail: hotelData.reservationEmail ,
@@ -186,7 +190,7 @@ export const createHotels = async (
               }
             : undefined,
           season : hotelData.season ,
-
+          link: fileUrl,
           maxOccupancy: hotelData.maxOccupancy ,
           childPolicies: hotelData.childPolicies ,
           markets: hotelData.markets ,
@@ -203,7 +207,9 @@ export const createHotels = async (
 
         // Create new hotel room category record
         const result = await Hotel.create(hotelDocument);
-console.log("Created hotel record:", result);
+
+        console.log("Hotel Document:", result);
+
  
 
         newRecords++;
