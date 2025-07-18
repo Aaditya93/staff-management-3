@@ -208,7 +208,7 @@ export const createHotels = async (
         // Create new hotel room category record
         const result = await Hotel.create(hotelDocument);
 
-        console.log("Hotel Document:", result);
+        // console.log("Hotel Document:", result);
 
  
 
