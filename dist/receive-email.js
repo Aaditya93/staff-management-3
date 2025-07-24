@@ -114,10 +114,9 @@ function processIncomingEmail(emailData) {
         let ticketResult = null;
         if (analysis.isTravelEmail) {
             try {
-                const ticket = yield (0, create_ticket_1.createTicketFromEmail)(analysis, emailData.email); // UNCOMMENTED
+                const ticket = yield (0, create_ticket_1.createTicketFromEmail)(analysis, emailData.email);
             }
             catch (error) {
-                console.error("Error handling ticket:", error);
                 throw new Error(`Ticket processing failed: ${error}`);
             }
         }

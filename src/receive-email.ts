@@ -123,9 +123,9 @@ export async function processIncomingEmail(emailData: any) {
 
   if (analysis.isTravelEmail) {
     try {
-      const ticket = await createTicketFromEmail(analysis, emailData.email); // UNCOMMENTED
+      const ticket = await createTicketFromEmail(analysis, emailData.email); 
     } catch (error) {
-      console.error("Error handling ticket:", error);
+
       throw new Error(`Ticket processing failed: ${error}`);
     }
   }
