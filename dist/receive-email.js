@@ -117,7 +117,8 @@ function processIncomingEmail(emailData) {
                 const ticket = yield (0, create_ticket_1.createTicketFromEmail)(analysis, emailData.email);
             }
             catch (error) {
-                throw new Error(`Ticket processing failed: ${error}`);
+                console.error("Error creating ticket from email:", error);
+                throw new Error(`Ticket creation failed: ${error}`);
             }
         }
         return {
