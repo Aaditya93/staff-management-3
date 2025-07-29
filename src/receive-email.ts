@@ -125,7 +125,7 @@ export async function processIncomingEmail(emailData: any) {
     try {
       const ticket = await createTicketFromEmail(analysis, emailData.email); 
     } catch (error) {
-      console.error("Error creating ticket from email:", error);
+
       throw new Error(`Ticket creation failed: ${error}`);
 
     }
