@@ -40,7 +40,7 @@ export async function updateUserTokens(
       }
     );
   } catch (error) {
-    console.log("error", error);
+    // console.log("error", error);
   }
 }
 /**
@@ -217,6 +217,6 @@ export async function refreshUserToken(
  * Utility to mark the token as needing refresh
  */
 export async function forceRefreshToken(): Promise<void> {
-  console.log("Token refresh flagged for next request");
+  // console.log("Token refresh flagged for next request");
   // Implementation could be added here if needed
 }

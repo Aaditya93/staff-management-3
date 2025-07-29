@@ -39,7 +39,7 @@ function updateUserTokens(userId, email, tokens) {
             });
         }
         catch (error) {
-            console.log("error", error);
+            // console.log("error", error);
         }
     });
 }
@@ -184,7 +184,7 @@ exports.refreshUserToken = refreshUserToken;
  */
 function forceRefreshToken() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("Token refresh flagged for next request");
+        // console.log("Token refresh flagged for next request");
         // Implementation could be added here if needed
     });
 }
